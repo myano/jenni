@@ -47,7 +47,8 @@ def stats(jenni, input):
     users = {}
     channels = {}
 
-    ignore = set(['f_note', 'startup', 'message', 'noteuri'])
+    ignore = set(['f_note', 'startup', 'message', 'noteuri',
+        'say_it', 'collectlines'])
     for (name, user), count in jenni.stats.iteritems():
         if name in ignore: continue
         if not user: continue
