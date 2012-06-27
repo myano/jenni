@@ -55,16 +55,19 @@ def setup(jenni):
         jenni.handle_connect = outer_handle_connect
 
 def startup(jenni, input):
+    import time
+
     if hasattr(jenni.config, 'serverpass'):
         jenni.write(('PASS', jenni.config.serverpass))
 
     if hasattr(jenni.config, 'password'):
         jenni.msg('NickServ', 'IDENTIFY %s' % jenni.config.password)
-        __import__('time').sleep(5)
+        time.sleep(5)
 
     # Cf. http://swhack.com/logs/2005-12-05#T19-32-36
     for channel in jenni.channels:
         jenni.write(('JOIN', channel))
+        time.sleep(0.5)
 startup.rule = r'(.*)'
 startup.event = '251'
 startup.priority = 'low'
