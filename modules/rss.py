@@ -19,16 +19,17 @@ from modules import url as url_module
 
 DEBUG = False
 socket.setdefaulttimeout(10)
-INTERVAL = 10  # seconds between checking for new updates
+INTERVAL = 30  # seconds between checking for new updates
 STOP = False
 
 
 def checkdb(cursor):
-    cursor.execute("CREATE TABLE IF NOT EXISTS rss ( channel text, site_name text, site_url text, fg text, bg text)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS rss ( channel text,\
+            site_name text, site_url text, fg text, bg text)")
 
 
 def manage_rss(jenni, input):
-    """ .rss operation channel site_name url -- operation can be either 'add', 'del', or 'list' no further operators needed if 'list' used """
+    """.rss operation channel site_name url -- 'add', 'del', or 'list' rss"""
     if not input.admin:
         jenni.reply("Sorry, you need to be an admin to modify the RSS feeds.")
         return
@@ -84,7 +85,8 @@ def manage_rss(jenni, input):
         jenni.reply("Successfully removed values from database.")
     elif len(text) >= 4 and text[1] == 'del':
         # .rss del ##channel Site_Name
-        c.execute("DELETE FROM rss WHERE channel = ? and site_name = ?", (channel, " ".join(text[3:]),))
+        c.execute("DELETE FROM rss WHERE channel = ? and site_name = ?",
+                (channel, " ".join(text[3:]),))
         conn.commit()
         c.close()
         jenni.reply("Successfully removed the site from the given channel.")
@@ -129,7 +131,6 @@ def read_feeds(jenni):
     cursor_recent = conn_recent.cursor()
     cursor_recent.execute("CREATE TABLE IF NOT EXISTS recent ( channel text, site_name text, article_title text, article_url text )")
 
-
     for row in c:
         feed_channel = row[0]
         feed_site_name = row[1]
@@ -162,9 +163,9 @@ def read_feeds(jenni):
         if len(cursor_recent.fetchall()) < 1:
             short_url = url_module.short(article_url)
 
-            if short_url:
+            try:
                 short_url = short_url[0][1][:-1]
-            else:
+            except:
                 short_url = article_url
 
             response = site_name_effect + " %s \x02%s\x02" % (entry.title, short_url)
@@ -187,7 +188,7 @@ def read_feeds(jenni):
 
 
 def startrss(jenni, input):
-    """ Begin reading RSS feeds """
+    """Begin reading RSS feeds"""
     if not input.admin:
         jenni.reply("You must be an admin to start up the RSS feeds.")
         return
