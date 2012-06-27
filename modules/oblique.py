@@ -43,7 +43,9 @@ def service(jenni, input, command, args):
     lines = bytes.splitlines()
     if not lines:
         return jenni.reply("Sorry, the service didn't respond any output.")
-    jenni.say(lines[0][:350])
+    try: line = lines[0].encode('utf-8')[:350]
+    except: line = lines[0][:250]
+    jenni.say(line)
 
 def refresh(jenni):
     if hasattr(jenni.config, 'services'):
