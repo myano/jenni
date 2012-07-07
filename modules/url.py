@@ -27,7 +27,7 @@ import web
 # this variable is to determine when to use bitly. If the URL is more
 # than this length, it'll display a bitly URL instead. To disable bit.ly, put None
 # even if it's set to None, triggering .bitly command will still work!
-BITLY_TRIGGER_LEN = 65
+BITLY_TRIGGER_LEN = 60
 EXCLUSION_CHAR = "!"
 IGNORE = ["git.io"]
 

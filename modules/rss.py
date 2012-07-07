@@ -18,8 +18,8 @@ import time
 from modules import url as url_module
 
 DEBUG = False
-socket.setdefaulttimeout(10)
-INTERVAL = 30  # seconds between checking for new updates
+socket.setdefaulttimeout(30)
+INTERVAL = 60  # seconds between checking for new updates
 STOP = False
 
 
@@ -139,9 +139,14 @@ def read_feeds(jenni):
         feed_bg = row[4]
         try:
             fp = feedparser.parse(feed_url)
-        except IOError, E:
-            jenni.say("Can't parse, " + str(E))
-        entry = fp.entries[0]
+        except:
+            jenni.say("Can't parse.")
+
+        try:
+            entry = fp.entries[0]
+        except:
+            jenni.say("Can't find element: " + str(fp))
+            continue
 
         if not feed_fg and not feed_bg:
             site_name_effect = "[\x02%s\x02]" % (feed_site_name)
