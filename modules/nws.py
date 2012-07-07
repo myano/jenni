@@ -13,8 +13,10 @@ watches, warnings, and advisories that are present.
 
 import feedparser
 import re
+import time
 import urllib
 import web
+import sqlite3
 
 states = {
         "alabama" : "al",
@@ -77,6 +79,9 @@ re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
 re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[(\S+)\]</a></td></tr>')
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 more_info = "Complete weather watches, warnings, and advisories for {0}, available here: {1}"
+warning_list = "http://alerts.weather.gov/cap/us.php?x=1"
+STOP = False
+CHANNEL = "##weather-alerts"
 
 def nws_lookup(jenni, input):
     """ Look up weather watches, warnings, and advisories. """
@@ -165,8 +170,95 @@ def nws_lookup(jenni, input):
                 jenni.msg(input.nick, warnings_dict[key])
             jenni.msg(input.nick, more_info.format(location, master_url))
 nws_lookup.commands = ['nws']
-nws_lookup.priority = 'high'
-nws_lookup.rate = 60
+
+def warns_control(jenni, input):
+    global STOP
+    if not input.admin: return
+
+    if input.group(2) == "start":
+        jenni.reply("Starting...")
+        STOP = False
+        weather_feed(jenni, input)
+    elif input.group(2) == "stop":
+        jenni.reply("Stopping...")
+        STOP = True
+    else:
+        jenni.reply("Not a vaid input.")
+warns_control.commands = ['warns']
+warns_control.priority = 'high'
+
+def weather_feed(jenni, input):
+    global STOP
+    conn = sqlite3.connect('nws.db')
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS nws ( area text, state text, title text )")
+
+    if not STOP:
+        while True:
+            if STOP:
+                jenni.msg(CHANNEL, "Checking, stopped.")
+                STOP = False
+                conn.commit()
+                c.close()
+                break
+            parsed = feedparser.parse(warning_list)
+            if not len(parsed['entries']) > 0:
+                continue
+            for entity in parsed['entries']:
+                if STOP:
+                    jenni.msg(CHANNEL, "Checking, stopped.")
+                    conn.commit()
+                    c.close()
+                    break
+                entry = entity
+                area = entry['cap_areadesc']
+                link = entry['link']
+                title = entry['title']
+                state = link.split("?x=")[1][:2]
+                summary = entry['summary']
+                cert = entry['cap_certainty']
+                severity = entry['cap_severity']
+                status = entry['cap_status']
+                urgency = entry['cap_urgency']
+
+                sql_text = (area, state, title,)
+                c.execute("SELECT * FROM nws WHERE area = ? AND state = ? AND title = ?", sql_text)
+                if len(c.fetchall()) < 1:
+                    t = (area, state, title,)
+                    c.execute("INSERT INTO nws VALUES (?, ?, ?)", t)
+                    conn.commit()
+                    c.close()
+
+                    for st in states:
+                        if states[st] == state.lower():
+                            state = st[0].upper() + st[1:]
+
+                    if "Heat" in title:
+                        title = title.replace("Heat", "\x02\x0304Heat\x03\x02")
+                    if "Flood" in title:
+                        title = title.replace("Flood", "\x02\x0303Flood\x03\x02")
+                    if "Weather Statement" in title:
+                        title = title.replace("Weather Statement", "\x02\x0313Weather Statement\x03\x02")
+                    if "Surf":
+                        title = title.replace("Surf", "\x02\x0311Surf\x03\x02")
+                    if "Thunderstorm" in title:
+                        title = title.replace("Thunderstorm", "\x02\x0308Thunderstorm\x03\x02")
+                    if "Red Flag" in title:
+                        title = title.replace("Red Flag", "\x02\x0304Red Flag\x03\x02")
+                    if "Lake" in title:
+                        title = title.replace("Lake", "\x02\x0311Lake\x03\x02")
+                    if "Air" in title:
+                        title = title.replace("Air", "\x02\x0305Air\x03\x02")
+                    line1 = "\x02[\x0302{1}\x03] {0}\x02"
+                    line2 = "{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}"
+                    line1 = line1.format(area, state)
+                    line2 = line2.format(title, cert, severity, status, urgency)
+                    jenni.msg(CHANNEL, line1)
+                    jenni.msg(CHANNEL, line2)
+                    jenni.msg(CHANNEL, summary)
+            time.sleep(10)
+    conn.commit()
+    c.close()
 
 if __name__ == '__main__':
     print __doc__.strip()
