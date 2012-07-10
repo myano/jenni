@@ -193,6 +193,31 @@ def weather_feed(jenni, input):
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS nws ( area text, state text, title text )")
 
+    conditions = {
+        "Heat": "\x02\x0304Heat\x03\x02",
+        "Flood": "\x02\x0303Flood\x03\x02",
+        "Weather Statement": "\x02\x0313Weather _Statement_\x03\x02",
+        "Surf": "\x02\x0311Surf\x03\x02",
+        "Thunderstorm": "\x02\x0308Thunderstorm\x03\x02",
+        "Red Flag": "\x02\x0304Red Flag\x03\x02",
+        "Lake": "\x02\x0311Lake\x03\x02",
+        "Air": "\x02\x0305Air\x03\x02",
+        "Tornado": "\x02\x0304!!TORNADO!!\x03\x02",
+        "Watch": "\x02\x0308_WATCH_\x03\x02",
+        "Warning": "\x02\x0304!WARNING!\x03\x02",
+        "Severe": "\x02\x0305Severe\x03\x02",
+        "Special": "\x02\x0306_Special_\x03\x02",
+        "Fire": "\x02\x0304Fire\x03\x02",
+    }
+
+    word_re = re.compile("\w+")
+
+    def _cap(match):
+        return match.group(0).capitalize()
+
+    def capitalize_all(s):
+        return word_re.sub(_cap, s)
+
     if not STOP:
         while True:
             if STOP:
@@ -233,29 +258,39 @@ def weather_feed(jenni, input):
                         if states[st] == state.lower():
                             state = st[0].upper() + st[1:]
 
-                    if "Heat" in title:
-                        title = title.replace("Heat", "\x02\x0304Heat\x03\x02")
-                    if "Flood" in title:
-                        title = title.replace("Flood", "\x02\x0303Flood\x03\x02")
-                    if "Weather Statement" in title:
-                        title = title.replace("Weather Statement", "\x02\x0313Weather Statement\x03\x02")
-                    if "Surf":
-                        title = title.replace("Surf", "\x02\x0311Surf\x03\x02")
-                    if "Thunderstorm" in title:
-                        title = title.replace("Thunderstorm", "\x02\x0308Thunderstorm\x03\x02")
-                    if "Red Flag" in title:
-                        title = title.replace("Red Flag", "\x02\x0304Red Flag\x03\x02")
-                    if "Lake" in title:
-                        title = title.replace("Lake", "\x02\x0311Lake\x03\x02")
-                    if "Air" in title:
-                        title = title.replace("Air", "\x02\x0305Air\x03\x02")
+                    for condition in conditions:
+                        if condition in title:
+                            title = title.replace(condition, conditions[condition])
+
+                    state = capitalize_all(state)
                     line1 = "\x02[\x0302{1}\x03] {0}\x02"
                     line2 = "{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}"
-                    line1 = line1.format(area, state)
-                    line2 = line2.format(title, cert, severity, status, urgency)
-                    jenni.msg(CHANNEL, line1)
-                    jenni.msg(CHANNEL, line2)
-                    jenni.msg(CHANNEL, summary)
+                    la = len(area)
+                    j = round((la / 450.00) + 0.5)
+                    if la > 450:
+                        i = 1
+                        beg = 0
+                        while i <= j:
+                            end = string.find(area, ";", 450 * i)
+                            jenni.msg(CHANNEL, line1.format(area[beg:end], state))
+                            i += 1
+                            beg = end + 2
+                    else:
+                        jenni.msg(CHANNEL, line1.format(area, state))
+                    jenni.msg(CHANNEL, line2.format(title, cert, severity, status, urgency))
+                    ls = len(summary)
+                    if ls > 500:
+                        n = 1
+                        lss = round((ls / 500.0) + 0.5)
+                        beg = 0
+                        end = 0
+                        while n <= lss:
+                            end = n * 500
+                            jenni.msg(CHANNEL, summary[beg:end])
+                            beg += end
+                            n += 1
+                    else:
+                        jenni.msg(CHANNEL, summary)
             time.sleep(10)
     conn.commit()
     c.close()
