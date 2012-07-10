@@ -17,6 +17,7 @@ import time
 import urllib
 import web
 import sqlite3
+import string
 
 states = {
         "alabama" : "al",
@@ -192,6 +193,8 @@ def weather_feed(jenni, input):
     conn = sqlite3.connect('nws.db')
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS nws ( area text, state text, title text )")
+    conn.commit()
+    c.close()
 
     conditions = {
         "Heat": "\x02\x0304Heat\x03\x02",
@@ -247,12 +250,13 @@ def weather_feed(jenni, input):
                 urgency = entry['cap_urgency']
 
                 sql_text = (area, state, title,)
+                conn = sqlite3.connect('nws.db')
+                c = conn.cursor()
                 c.execute("SELECT * FROM nws WHERE area = ? AND state = ? AND title = ?", sql_text)
                 if len(c.fetchall()) < 1:
                     t = (area, state, title,)
                     c.execute("INSERT INTO nws VALUES (?, ?, ?)", t)
                     conn.commit()
-                    c.close()
 
                     for st in states:
                         if states[st] == state.lower():
@@ -267,7 +271,7 @@ def weather_feed(jenni, input):
                     line2 = "{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}"
                     la = len(area)
                     j = round((la / 450.00) + 0.5)
-                    if la > 450:
+                    if la >= 450:
                         i = 1
                         beg = 0
                         while i <= j:
@@ -278,22 +282,16 @@ def weather_feed(jenni, input):
                     else:
                         jenni.msg(CHANNEL, line1.format(area, state))
                     jenni.msg(CHANNEL, line2.format(title, cert, severity, status, urgency))
-                    ls = len(summary)
-                    if ls > 500:
-                        n = 1
-                        lss = round((ls / 500.0) + 0.5)
-                        beg = 0
-                        end = 0
-                        while n <= lss:
-                            end = n * 500
-                            jenni.msg(CHANNEL, summary[beg:end])
-                            beg += end
-                            n += 1
+                    if len(summary) > 500:
+                        size = 500
+                        splits = [summary[start:start+size] for start in range(0, len(summary), size)]
+                        for x in splits:
+                            jenni.msg(CHANNEL, x)
                     else:
                         jenni.msg(CHANNEL, summary)
+                conn.commit()
+                c.close()
             time.sleep(10)
-    conn.commit()
-    c.close()
 
 if __name__ == '__main__':
     print __doc__.strip()
