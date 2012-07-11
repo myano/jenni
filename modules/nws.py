@@ -100,15 +100,19 @@ def nws_lookup(jenni, input):
             return
         url1 = county_list.format(states[state])
         page1 = web.get(url1).split("\n")
+        prev1 = str()
+        prev2 = str()
         for line in page1:
             mystr = ">" + unicode(county) + "<"
             if mystr in line.lower():
-                url_part2 = line[9:36]
+                url_part2 = prev2[9:40]
                 break
+            prev2 = prev1
+            prev1 = line
         if not url_part2:
             jenni.reply("Could not find county.")
             return
-        master_url = url_part1 + url_part2
+        master_url = "https://alerts.weather.gov/cap/" + url_part2
         location = text
     elif len(bits) == 1:
         ## zip code
@@ -143,18 +147,6 @@ def nws_lookup(jenni, input):
             return
         else:
             warnings_dict[unicode(item["title"])] = unicode(item["summary"])
-
-    paste_code = ""
-    for alert in warnings_dict:
-        paste_code += item["title"] + "\n" + item["summary"] + "\n\n"
-
-    paste_dict = {
-        "paste_private" : 0,
-        "paste_code" : paste_code,
-        }
-
-    pastey = urllib.urlopen("http://pastebin.com/api_public.php",
-        urllib.urlencode(paste_dict)).read()
 
     if len(warnings_dict) > 0:
         if input.sender.startswith('#'):
@@ -212,6 +204,11 @@ def weather_feed(jenni, input):
         "Severe": "\x02\x0305Severe\x03\x02",
         "Special": "\x02\x0306_Special_\x03\x02",
         "Fire": "\x02\x0304Fire\x03\x02",
+        "Seas": "\x02\x0311Seas\x03\x02",
+        "Danger": "\x02\x0304DANGER\x03\x02",
+        "Small Craft": "\x02\x0311Small Craft\x03\x02",
+        "Advisory": "\x02Advisory\x02",
+        "Hurricane": "\x02\x0313HURRICANE\x03\x02",
     }
 
     word_re = re.compile("\w+")
