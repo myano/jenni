@@ -187,6 +187,7 @@ def warns_control(jenni, input):
         jenni.reply("Not a vaid input.")
 warns_control.commands = ['warns']
 warns_control.priority = 'high'
+warns_control.thread = True
 
 def weather_feed(jenni, input):
     global STOP
