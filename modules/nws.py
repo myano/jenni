@@ -207,8 +207,10 @@ def weather_feed(jenni, input):
         "Seas": "\x02\x0311Seas\x03\x02",
         "Danger": "\x02\x0304DANGER\x03\x02",
         "Small Craft": "\x02\x0311Small Craft\x03\x02",
-        "Advisory": "\x02Advisory\x02",
+        "Advisory": "\x0306Advisory\x03",
         "Hurricane": "\x02\x0313HURRICANE\x03\x02",
+        "Wind": "\x02\x0311Wind\x03\x02",
+        "Flash": "\x0311Flash\x03",
     }
 
     word_re = re.compile("\w+")

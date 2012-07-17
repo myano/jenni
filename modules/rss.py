@@ -130,6 +130,7 @@ def read_feeds(jenni):
     conn_recent = sqlite3.connect('recent_rss.db')
     cursor_recent = conn_recent.cursor()
     cursor_recent.execute("CREATE TABLE IF NOT EXISTS recent ( channel text, site_name text, article_title text, article_url text )")
+    conn_recent.commit()
 
     for row in c:
         feed_channel = row[0]
@@ -182,9 +183,7 @@ def read_feeds(jenni):
             t = (feed_channel, feed_site_name, entry.title, article_url,)
             cursor_recent.execute("INSERT INTO recent VALUES (?, ?, ?, ?)", t)
             conn_recent.commit()
-            cursor_recent.close()
             conn.commit()
-            c.close()
         else:
             if DEBUG:
                 jenni.msg(feed_channel, u"Skipping previously read entry: %s %s" % (site_name_effect, entry.title))
