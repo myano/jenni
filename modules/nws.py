@@ -18,58 +18,59 @@ import urllib
 import web
 import sqlite3
 import string
+import textwrap
 
 states = {
-        "alabama" : "al",
-        "alaska" : "ak",
-        "arizona" : "az",
-        "arkansas" : "ar",
-        "california" : "ca",
-        "colorado" : "co",
-        "connecticut" : "ct",
-        "delaware" : "de",
-        "florida" : "fl",
-        "georgia" : "ga",
-        "hawaii" : "hi",
-        "idaho" : "id",
-        "illinois" : "il",
-        "indiana" : "in",
-        "iowa" : "ia",
-        "kansas" : "ks",
-        "kentucky" : "ky",
-        "louisiana" : "la",
-        "maine" : "me",
-        "maryland" : "md",
-        "massachusetts" : "ma",
-        "michigan" : "mi",
-        "minnesota" : "mn",
-        "mississippi" : "ms",
-        "missouri" : "mo",
-        "montana" : "mt",
-        "nebraska" : "ne",
-        "nevada" : "nv",
-        "new hampshire" : "nh",
-        "new jersey" : "nj",
-        "new mexico" : "nm",
-        "new york" : "ny",
-        "north carolina" : "nc",
-        "north dakota" : "nd",
-        "ohio" : "oh",
-        "oklahoma" : "ok",
-        "oregon" : "or",
-        "pennsylvania" : "pa",
-        "rhode island" : "ri",
-        "south carolina" : "sc",
-        "south dakota" : "sd",
-        "tennessee" : "tn",
-        "texas" : "tx",
-        "utah" : "ut",
-        "vermont" : "vt",
-        "virginia" : "va",
-        "washington" : "wa",
-        "west virginia" : "wv",
-        "wisconsin" : "wi",
-        "wyoming" : "wy",
+        "alabama": "al",
+        "alaska": "ak",
+        "arizona": "az",
+        "arkansas": "ar",
+        "california": "ca",
+        "colorado": "co",
+        "connecticut": "ct",
+        "delaware": "de",
+        "florida": "fl",
+        "georgia": "ga",
+        "hawaii": "hi",
+        "idaho": "id",
+        "illinois": "il",
+        "indiana": "in",
+        "iowa": "ia",
+        "kansas": "ks",
+        "kentucky": "ky",
+        "louisiana": "la",
+        "maine": "me",
+        "maryland": "md",
+        "massachusetts": "ma",
+        "michigan": "mi",
+        "minnesota": "mn",
+        "mississippi": "ms",
+        "missouri": "mo",
+        "montana": "mt",
+        "nebraska": "ne",
+        "nevada": "nv",
+        "new hampshire": "nh",
+        "new jersey": "nj",
+        "new mexico": "nm",
+        "new york": "ny",
+        "north carolina": "nc",
+        "north dakota": "nd",
+        "ohio": "oh",
+        "oklahoma": "ok",
+        "oregon": "or",
+        "pennsylvania": "pa",
+        "rhode island": "ri",
+        "south carolina": "sc",
+        "south dakota": "sd",
+        "tennessee": "tn",
+        "texas": "tx",
+        "utah": "ut",
+        "vermont": "vt",
+        "virginia": "va",
+        "washington": "wa",
+        "west virginia": "wv",
+        "wisconsin": "wi",
+        "wyoming": "wy",
 }
 
 county_list = "http://alerts.weather.gov/cap/{0}.php?x=3"
@@ -82,12 +83,14 @@ re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.
 more_info = "Complete weather watches, warnings, and advisories for {0}, available here: {1}"
 warning_list = "http://alerts.weather.gov/cap/us.php?x=1"
 STOP = False
-CHANNEL = "##weather-alerts"
+CHANNEL = "##weather"  # -alerts"
+
 
 def nws_lookup(jenni, input):
     """ Look up weather watches, warnings, and advisories. """
     text = input.group(2)
-    if not text: return
+    if not text:
+        return
     bits = text.split(",")
     master_url = False
     if len(bits) == 2:
@@ -140,7 +143,7 @@ def nws_lookup(jenni, input):
         return
 
     feed = feedparser.parse(master_url)
-    warnings_dict = { }
+    warnings_dict = dict()
     for item in feed.entries:
         if nomsg[:51] == item["title"]:
             jenni.reply(nomsg.format(location))
@@ -150,23 +153,28 @@ def nws_lookup(jenni, input):
 
     if len(warnings_dict) > 0:
         if input.sender.startswith('#'):
+            ## if queried in a channel
             i = 1
             for key in warnings_dict:
-                if i > 1: break
+                if i > 1:
+                    break
                 jenni.reply(key)
                 jenni.reply(warnings_dict[key][:510])
                 i += 1
             jenni.reply(more_info.format(location, master_url))
         else:
+            ## if queried in private message
             for key in warnings_dict:
-                jenni.msg(input.nick, key)
-                jenni.msg(input.nick, warnings_dict[key])
-            jenni.msg(input.nick, more_info.format(location, master_url))
+                jenni.reply(key)
+                jenni.reply(warnings_dict[key])
+            jenni.reply(more_info.format(location, master_url))
 nws_lookup.commands = ['nws']
+
 
 def warns_control(jenni, input):
     global STOP
-    if not input.admin: return
+    if not input.admin:
+        return
 
     if input.group(2) == "start":
         jenni.reply("Starting...")
@@ -180,6 +188,7 @@ def warns_control(jenni, input):
 warns_control.commands = ['warns']
 warns_control.priority = 'high'
 warns_control.thread = True
+
 
 def weather_feed(jenni, input):
     global STOP
@@ -224,7 +233,7 @@ def weather_feed(jenni, input):
     if not STOP:
         while True:
             if STOP:
-                jenni.msg(CHANNEL, "Checking, stopped.")
+                jenni.reply("Checking, stopped. (Master)")
                 STOP = False
                 conn.commit()
                 c.close()
@@ -234,7 +243,7 @@ def weather_feed(jenni, input):
                 continue
             for entity in parsed['entries']:
                 if STOP:
-                    jenni.msg(CHANNEL, "Checking, stopped.")
+                    jenni.reply("Checking, stopped. (XML Parse)")
                     conn.commit()
                     c.close()
                     break
@@ -248,6 +257,8 @@ def weather_feed(jenni, input):
                 severity = entry['cap_severity']
                 status = entry['cap_status']
                 urgency = entry['cap_urgency']
+
+                ch_state = "{0}-{1}-{2}".format(CHANNEL, "us", state.lower())
 
                 sql_text = (area, state, title,)
                 conn = sqlite3.connect('nws.db')
@@ -269,26 +280,13 @@ def weather_feed(jenni, input):
                     state = capitalize_all(state)
                     line1 = "\x02[\x0302{1}\x03] {0}\x02"
                     line2 = "{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}"
-                    la = len(area)
-                    j = round((la / 450.00) + 0.5)
-                    if la >= 450:
-                        i = 1
-                        beg = 0
-                        while i <= j:
-                            end = string.find(area, ";", 450 * i)
-                            jenni.msg(CHANNEL, line1.format(area[beg:end], state))
-                            i += 1
-                            beg = end + 2
-                    else:
-                        jenni.msg(CHANNEL, line1.format(area, state))
-                    jenni.msg(CHANNEL, line2.format(title, cert, severity, status, urgency))
-                    if len(summary) > 500:
-                        size = 500
-                        splits = [summary[start:start+size] for start in range(0, len(summary), size)]
-                        for x in splits:
-                            jenni.msg(CHANNEL, x)
-                    else:
-                        jenni.msg(CHANNEL, summary)
+                    areas = textwrap.wrap(area, 475)
+                    for each in areas:
+                        jenni.msg(ch_state, line1.format(each, state))
+                    jenni.msg(ch_state, line2.format(title, cert, severity, status, urgency))
+                    summaries = textwrap.wrap(summary, 500)
+                    for each in summaries:
+                        jenni.msg(ch_state, each)
                 conn.commit()
                 c.close()
             time.sleep(10)
