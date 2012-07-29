@@ -169,6 +169,7 @@ def nws_lookup(jenni, input):
                 jenni.reply(warnings_dict[key])
             jenni.reply(more_info.format(location, master_url))
 nws_lookup.commands = ['nws']
+nws_lookup.priority = 'high'
 
 
 def warns_control(jenni, input):
