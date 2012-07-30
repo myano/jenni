@@ -140,9 +140,23 @@ class Scores:
             t10_chan = top10(line[0])
             jenni.say(t10_chan)
 
-        elif len(line) == 2:
+        elif len(line) == 2 and line[1] <> "all":
             ## .scores <channel> <nick>
             jenni.say(given_user(line[1], line[0]))
+
+        elif len(line) == 2:
+            ## .scores <nick> all
+            outstr = "Scores for {0} in: ".format(line[0])
+            for channel in self.scores_dict:
+                for nick in self.scores_dict[channel]:
+                    if nick == line[0]:
+                        nick_scores = self.scores_dict[channel][nick]
+                        outstr += "{0}; {1}/{2}, {3} | ".format(channel, nick_scores[0],
+                                nick_scores[1], int(nick_scores[0]) - int(nick_scores[1]))
+            if outstr.endswith("| "):
+                outstr = outstr[:-2]
+            jenni.say(outstr)
+
 
     def setpoint(self, jenni, input, line):
         if not input.admin:
