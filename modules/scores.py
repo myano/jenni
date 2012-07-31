@@ -19,20 +19,20 @@ class Scores:
         self.scores_dict = dict()
         self.load()
         self.STRINGS = {
-                "nochan": "Channel, {0}, has no users with scores.",
-                "nouser": "{0} has no score in {1}.",
-                "rmuser": "User, {0}, has been removed from room: {1}.",
-                "cantadd": "I'm sorry, but I'm afraid I can't add that user!",
-                "denied": "I'm sorry, but I can't let you do that!",
-                "invalid": "Invalid parameters entered.",
-            }
+            "nochan": "Channel, {0}, has no users with scores.",
+            "nouser": "{0} has no score in {1}.",
+            "rmuser": "User, {0}, has been removed from room: {1}.",
+            "cantadd": "I'm sorry, but I'm afraid I can't add that user!",
+            "denied": "I'm sorry, but I can't let you do that!",
+            "invalid": "Invalid parameters entered.",
+        }
 
     def str_score(self, nick, channel):
         return "%s: +%s/-%s, %s" % (nick,
-                self.scores_dict[channel][nick][0],
-                self.scores_dict[channel][nick][1],
-                self.scores_dict[channel][nick][0] -\
-                self.scores_dict[channel][nick][1])
+                                    self.scores_dict[channel][nick][0],
+                                    self.scores_dict[channel][nick][1],
+                                    self.scores_dict[channel][nick][0] -
+                                    self.scores_dict[channel][nick][1])
 
     def editpoints(self, jenni, input, nick, points):
         if not nick:
@@ -65,8 +65,10 @@ class Scores:
         for each_chan in self.scores_dict:
             for each_nick in self.scores_dict[each_chan]:
                 line = "{0},{1},{2},{3}\n".format(each_chan, each_nick,
-                        self.scores_dict[each_chan][each_nick][0],
-                        self.scores_dict[each_chan][each_nick][1])
+                                                  self.scores_dict[
+                                                  each_chan][each_nick][0],
+                                                  self.scores_dict[
+                                                  each_chan][each_nick][1])
                 scores_file.write(line)
         scores_file.close()
 
@@ -83,7 +85,7 @@ class Scores:
                 if values[0] not in self.scores_dict:
                     self.scores_dict[values[0]] = dict()
                 self.scores_dict[values[0]][values[1]] = [int(values[2]),
-                        int(values[3])]
+                                                          int(values[3])]
         if not self.scores_dict:
             self.scores_dict = dict()
         sfile.close()
@@ -98,7 +100,7 @@ class Scores:
             top_scores = list()
             str_say = "\x02Top 10 (for %s):\x02" % (channel)
             scores = sorted(self.scores_dict[channel].iteritems(),
-                    key=lambda (k, v): (v[0] - v[1]), reverse=True)
+                            key=lambda (k, v): (v[0] - v[1]), reverse=True)
             for key, value in scores:
                 top_scores.append(self.str_score(key, channel))
                 if len(scores) == q + 1:
@@ -140,7 +142,7 @@ class Scores:
             t10_chan = top10(line[0])
             jenni.say(t10_chan)
 
-        elif len(line) == 2 and line[1] <> "all":
+        elif len(line) == 2 and line[1] != "all":
             ## .scores <channel> <nick>
             jenni.say(given_user(line[1], line[0]))
 
@@ -151,12 +153,17 @@ class Scores:
                 for nick in self.scores_dict[channel]:
                     if nick == line[0]:
                         nick_scores = self.scores_dict[channel][nick]
-                        outstr += "{0}; {1}/{2}, {3} | ".format(channel, nick_scores[0],
-                                nick_scores[1], int(nick_scores[0]) - int(nick_scores[1]))
+                        outstr += "{0}; {1}/{2}, {3} | ".format(channel,
+                                                                nick_scores[0],
+                                                                nick_scores[1],
+                                                                int(
+                                                                nick_scores[0]
+                                                                ) - int(
+                                                                nick_scores[1]
+                                                                ))
             if outstr.endswith("| "):
                 outstr = outstr[:-2]
             jenni.say(outstr)
-
 
     def setpoint(self, jenni, input, line):
         if not input.admin:
