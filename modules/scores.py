@@ -153,7 +153,7 @@ class Scores:
                 for nick in self.scores_dict[channel]:
                     if nick == line[0]:
                         nick_scores = self.scores_dict[channel][nick]
-                        outstr += "{0}; {1}/{2}, {3} | ".format(channel,
+                        outstr += "{0}: {1}/{2}, {3} | ".format(channel,
                                                                 nick_scores[0],
                                                                 nick_scores[1],
                                                                 int(
