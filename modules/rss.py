@@ -19,7 +19,7 @@ from modules import url as url_module
 
 DEBUG = False
 socket.setdefaulttimeout(30)
-INTERVAL = 60  # seconds between checking for new updates
+INTERVAL = 600  # seconds between checking for new updates
 STOP = False
 
 
@@ -146,6 +146,7 @@ def read_feeds(jenni):
         try:
             entry = fp.entries[0]
         except:
+            jenni.say("row: " + str(row))
             jenni.say("Can't find element: " + str(fp))
             continue
 
