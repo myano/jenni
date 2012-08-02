@@ -125,10 +125,12 @@ lookup.commands = ['cs']
 lookup.rate = 30
 
 def cw(jenni, input):
+    re_cw = re.compile("[\.\- ]+")
+    re_noncw = re.compile("[^\.\- ]+")
     text = input.group(2).lower().rstrip().lstrip()
     temp = text.split(" ")
     output = str()
-    if "." in text or "-" in text:
+    if re_cw.findall(text) and not re_noncw.findall(text):
         ## MORSE
         for code in temp:
             if " " in code:
@@ -148,7 +150,7 @@ def cw(jenni, input):
                 output += " "
     jenni.reply(output)
 cw.commands = ['cw']
-cw.rate = 5
+cw.rate = 15
 cw.thread = True
 
 if __name__ == '__main__':
