@@ -16,6 +16,7 @@ import re
 from htmlentitydefs import name2codepoint
 import unicode
 import urllib2
+import socket
 import web
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
@@ -33,6 +34,8 @@ IGNORE = ["git.io"]
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
+
+IP_HOST = urllib2.urlopen('http://yano.nu/ip/').read()
 
 try:
     file = open("bitly.txt", "r")
@@ -223,6 +226,14 @@ def get_results(text):
         url = unicode.encode(a[i][0])
         url = unicode.decode(url)
         url = unicode.iriToUri(url)
+        domain = getTLD(url)
+        ip = socket.gethostbyname_ex(domain.split('//')[1])[2]
+        localhost = False
+        for x in ip:
+            if x.startswith('127') or '::1' == x or '0:0:0:0:0:0:0:1' == x:
+                localhost = True
+                break
+        if localhost: break
         if not url.startswith(EXCLUSION_CHAR):
             try:
                 page_title = find_title(url)
@@ -232,6 +243,8 @@ def get_results(text):
                 bitly = short(url)
                 bitly = bitly[0][1]
             else: bitly = url
+            if IP_HOST in page_title:
+                break
             display.append([page_title, url, bitly])
         i += 1
     return display
