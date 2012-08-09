@@ -35,7 +35,8 @@ IGNORE = ["git.io"]
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
 
-IP_HOST = urllib2.urlopen('http://yano.nu/ip/').read()
+IPv6_HOST = urllib2.urlopen('http://ipv6.icanhazip.com').read().strip()
+IPv4_HOST = urllib2.urlopen('http://ipv4.icanhazip.com').read().strip()
 
 try:
     file = open("bitly.txt", "r")
@@ -48,7 +49,7 @@ try:
 except:
     print "ERROR: No bitly.txt found."
 
-url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+))' % (EXCLUSION_CHAR))
+url_finder = re.compile(r'(?u)(%s?(http|https|ftp)?(:?/?/?\S+\.\S+/?\S+?))' % (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 
@@ -102,8 +103,7 @@ def find_title(url):
             return "Too many re-directs."
 
     try: mtype = info['content-type']
-    except:
-        return
+    except: return
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return
 
@@ -161,6 +161,8 @@ def find_title(url):
 
     if title:
         return title
+    else:
+        return 'No title'
 
 def short(text):
     """
@@ -172,6 +174,7 @@ def short(text):
     bitlys = [ ]
     try:
         a = re.findall(url_finder, text)
+        print str(a)
         k = len(a)
         i = 0
         while i < k:
@@ -227,10 +230,18 @@ def get_results(text):
         url = unicode.decode(url)
         url = unicode.iriToUri(url)
         domain = getTLD(url)
-        ip = socket.gethostbyname_ex(domain.split('//')[1])[2]
+        domain = domain.strip()
+        if "//" in domain:
+            domain = domain.split('//')[1]
+        try:
+            ips = socket.getaddrinfo(domain, 80, 0, 0, socket.SOL_TCP)
+        except:
+            i += 1
+            continue
         localhost = False
-        for x in ip:
-            if x.startswith('127') or '::1' == x or '0:0:0:0:0:0:0:1' == x:
+        for x in ips:
+            y = x[4][0]
+            if y.startswith('127') or '::1' == y or '0:0:0:0:0:0:0:1' == y:
                 localhost = True
                 break
         if localhost: break
@@ -243,8 +254,9 @@ def get_results(text):
                 bitly = short(url)
                 bitly = bitly[0][1]
             else: bitly = url
-            if IP_HOST in page_title:
-                break
+            if page_title:
+                if IPv4_HOST in page_title or IPv6_HOST in page_title:
+                    break
             display.append([page_title, url, bitly])
         i += 1
     return display
@@ -273,10 +285,10 @@ show_title_auto.rule = '(?u).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 show_title_auto.priority = 'high'
 
 def show_title_demand (jenni, input):
-    #try:
-    results = get_results(input)
-    #except: return
-    if results is None: return
+    results = get_results(input.group(2))
+    if results is None:
+        jenni.reply('No title found.')
+        return
 
     for r in results:
         if r[0] is None: continue
