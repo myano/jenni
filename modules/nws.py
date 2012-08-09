@@ -249,15 +249,18 @@ def weather_feed(jenni, input):
                     c.close()
                     break
                 entry = entity
-                area = entry['cap_areadesc']
-                link = entry['link']
-                title = entry['title']
-                state = link.split("?x=")[1][:2]
-                summary = entry['summary']
-                cert = entry['cap_certainty']
-                severity = entry['cap_severity']
-                status = entry['cap_status']
-                urgency = entry['cap_urgency']
+                try:
+                    area = entry['cap_areadesc']
+                    link = entry['link']
+                    title = entry['title']
+                    state = link.split("?x=")[1][:2]
+                    summary = entry['summary']
+                    cert = entry['cap_certainty']
+                    severity = entry['cap_severity']
+                    status = entry['cap_status']
+                    urgency = entry['cap_urgency']
+                except:
+                    jenni.msg(jenni.logchan_pm, "No entry available.")
 
                 ch_state = "{0}-{1}-{2}".format(CHANNEL, "us", state.lower())
 
