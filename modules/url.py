@@ -170,11 +170,11 @@ def short(text):
     The return type is a list.
     """
 
-    if not bitly_loaded: return [ ]
-    bitlys = [ ]
+    if not bitly_loaded: return list()
+    if not text: return list()
+    bitlys = list()
     try:
         a = re.findall(url_finder, text)
-        print str(a)
         k = len(a)
         i = 0
         while i < k:
@@ -221,10 +221,11 @@ def doUseBitLy (url):
     return bitly_loaded and BITLY_TRIGGER_LEN is not None and len(url) > BITLY_TRIGGER_LEN
 
 def get_results(text):
+    if not text: return list()
     a = re.findall(url_finder, text)
     k = len(a)
     i = 0
-    display = [ ]
+    display = list()
     while i < k:
         url = unicode.encode(a[i][0])
         url = unicode.decode(url)
