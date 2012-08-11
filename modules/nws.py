@@ -78,7 +78,7 @@ alerts = "http://alerts.weather.gov/cap/wwaatmget.php?x={0}"
 zip_code_lookup = "http://www.zip-codes.com/zip-code/{0}/zip-code-{0}.asp"
 nomsg = "There are no active watches, warnings or advisories, for {0}."
 re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
-re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[(\S+)\]</a></td></tr>')
+re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z 0-9]+)\]</a></td></tr>')
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 more_info = "Complete weather watches, warnings, and advisories for {0}, available here: {1}"
 warning_list = "http://alerts.weather.gov/cap/us.php?x=1"
@@ -129,11 +129,15 @@ def nws_lookup(jenni, input):
                 if not state and not city:
                     jenni.reply("Could not match ZIP code to a state")
                     return
-                state = state[0].lower()
-                state = states[state].upper()
-                location = city[0] + ", " + state
-                fips_combo = unicode(state) + "C" + unicode(fips[0])
-                master_url = alerts.format(fips_combo)
+                try:
+                    state = state[0].lower()
+                    state = states[state].upper()
+                    location = city[0] + ", " + state
+                    fips_combo = unicode(state) + "C" + unicode(fips[0])
+                    master_url = alerts.format(fips_combo)
+                except:
+                    jenni.reply("Could not parse state or city from database.")
+                    return
             else:
                 jenni.reply("ZIP code does not exist.")
                 return
