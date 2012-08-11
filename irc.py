@@ -132,7 +132,7 @@ class Bot(asynchat.async_chat):
     def collect_incoming_data(self, data):
         if data:
             log_raw(data)
-            if hasattr(self, "logchan_pm") and self.logchan_pm and "PRIVMSG" in data and "#" not in data.split()[2]:
+            if hasattr(self, "logchan_pm") and self.logchan_pm and "#" not in data.split()[2] and ("PRIVMSG" in data or "NOTICE" in data):
                 self.msg(self.logchan_pm, data)
         self.buffer += data
 
