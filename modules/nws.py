@@ -129,11 +129,15 @@ def nws_lookup(jenni, input):
                 if not state and not city:
                     jenni.reply("Could not match ZIP code to a state")
                     return
-                state = state[0].lower()
-                state = states[state].upper()
-                location = city[0] + ", " + state
-                fips_combo = unicode(state) + "C" + unicode(fips[0])
-                master_url = alerts.format(fips_combo)
+                try:
+                    state = state[0].lower()
+                    state = states[state].upper()
+                    location = city[0] + ", " + state
+                    fips_combo = unicode(state) + "C" + unicode(fips[0])
+                    master_url = alerts.format(fips_combo)
+                except:
+                    jenni.reply("Could not parse state or city from database.")
+                    return
             else:
                 jenni.reply("ZIP code does not exist.")
                 return
