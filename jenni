@@ -42,6 +42,12 @@ def create_default_config(fn):
     # But admin.py is disabled by default, as follows:
     exclude = ['admin', 'adminchannel', 'ai', 'resp', 'school']
 
+    # Block modules from specific channels
+    # To not block anything for a channel, just don't mention it
+    excludes = {
+            '##blacklist': ['!'],
+        }
+
     # If you want to enumerate a list of modules rather than disabling
     # some, use "enable = ['example']", which takes precedent over exclude
     #

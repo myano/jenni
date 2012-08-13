@@ -30,7 +30,8 @@ class Jenni(irc.Bot):
         self.doc = {}
         self.stats = {}
         self.times = {}
-        self.acivity = {}
+        if hasattr(config, 'excludes'):
+            self.excludes = config.excludes
         self.setup()
 
     def setup(self):
@@ -216,6 +217,21 @@ class Jenni(irc.Bot):
                         return
         else: self.times[nick] = dict()
         self.times[nick][func] = time.time()
+        try:
+            if hasattr(self, 'excludes'):
+                if input.sender in self.excludes:
+                    if '!' in self.excludes[input.sender]:
+                        # block all function calls for this channel
+                        return
+                    fname = func.func_code.co_filename.split('/')[-1].split('.')[0]
+                    if fname in self.excludes[input.sender]:
+                        # block function call if channel is blacklisted
+                        print "Blocking...", fname
+                        return
+        except Exception, e:
+            print "Error attempting to block:", str(func.name)
+            self.error(origin)
+
         try:
             func(jenni, input)
         except Exception, e:
