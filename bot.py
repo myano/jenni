@@ -226,7 +226,7 @@ class Jenni(irc.Bot):
                     fname = func.func_code.co_filename.split('/')[-1].split('.')[0]
                     if fname in self.excludes[input.sender]:
                         # block function call if channel is blacklisted
-                        print "Blocking...", fname
+                        print 'Blocked:', input.sender, func.name, func.func_code.co_filename
                         return
         except Exception, e:
             print "Error attempting to block:", str(func.name)
