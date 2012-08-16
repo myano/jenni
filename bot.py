@@ -264,7 +264,7 @@ class Jenni(irc.Bot):
 
                         nick = (input.nick).lower()
 
-                        ## blocking ability
+                        # blocking ability
                         if os.path.isfile("blocks"):
                             g = open("blocks", "r")
                             contents = g.readlines()
@@ -276,22 +276,32 @@ class Jenni(irc.Bot):
                             try: bad_nicks = contents[1].split(',')
                             except: bad_nicks = ['']
 
+                            # check for blocked hostmasks
                             if len(bad_masks) > 0:
+                                host = origin.host
+                                host = host.lower()
                                 for hostmask in bad_masks:
-                                    hostmask = hostmask.replace("\n", "")
+                                    hostmask = hostmask.replace("\n", "").strip()
                                     if len(hostmask) < 1: continue
-                                    re_temp = re.compile(hostmask)
-                                    host = origin.host
-                                    host = host.lower()
-                                    if re_temp.findall(host) or hostmask in host:
-                                        return
+                                    try:
+                                        re_temp = re.compile(hostmask)
+                                        if re_temp.findall(host):
+                                            return
+                                    except:
+                                        if hostmask in host:
+                                            return
+                            # check for blocked nicks
                             if len(bad_nicks) > 0:
                                 for nick in bad_nicks:
-                                    nick = nick.replace("\n", "")
+                                    nick = nick.replace("\n", "").strip()
                                     if len(nick) < 1: continue
-                                    re_temp = re.compile(nick)
-                                    if re_temp.findall(input.nick) or nick in input.nick:
-                                        return
+                                    try:
+                                        re_temp = re.compile(nick)
+                                        if re_temp.findall(input.nick):
+                                            return
+                                    except:
+                                        if nick in input.nick:
+                                            return
                         # stats
                         if func.thread:
                             targs = (func, origin, jenni, input)

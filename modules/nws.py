@@ -297,7 +297,7 @@ def weather_feed(jenni, input):
                         jenni.msg(ch_state, each)
                 conn.commit()
                 c.close()
-            time.sleep(10)
+            time.sleep(60)
 
 if __name__ == '__main__':
     print __doc__.strip()
