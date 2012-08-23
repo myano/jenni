@@ -207,7 +207,17 @@ def displayBitLy (jenni, url, shorten):
     u = getTLD(url)
     jenni.say('%s  -  %s' % (u, shorten))
 
+def remove_nonprint(text):
+    new = str()
+    for char in text:
+        x = ord(char)
+        if x > 32 and x < 126:
+            new += char
+    return new
+
 def getTLD (url):
+    url = url.strip()
+    url = remove_nonprint(url)
     idx = 7
     if url.startswith('https://'): idx = 8
     elif url.startswith('ftp://'): idx = 6
@@ -215,7 +225,7 @@ def getTLD (url):
     f = u.find('/')
     if f == -1: u = url
     else: u = url[0:idx] + u[0:f]
-    return u
+    return remove_nonprint(u)
 
 def doUseBitLy (url):
     return bitly_loaded and BITLY_TRIGGER_LEN is not None and len(url) > BITLY_TRIGGER_LEN
@@ -230,8 +240,8 @@ def get_results(text):
         url = unicode.encode(a[i][0])
         url = unicode.decode(url)
         url = unicode.iriToUri(url)
+        url = remove_nonprint(url)
         domain = getTLD(url)
-        domain = domain.strip()
         if "//" in domain:
             domain = domain.split('//')[1]
         try:
