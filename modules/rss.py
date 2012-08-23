@@ -157,12 +157,12 @@ def read_feeds(jenni):
         elif feed_fg and feed_bg:
             site_name_effect = "[\x02\x03%s,%s%s\x03\x02]" % (feed_fg, feed_bg, feed_site_name)
 
-        if hasattr(entry, 'id'):
-            article_url = entry.id
-        elif hasattr(entry, 'feedburner_origlink'):
-            article_url = entry.feedburner_origlink
-        else:
-            article_url = entry.links[0].href
+        try:
+            article_url = entry.link
+        except:
+            print "Something went wrong"
+            print str(entry)
+            continue
 
         # only print if new entry
         sql_text = (feed_channel, feed_site_name, entry.title, article_url)
