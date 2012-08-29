@@ -105,6 +105,7 @@ def nws_lookup(jenni, input):
         page1 = web.get(url1).split("\n")
         prev1 = str()
         prev2 = str()
+        url_part2 = str()
         for line in page1:
             mystr = ">" + unicode(county) + "<"
             if mystr in line.lower():
