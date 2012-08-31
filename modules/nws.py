@@ -80,6 +80,7 @@ nomsg = "There are no active watches, warnings or advisories, for {0}."
 re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
 re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z ]+)\]</a></td></tr>')
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
+re_zip = re.compile(r'^(\d{5})\-?(\d{4})?$')
 more_info = "Complete weather watches, warnings, and advisories for {0}, available here: {1}"
 warning_list = "http://alerts.weather.gov/cap/us.php?x=1"
 STOP = False
@@ -98,7 +99,12 @@ def nws_lookup(jenni, input):
         url_part1 = "http://alerts.weather.gov"
         state = bits[1].lstrip().rstrip().lower()
         county = bits[0].lstrip().rstrip().lower()
-        if state not in states:
+        reverse_lookup = list()
+        if len(state) == 2:
+            reverse_lookup = [k for k, v in states.iteritems() if v == state]
+            if reverse_lookup:
+                state = reverse_lookup[0]
+        if state not in states and len(reverse_lookup) < 1:
             jenni.reply("State not found.")
             return
         url1 = county_list.format(states[state])
@@ -121,7 +127,17 @@ def nws_lookup(jenni, input):
     elif len(bits) == 1:
         ## zip code
         if bits[0]:
-            urlz = zip_code_lookup.format(bits[0])
+            zip_code = bits[0]
+            zips = re_zip.findall(zip_code)
+            if not zips:
+                jenni.reply("ZIP is invalid.")
+                return
+            else:
+                try:
+                    zip_code = zips[0][0]
+                except:
+                    jenni.reply("ZIP could not be validated.")
+            urlz = zip_code_lookup.format(zip_code)
             pagez = web.get(urlz)
             fips = re_fips.findall(pagez)
             if fips:
