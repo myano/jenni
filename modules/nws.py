@@ -73,6 +73,39 @@ states = {
         "wyoming": "wy",
 }
 
+conditions = {
+    "Heat": "\x02\x0304Heat\x03\x02",
+    "Flood": "\x02\x0303Flood\x03\x02",
+    "Statement": "\x02\x0313_Statement_\x03\x02",
+    "Surf": "\x02\x0311Surf\x03\x02",
+    "Thunderstorm": "\x02\x0307Thunderstorm\x03\x02",
+    "Red Flag": "\x02\x0304Red Flag\x03\x02",
+    "Lake": "\x02\x0311Lake\x03\x02",
+    "Air": "\x02\x0305Air\x03\x02",
+    "Tornado": "\x02\x0304!!TORNADO!!\x03\x02",
+    "Watch": "\x02\x0308_WATCH_\x03\x02",
+    "Warning": "\x02\x0304!WARNING!\x03\x02",
+    "Severe": "\x02\x0305Severe\x03\x02",
+    "Special": "\x02\x0306_Special_\x03\x02",
+    "Fire": "\x02\x0304Fire\x03\x02",
+    "Seas": "\x02\x0311Seas\x03\x02",
+    "Danger": "\x02\x0304DANGER\x03\x02",
+    "Small Craft": "\x02\x0311Small Craft\x03\x02",
+    "Advisory": "\x0306Advisory\x03",
+    "Hurricane": "\x02\x0313HURRICANE\x03\x02",
+    "Wind": "\x02\x0311Wind\x03\x02",
+    "Flash": "\x0311Flash\x03",
+    "Rip Current": "\x02\x0311Rip Current\x03\x02",
+    "Beach Hazards": "\x0308Beach Hazards\x03",
+    "Frost": "\x02Frost\x02",
+    "Quality": "\x0313Quality\x03",
+    "Hydrologic": "\x0311Hydrologic\x03",
+    "Weather": "\x02Weather\x02",
+    "High": "\x02\x0304HIGH\x03\x02",
+    "Dense Fog": "\x0303Dense Fog\x03",
+    "Winter": "\x02\x0311Winter\x03\x02",
+}
+
 county_list = "http://alerts.weather.gov/cap/{0}.php?x=3"
 alerts = "http://alerts.weather.gov/cap/wwaatmget.php?x={0}"
 zip_code_lookup = "http://www.zip-codes.com/zip-code/{0}/zip-code-{0}.asp"
@@ -219,30 +252,6 @@ def weather_feed(jenni, input):
     c.execute("CREATE TABLE IF NOT EXISTS nws ( area text, state text, title text )")
     conn.commit()
     c.close()
-
-    conditions = {
-        "Heat": "\x02\x0304Heat\x03\x02",
-        "Flood": "\x02\x0303Flood\x03\x02",
-        "Weather Statement": "\x02\x0313Weather _Statement_\x03\x02",
-        "Surf": "\x02\x0311Surf\x03\x02",
-        "Thunderstorm": "\x02\x0308Thunderstorm\x03\x02",
-        "Red Flag": "\x02\x0304Red Flag\x03\x02",
-        "Lake": "\x02\x0311Lake\x03\x02",
-        "Air": "\x02\x0305Air\x03\x02",
-        "Tornado": "\x02\x0304!!TORNADO!!\x03\x02",
-        "Watch": "\x02\x0308_WATCH_\x03\x02",
-        "Warning": "\x02\x0304!WARNING!\x03\x02",
-        "Severe": "\x02\x0305Severe\x03\x02",
-        "Special": "\x02\x0306_Special_\x03\x02",
-        "Fire": "\x02\x0304Fire\x03\x02",
-        "Seas": "\x02\x0311Seas\x03\x02",
-        "Danger": "\x02\x0304DANGER\x03\x02",
-        "Small Craft": "\x02\x0311Small Craft\x03\x02",
-        "Advisory": "\x0306Advisory\x03",
-        "Hurricane": "\x02\x0313HURRICANE\x03\x02",
-        "Wind": "\x02\x0311Wind\x03\x02",
-        "Flash": "\x0311Flash\x03",
-    }
 
     word_re = re.compile("\w+")
 
