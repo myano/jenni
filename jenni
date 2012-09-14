@@ -31,7 +31,7 @@ def create_default_config(fn):
     port = 6667
     channels = ['#example', '#test']
     owner = 'yournickname'
-    logchan_pm = ''
+    logchan_pm = '#jenni-log'
 
     # password is the NickServ password, serverpass is the server password
     # password = 'example'
