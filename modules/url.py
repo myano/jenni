@@ -14,7 +14,7 @@ It also automatically displays the "title" of any URL pasted into the channel.
 
 import re
 from htmlentitydefs import name2codepoint
-import unicode
+from modules import unicode
 import urllib2
 import socket
 import web
@@ -35,7 +35,7 @@ IGNORE = ["git.io"]
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
 
-IPv6_HOST = urllib2.urlopen('http://ipv6.icanhazip.com').read().strip()
+#IPv6_HOST = urllib2.urlopen('http://ipv6.icanhazip.com').read().strip()
 IPv4_HOST = urllib2.urlopen('http://ipv4.icanhazip.com').read().strip()
 
 try:
