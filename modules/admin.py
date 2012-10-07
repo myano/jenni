@@ -12,54 +12,55 @@ More info:
 import os
 
 def join(jenni, input):
-   """Join the specified channel. This is an admin-only command."""
-   # Can only be done in privmsg by an admin
-   if input.sender.startswith('#'): return
-   if input.admin:
-      channel, key = input.group(1), input.group(2)
-      if not key:
-         jenni.write(['JOIN'], channel)
-      else: jenni.write(['JOIN', channel, key])
+    """Join the specified channel. This is an admin-only command."""
+    # Can only be done in privmsg by an admin
+    if input.sender.startswith('#'): return
+    if input.admin:
+        channel, key = input.group(1), input.group(2)
+        if not key:
+            jenni.write(['JOIN'], channel)
+        else: jenni.write(['JOIN', channel, key])
 join.rule = r'\.join (#\S+)(?: *(\S+))?'
 join.priority = 'low'
 join.example = '.join #example or .join #example key'
 
 def part(jenni, input):
-   """Part the specified channel. This is an admin-only command."""
-   # Can only be done in privmsg by an admin
-   if input.sender.startswith('#'): return
-   if input.admin:
-      jenni.write(['PART'], input.group(2))
+    """Part the specified channel. This is an admin-only command."""
+    # Can only be done in privmsg by an admin
+    if input.sender.startswith('#'): return
+    if input.admin:
+        jenni.write(['PART'], input.group(2))
 part.commands = ['part']
 part.priority = 'low'
 part.example = '.part #example'
 
 def quit(jenni, input):
-   """Quit from the server. This is an owner-only command."""
-   # Can only be done in privmsg by the owner
-   if input.sender.startswith('#'): return
-   if input.owner:
-      jenni.write(['QUIT'])
-      __import__('os')._exit(0)
+    """Quit from the server. This is an owner-only command."""
+    # Can only be done in privmsg by the owner
+    if input.sender.startswith('#'): return
+    if input.owner:
+        jenni.write(['QUIT'])
+        __import__('os')._exit(0)
 quit.commands = ['quit']
 quit.priority = 'low'
 
 def msg(jenni, input):
-   # Can only be done in privmsg by an admin
-   if input.sender.startswith('#'): return
-   a, b = input.group(2), input.group(3)
-   if (not a) or (not b): return
-   if input.admin:
-      jenni.msg(a, b)
+    # Can only be done in privmsg by an admin
+    if input.sender.startswith('#'): return
+    a, b = input.group(2), input.group(3)
+    if (not a) or (not b): return
+    if input.admin:
+        jenni.msg(a, b)
 msg.rule = (['msg'], r'(#?\S+) (.+)')
 msg.priority = 'low'
 
 def me(jenni, input):
-   # Can only be done in privmsg by an admin
-   if input.sender.startswith('#'): return
-   if input.admin:
-      msg = '\x01ACTION %s\x01' % input.group(3)
-      jenni.msg(input.group(2), msg)
+    # Can only be done in privmsg by an admin
+    if input.sender.startswith('#'): return
+    if input.admin:
+        if input.group(2) and input.group(3):
+            msg = '\x01ACTION %s\x01' % input.group(3)
+            jenni.msg(input.group(2), msg, x=True)
 me.rule = (['me'], r'(#?\S+) (.*)')
 me.priority = 'low'
 
@@ -175,6 +176,18 @@ blocks.commands = ['blocks']
 blocks.priority = 'low'
 blocks.thread = False
 
+def write_raw(jenni, input):
+    if not input.owner: return
+    txt = input.bytes[7:]
+    jenni.reply(txt)
+    txt = txt.encode('utf-8')
+    a = txt.split(":")
+    jenni.reply(str(a))
+    jenni.write([a[0].strip()],a[1].strip(),True)
+write_raw.commands = ['write']
+write_raw.priority = 'high'
+write_raw.thread = False
+
 if __name__ == '__main__':
-   print __doc__.strip()
+    print __doc__.strip()
 

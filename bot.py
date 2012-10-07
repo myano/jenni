@@ -2,9 +2,12 @@
 """
 bot.py - Jenni IRC Bot
 Copyright 2008, Sean B. Palmer, inamidst.com
+Modified by: Michael Yanovich
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * Jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import time, sys, os, re, threading, imp
@@ -24,7 +27,9 @@ class Jenni(irc.Bot):
     def __init__(self, config):
         if hasattr(config, "logchan_pm"): lc_pm = config.logchan_pm
         else: lc_pm = None
-        args = (config.nick, config.name, config.channels, config.password, lc_pm)
+        if hasattr(config, "logging"): logging = config.logging
+        else: logging = False
+        args = (config.nick, config.name, config.channels, config.password, lc_pm, logging)
         irc.Bot.__init__(self, *args)
         self.config = config
         self.doc = {}
@@ -118,7 +123,7 @@ class Jenni(irc.Bot):
 
             if not hasattr(func, 'rate'):
                 if hasattr(func, 'commands'):
-                    func.rate = 20
+                    func.rate = 0
                 else:
                     func.rate = 0
 
