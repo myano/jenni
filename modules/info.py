@@ -7,6 +7,13 @@ Licensed under the Eiffel Forum License 2.
 http://inamidst.com/phenny/
 """
 
+def fchannels():
+    f = open("nochannels.txt", "r")
+    lines = f.readlines()[0]
+    f.close()
+    lines = lines.replace('\n', '')
+    return lines.split(',')
+
 def doc(jenni, input):
     """Shows a command's documentation, and possibly an example."""
     name = input.group(1)
@@ -46,9 +53,10 @@ def stats(jenni, input):
     commands = {}
     users = {}
     channels = {}
+    bchannels = fchannels()
 
     ignore = set(['f_note', 'startup', 'message', 'noteuri',
-        'say_it', 'collectlines'])
+        'say_it', 'collectlines', 'oh_baby'])
     for (name, user), count in jenni.stats.iteritems():
         if name in ignore: continue
         if not user: continue
@@ -82,6 +90,8 @@ def stats(jenni, input):
     # most heavy channels
     chreply = 'power channels: '
     for count, channel in charank[:3]:
+        if channel in bchannels:
+            continue
         chreply += '%s (%s), ' % (channel, count)
     jenni.say(chreply.rstrip(', '))
 stats.commands = ['stats']

@@ -179,11 +179,19 @@ blocks.thread = False
 def write_raw(jenni, input):
     if not input.owner: return
     txt = input.bytes[7:]
-    jenni.reply(txt)
     txt = txt.encode('utf-8')
     a = txt.split(":")
-    jenni.reply(str(a))
-    jenni.write([a[0].strip()],a[1].strip(),True)
+    status = False
+    if len(a) > 1:
+        jenni.write([a[0].strip()],a[1].strip(),raw=True)
+        status = True
+    elif a:
+        b = a[0].split()
+        jenni.reply("foo," + str(b))
+        jenni.write([b[0].strip()]," ".join(b[1:]),raw=True)
+        status = True
+    if status:
+        jenni.reply("Message sent to server.")
 write_raw.commands = ['write']
 write_raw.priority = 'high'
 write_raw.thread = False

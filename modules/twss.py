@@ -75,10 +75,12 @@ say_it.priority = "low"
 
 def add_twss(jenni, input):
     print last
-    with open("modules/twss_user_added.txt", "a") as f:
-        f.write(re.sub(r"[^\w\s]", "", last.lower()) + "\n")
-        f.close()
-    jenni.say("That's what she said.")
+    txt = input.group(2)
+    if txt:
+        with open("modules/twss_user_added.txt", "a") as f:
+            f.write(re.sub(r"[^\w\s]", "", last.lower()) + "\n")
+            f.close()
+        jenni.say("Added, new \"That's what she said.\"")
 add_twss.commands = ["twss"]
 add_twss.priority = "low"
 add_twss.threading = False

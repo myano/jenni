@@ -24,7 +24,7 @@ def google_ajax(query):
     """Search using AjaxSearch, and return its JSON."""
     if isinstance(query, unicode):
         query = query.encode('utf-8')
-    uri = 'http://ajax.googleapis.com/ajax/services/search/web'
+    uri = 'https://ajax.googleapis.com/ajax/services/search/web'
     args = '?v=1.0&safe=off&q=' + web.urllib.quote(query)
     handler = web.urllib._urlopener
     web.urllib._urlopener = Grab()
@@ -149,7 +149,7 @@ r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
 def duck_search(query):
     query = query.replace('!', '')
     query = web.urllib.quote(query)
-    uri = 'http://duckduckgo.com/html/?q=%s&kl=uk-en' % query
+    uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % query
     bytes = web.get(uri)
     m = r_duck.search(bytes)
     if m: return web.decode(m.group(1))

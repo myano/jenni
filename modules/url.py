@@ -28,22 +28,19 @@ import web
 # this variable is to determine when to use bitly. If the URL is more
 # than this length, it'll display a bitly URL instead. To disable bit.ly, put None
 # even if it's set to None, triggering .bitly command will still work!
-BITLY_TRIGGER_LEN = 60
+BITLY_TRIGGER_LEN = 35
 EXCLUSION_CHAR = "!"
 IGNORE = ["git.io"]
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
 
-IPv6_HOST = urllib2.urlopen('http://ipv6.icanhazip.com').read().strip()
-IPv4_HOST = urllib2.urlopen('http://ipv4.icanhazip.com').read().strip()
-
 try:
     file = open("bitly.txt", "r")
     key = file.read()
     key = key.split(",")
-    bitly_api_key = str(key[0].lstrip().rstrip())
-    bitly_user = str(key[1].lstrip().rstrip())
+    bitly_api_key = str(key[0].strip())
+    bitly_user = str(key[1].strip())
     file.close()
     bitly_loaded = 1
 except:
@@ -82,11 +79,13 @@ def find_title(url):
 
     redirects = 0
     ## follow re-directs, if someone pastes a bitly of a tinyurl, etc..
+    page = str()
     while True:
         req = urllib2.Request(uri, headers={'Accept':'text/html'})
-        req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:5.0) Gecko/20100101 Firefox/5.0')
+        req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0')
         u = urllib2.urlopen(req)
         info = u.info()
+        page = u.read()
         u.close()
 
         if not isinstance(info, list):
@@ -107,10 +106,11 @@ def find_title(url):
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return
 
-    u = urllib2.urlopen(req)
-    bytes = u.read(262144)
-    u.close()
-    content = bytes
+    if not page:
+        u = urllib2.urlopen(req)
+        page = u.read(262144)
+        u.close()
+    content = page
     regex = re.compile('<(/?)title( [^>]+)?>', re.IGNORECASE)
     content = regex.sub(r'<\1title>',content)
     regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
@@ -180,10 +180,6 @@ def short(text):
         while i < k:
             b = unicode.decode(a[i][0])
             if not b.startswith("http://bit.ly") or not b.startswith("http://j.mp/"):
-                # check to see if the url is valid
-                try: c = web.head(b)
-                except: return [[None, None]]
-
                 url = "http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt" % (bitly_user, bitly_api_key, urllib2.quote(b))
                 shorter = web.get(url)
                 shorter.strip()
@@ -244,18 +240,6 @@ def get_results(text):
         domain = getTLD(url)
         if "//" in domain:
             domain = domain.split('//')[1]
-        try:
-            ips = socket.getaddrinfo(domain, 80, 0, 0, socket.SOL_TCP)
-        except:
-            i += 1
-            continue
-        localhost = False
-        for x in ips:
-            y = x[4][0]
-            if y.startswith('127') or '::1' == y or '0:0:0:0:0:0:0:1' == y:
-                localhost = True
-                break
-        if localhost: break
         if not url.startswith(EXCLUSION_CHAR):
             try:
                 page_title = find_title(url)
@@ -265,9 +249,6 @@ def get_results(text):
                 bitly = short(url)
                 bitly = bitly[0][1]
             else: bitly = url
-            if page_title:
-                if IPv4_HOST in page_title or IPv6_HOST in page_title:
-                    break
             display.append([page_title, url, bitly])
         i += 1
     return display
