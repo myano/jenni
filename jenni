@@ -32,6 +32,7 @@ def create_default_config(fn):
     nick = 'jenni'
     host = 'irc.example.net'
     port = 6667
+    ssl = False
     channels = ['#example', '#test']
     owner = 'yournickname'
     logchan_pm = '#jenni-log'
@@ -43,7 +44,7 @@ def create_default_config(fn):
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
-    exclude = ['admin', 'adminchannel', 'ai', 'resp', 'school']
+    exclude = ['ai', 'resp', 'school', 'twss', 'nws', 'woot', 'rss']
 
     # Enable raw logging of everything jenni sees
     logging = False
@@ -149,6 +150,9 @@ def main(argv=None):
 
         if not hasattr(module, 'port'):
             module.port = 6667
+
+        if not hasattr(module, 'ssl'):
+            module.ssl = False
 
         if not hasattr(module, 'password'):
             module.password = None
