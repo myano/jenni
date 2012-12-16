@@ -121,15 +121,18 @@ class Bot(asynchat.async_chat):
                 input = input.encode('utf-8')
         return input
 
-    def run(self, host, port=6667):
-        self.initiate_connect(host, port)
+    def run(self, host, port=6667, ssl=False):
+        self.initiate_connect(host, port, ssl)
 
-    def initiate_connect(self, host, port):
+    def initiate_connect(self, host, port, ssl):
         if self.verbose:
             message = 'Connecting to %s:%s...' % (host, port)
             print >> sys.stderr, message,
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((host, port))
+        if ssl:
+            import ssl
+            self.socket = ssl.wrap_socket(self.socket)
         try: asyncore.loop()
         except KeyboardInterrupt:
             sys.exit()
