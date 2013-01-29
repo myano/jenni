@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """
-reload.py - Jenni Module Reloader Module
-Copyright 2008, Sean B. Palmer, inamidst.com
+reload.py - jenni Module Reloader Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import sys, os.path, time, imp

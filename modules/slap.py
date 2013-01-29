@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-scores.py - Slap Module
-Copyright 2009, Michael Yanovich, yanovich.net
+scores.py - jenni Slap Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

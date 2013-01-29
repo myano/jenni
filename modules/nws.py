@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-warnings.py -- NWS Alert Module
-Copyright 2011, Michael Yanovich, yanovich.net
+warnings.py -- jenni NWS Alert Module
+Copyright 2011-2013, Michael Yanovich (yanovich.net)
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 This module allows one to query the National Weather Service for active

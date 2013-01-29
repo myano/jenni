@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-southpark.py - Jenni Southpark Module
-Copyright 2011, Michael Yanovich (myano), Kenneth Sham (Kays)
+southpark.py - jenni Southpark Module
+Copyright 2011-2013, Michael Yanovich (yanovich.net) and Kenneth Sham (Kays)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

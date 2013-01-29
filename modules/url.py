@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-url.py - Jenni Bitly Module
-Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
+url.py - jenni Bitly Module
+Copyright 2010-2013, Michael Yanovich (yanovich.net)
+Copyright 2010-2013, Kenneth Sham
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 This module will record all URLs to bitly via an api key and account.

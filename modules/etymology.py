@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """
-etymology.py - Jenni Etymology Module
-Copyright 2007-9, Sean B. Palmer, inamidst.com
+etymology.py - jenni Etymology Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2007-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re

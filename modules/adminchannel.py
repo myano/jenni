@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-admin.py - Jenni Admin Module
-Copyright 2010-2011, Michael Yanovich (yanovich.net) and Alek Rollyson.
+admin.py - jenni Admin Module
+Copyright 2010-2013, Michael Yanovich (yanovich.net) and Alek Rollyson.
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 Beefed up by Alek Rollyson. added functions for op, deop, voice, devoice

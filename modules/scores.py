@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-scores.py - Scores Module
-Copyright 2010-2011, Michael Yanovich (yanovich.net), Matt Meinwald,
-and Samuel Clements
+scores.py - jenni Scores Module
+Copyright 2010-2013, Michael Yanovich (yanovich.net) and Matt Meinwald,
+    and Samuel Clements
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
@@ -220,7 +220,7 @@ class Scores:
 
         jenni.say(result)
 
-# Jenni commands
+# jenni commands
 scores = Scores()
 
 

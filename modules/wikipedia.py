@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
-wikipedia.py - Jenni Wikipedia Module
-Copyright 2008-2013, Sean B. Palmer (inamidst.com) and Michael Yanovich (yanovich.net)
+wikipedia.py - jenni Wikipedia Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
-* Jenni: https://github.com/myano/jenni/
-* Phenny: http://inamidst.com/phenny/
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re, urllib, gzip, StringIO

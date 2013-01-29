@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-twitter.py - Jenni Twitter Module
-Copyright 2012, Sean B. Palmer, inamidst.com
+twitter.py - jenni Twitter Module
+Copyright 2012-2013, Michael Yanovich (yanovich.net)
+Copyright 2012-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

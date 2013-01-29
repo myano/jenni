@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-search.py - Jenni Web Search Module
-Copyright 2008-9, Sean B. Palmer, inamidst.com
+search.py - jenni Web Search Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013 Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
@@ -14,7 +15,7 @@ import web
 
 class Grab(web.urllib.URLopener):
     def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Jenni)'
+        self.version = 'Mozilla/5.0 (jenni)'
         web.urllib.URLopener.__init__(self, *args)
         self.addheader('Referer', 'https://github.com/myano/jenni')
     def http_error_default(self, url, fp, errcode, errmsg, headers):

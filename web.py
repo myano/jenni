@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 """
 web.py - Web Facilities
-Author: Sean B. Palmer, inamidst.com
-About: http://inamidst.com/phenny/
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
+
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re, urllib

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-quote.py - Jenni Quote Module
-Copyright 2008-10, Michael Yanovich, yanovich.net
+quote.py - jenni Quote Module
+Copyright 2008-2013, Michael Yanovich (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
