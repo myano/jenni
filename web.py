@@ -14,7 +14,7 @@ from htmlentitydefs import name2codepoint
 
 class Grab(urllib.URLopener):
     def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Jenni)'
+        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0'
         urllib.URLopener.__init__(self, *args)
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         return urllib.addinfourl(fp, [headers, errcode], "http:" + url)
