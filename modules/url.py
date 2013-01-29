@@ -14,7 +14,7 @@ It also automatically displays the "title" of any URL pasted into the channel.
 
 import re
 from htmlentitydefs import name2codepoint
-import unicode
+from modules import unicode
 import urllib2
 import urlparse
 import socket
