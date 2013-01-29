@@ -2,6 +2,7 @@
 """
 search.py - jenni Web Search Module
 Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2013, Edward Powell (embolalia.net)
 Copyright 2008-2013 Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
@@ -12,6 +13,7 @@ More info:
 
 import re
 import web
+import json
 
 class Grab(web.urllib.URLopener):
     def __init__(self, *args):
@@ -155,11 +157,27 @@ def duck_search(query):
     m = r_duck.search(bytes)
     if m: return web.decode(m.group(1))
 
+def duck_api(query):
+    uri = web.urllib.quote(query)
+    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1'%query
+    results = json.loads(web.get(uri))
+    print results
+    if results['Redirect']:
+        return results['Redirect']
+    else:
+        return None
+
 def duck(jenni, input):
     query = input.group(2)
     if not query: return jenni.reply('.ddg what?')
 
     query = query.encode('utf-8')
+
+    result = duck_api(query)
+    if result:
+        jenni.reply(result)
+        return
+
     uri = duck_search(query)
     if uri:
         jenni.reply(uri)
