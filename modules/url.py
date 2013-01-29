@@ -16,6 +16,7 @@ import re
 from htmlentitydefs import name2codepoint
 import unicode
 import urllib2
+import urlparse
 import socket
 import web
 
@@ -28,7 +29,8 @@ import web
 # this variable is to determine when to use bitly. If the URL is more
 # than this length, it'll display a bitly URL instead. To disable bit.ly, put None
 # even if it's set to None, triggering .bitly command will still work!
-BITLY_TRIGGER_LEN = 35
+BITLY_TRIGGER_LEN_TITLE = 35
+BITLY_TRIGGER_LEN_NOTITLE = 80
 EXCLUSION_CHAR = "!"
 IGNORE = ["git.io"]
 
@@ -91,14 +93,15 @@ def find_title(url):
         if not isinstance(info, list):
             status = '200'
         else:
-            status = unicode.encode(info[1])
+            status = str(info[1])
             info = info[0]
         if status.startswith('3'):
             uri = urlparse.urljoin(uri, info['Location'])
-        else: break
+        else:
+            break
 
         redirects += 1
-        if redirects >= 50:
+        if redirects >= 10:
             return "Too many re-directs."
 
     try: mtype = info['content-type']
@@ -106,15 +109,11 @@ def find_title(url):
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return
 
-    if not page:
-        u = urllib2.urlopen(req)
-        page = u.read(262144)
-        u.close()
     content = page
     regex = re.compile('<(/?)title( [^>]+)?>', re.IGNORECASE)
-    content = regex.sub(r'<\1title>',content)
+    content = regex.sub(r'<\1title>', content)
     regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
-    content = regex.sub('',content)
+    content = regex.sub('', content)
     start = content.find('<title>')
     if start == -1: return
     end = content.find('</title>', start)
@@ -223,8 +222,13 @@ def getTLD (url):
     else: u = url[0:idx] + u[0:f]
     return remove_nonprint(u)
 
-def doUseBitLy (url):
-    return bitly_loaded and BITLY_TRIGGER_LEN is not None and len(url) > BITLY_TRIGGER_LEN
+def doUseBitLy (title, url):
+    BTL = None
+    if title:
+        BTL = BITLY_TRIGGER_LEN_TITLE
+    else:
+        BTL = BITLY_TRIGGER_LEN_NOTITLE
+    return bitly_loaded and BTL is not None and len(url) > BTL
 
 def get_results(text):
     if not text: return list()
@@ -266,14 +270,14 @@ def show_title_auto (jenni, input):
         if k > 3: break
         k += 1
 
-        useBitLy = doUseBitLy(r[1])
+        useBitLy = doUseBitLy(r[0], r[1])
         if r[0] is None:
             if useBitLy: displayBitLy(jenni, r[1], r[2])
             continue
         if useBitLy: r[1] = r[2]
         else: r[1] = getTLD(r[1])
         jenni.say('[ %s ] - %s' % (r[0], r[1]))
-show_title_auto.rule = '(?u).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
+show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 show_title_auto.priority = 'high'
 
 def show_title_demand (jenni, input):
