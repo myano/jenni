@@ -6,3 +6,5 @@ osu_osc.py
 blocks
 logs/*
 *.db
+build
+
