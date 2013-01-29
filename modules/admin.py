@@ -49,6 +49,9 @@ def msg(jenni, input):
     if input.sender.startswith('#'): return
     a, b = input.group(2), input.group(3)
     if (not a) or (not b): return
+    if not input.owner:
+        if a.lower() == "nickserv": return
+        if a.lower() == "chanserv" and "drop" in b: return
     if input.admin:
         jenni.msg(a, b)
 msg.rule = (['msg'], r'(#?\S+) (.+)')
@@ -176,6 +179,12 @@ blocks.commands = ['blocks']
 blocks.priority = 'low'
 blocks.thread = False
 
+char_replace = {
+        r"\x01": chr(1),
+        r"\x02": chr(2),
+        r"\x03": chr(3),
+        }
+
 def write_raw(jenni, input):
     if not input.owner: return
     txt = input.bytes[7:]
@@ -183,12 +192,15 @@ def write_raw(jenni, input):
     a = txt.split(":")
     status = False
     if len(a) > 1:
-        jenni.write([a[0].strip()],a[1].strip(),raw=True)
+        newstr = a[1]
+        for x in char_replace:
+            if x in newstr:
+                newstr = newstr.replace(x, char_replace[x])
+        jenni.write(a[0].split(), newstr, raw=True)
         status = True
     elif a:
         b = a[0].split()
-        jenni.reply("foo," + str(b))
-        jenni.write([b[0].strip()]," ".join(b[1:]),raw=True)
+        jenni.write([b[0].strip()], u" ".join(b[1:]), raw=True)
         status = True
     if status:
         jenni.reply("Message sent to server.")
