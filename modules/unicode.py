@@ -13,6 +13,7 @@ import re
 import unicodedata
 import urlparse
 
+
 def meh(jenni, input):
     s = 'u'
     for i in xrange(1, 3000):
@@ -27,7 +28,10 @@ meh.rate = 30
 
 def decode(bytes):
     try:
-        text = bytes.decode('utf-8')
+        if isinstance(bytes, str) or isinstance(bytes, unicode):
+            text = bytes.decode('utf-8')
+        else:
+            text = str()
     except UnicodeDecodeError:
         try:
             text = bytes.decode('iso-8859-1')
@@ -38,7 +42,10 @@ def decode(bytes):
 
 def encode(bytes):
     try:
-        text = bytes.encode('utf-8')
+        if isinstance(bytes, str) or isinstance(bytes, unicode):
+            text = bytes.encode('utf-8')
+        else:
+            text = str()
     except UnicodeEncodeError:
         try:
             text = bytes.encode('iso-8859-1')
@@ -54,9 +61,11 @@ def urlEncodeNonAscii(b):
 def iriToUri(iri):
     parts = urlparse.urlparse(iri)
     return urlparse.urlunparse(
-        part.encode('idna') if parti == 1 else urlEncodeNonAscii(part.encode('utf-8'))
+        part.encode('idna') if parti == 1 else urlEncodeNonAscii(
+            part.encode('utf-8'))
         for parti, part in enumerate(parts)
     )
+
 
 if __name__ == '__main__':
     print __doc__.strip()
