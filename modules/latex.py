@@ -176,8 +176,9 @@ def latex(jenni, input):
         if char in HTML_ENCODINGS:
             text = text.replace(char, HTML_ENCODINGS[char])
     bah = uri + text
-    url = "http://tinyurl.com/api-create.php?url={0}".format(bah)
+    url = "https://tinyurl.com/api-create.php?url={0}".format(bah)
     a = web.get(url)
+    a = a.replace("http:", "https:")
     jenni.reply(a)
 latex.commands = ['tex']
 latex.priority = 'high'

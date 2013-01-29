@@ -46,7 +46,7 @@ def calc(jenni, input):
         precision = 2
     query = web.urllib.quote(query.encode('utf-8'))
 
-    uri = 'http://futureboy.us/fsp/frink.fsp?fromVal='
+    uri = 'https://futureboy.us/fsp/frink.fsp?fromVal='
     bytes = web.get(uri + query)
     m = r_result.search(bytes)
     if m:
@@ -78,7 +78,7 @@ def c(jenni, input):
     q = input.group(2).encode('utf-8')
     q = q.replace('\xcf\x95', 'phi') # utf-8 U+03D5
     q = q.replace('\xcf\x80', 'pi') # utf-8 U+03C0
-    uri = 'http://www.google.com/ig/calculator?q='
+    uri = 'https://www.google.com/ig/calculator?q='
     bytes = web.get(uri + web.urllib.quote(q))
     parts = bytes.split('",')
     answer = [p for p in parts if p.startswith('rhs: "')][0][6:]
@@ -100,7 +100,7 @@ def py(jenni, input):
     code = input.group(2)
     if not code: return
     query = code.encode('utf-8')
-    uri = 'http://tumbolia.appspot.com/py/'
+    uri = 'https://tumbolia.appspot.com/py/'
     answer = web.get(uri + web.urllib.quote(query))
     if answer:
         jenni.say(answer)
@@ -112,7 +112,7 @@ def wa(jenni, input):
     if not input.group(2):
         return jenni.reply("No search term.")
     query = input.group(2).encode('utf-8')
-    uri = 'http://tumbolia.appspot.com/wa/'
+    uri = 'https://tumbolia.appspot.com/wa/'
     answer = web.get(uri + web.urllib.quote(query.replace('+', '%2B')))
     if answer:
         jenni.say(answer)

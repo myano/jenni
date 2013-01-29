@@ -87,7 +87,7 @@ def getNewShowDate (jenni):
         return
 
     today = time.localtime()
-    src = web.get('http://en.wikipedia.org/wiki/List_of_South_Park_episodes')
+    src = web.get('https://en.wikipedia.org/wiki/List_of_South_Park_episodes')
     parts = src.split('Season 15 (2011)')
     cont = parts.pop()
     parts = cont.split('Shorts and unaired episodes')

@@ -13,7 +13,7 @@ More info:
 import re
 import web
 
-uri = 'http://en.wiktionary.org/w/index.php?title=%s&printable=yes'
+uri = 'https://en.wiktionary.org/w/index.php?title=%s&printable=yes'
 r_tag = re.compile(r'<[^>]+>')
 r_ul = re.compile(r'(?ims)<ul>.*?</ul>')
 

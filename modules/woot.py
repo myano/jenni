@@ -11,7 +11,7 @@ More info:
 
 import feedparser
 
-api = "http://api.woot.com/1/sales/current.rss/www.woot.com"
+api = "https://api.woot.com/1/sales/current.rss/www.woot.com"
 
 
 def woot(jenni, input):
@@ -38,7 +38,7 @@ def woot(jenni, input):
     base = base1 + base2
 
     output = base.format(item, price, soldout, condition, quantity,
-        woot_off, link)
+            woot_off, link.replace("http:", "https:"))
     jenni.reply(output)
 woot.commands = ['woot']
 woot.priority = 'low'
