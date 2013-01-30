@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-startup.py - Jenni Startup Module
-Copyright 2008, Sean B. Palmer, inamidst.com
+startup.py - jenni Startup Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

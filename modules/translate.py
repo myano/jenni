@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-translate.py - Jenni Translation Module
-Copyright 2008, Sean B. Palmer, inamidst.com
+translate.py - jenni Translation Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
@@ -30,7 +31,7 @@ def translate(text, input='auto', output='en'):
     input, output = urllib.quote(input), urllib.quote(output)
     text = urllib.quote(text)
 
-    result = opener.open('http://translate.google.com/translate_a/t?' +
+    result = opener.open('https://translate.google.com/translate_a/t?' +
         ('client=t&hl=en&sl=%s&tl=%s&multires=1' % (input, output)) +
         ('&otf=1&ssel=0&tsel=0&uptl=en&sc=1&text=%s' % text)).read()
 

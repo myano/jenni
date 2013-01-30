@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 """
-ping.py - Jenni Ping Module
-Author: Sean B. Palmer, inamidst.com
-Modified by: Michael Yanovich
-About: http://inamidst.com/phenny/
+ping.py - jenni Ping Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
+
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import random

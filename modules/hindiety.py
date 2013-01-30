@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-hindiety.py - Jenni Hindi Etymology Module
-Copyright 2012, Kenneth K. Sham
+hindiety.py - jenni Hindi Etymology Module
+Copyright 2012-2013, Kenneth K. Sham and Michael Yanovich (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

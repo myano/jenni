@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-warnings.py -- NWS Alert Module
-Copyright 2011, Michael Yanovich, yanovich.net
+warnings.py -- jenni NWS Alert Module
+Copyright 2011-2013, Michael Yanovich (yanovich.net)
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 This module allows one to query the National Weather Service for active
@@ -76,17 +76,18 @@ states = {
 conditions = {
     "Heat": "\x02\x0304Heat\x03\x02",
     "Flood": "\x02\x0303Flood\x03\x02",
-    "Statement": "\x02\x0313_Statement_\x03\x02",
+    "Statement": "\x02\x0313__Statement__\x03\x02",
     "Surf": "\x02\x0311Surf\x03\x02",
     "Thunderstorm": "\x02\x0307Thunderstorm\x03\x02",
     "Red Flag": "\x02\x0304Red Flag\x03\x02",
     "Lake": "\x02\x0311Lake\x03\x02",
+    "Effect": "\x02\x0311Effect\x03\x02",
     "Air": "\x02\x0305Air\x03\x02",
-    "Tornado": "\x02\x0304!!TORNADO!!\x03\x02",
-    "Watch": "\x02\x0308_WATCH_\x03\x02",
+    "Tornado": "\x02\x0304!!!TORNADO!!!\x03\x02",
+    "Watch": "\x02\x0308*_WATCH_*\x03\x02",
     "Warning": "\x02\x0304!WARNING!\x03\x02",
     "Severe": "\x02\x0305Severe\x03\x02",
-    "Special": "\x02\x0306_Special_\x03\x02",
+    "Special": "\x02\x0306__Special__\x03\x02",
     "Fire": "\x02\x0304Fire\x03\x02",
     "Seas": "\x02\x0311Seas\x03\x02",
     "Danger": "\x02\x0304DANGER\x03\x02",
@@ -104,6 +105,15 @@ conditions = {
     "High": "\x02\x0304HIGH\x03\x02",
     "Dense Fog": "\x0303Dense Fog\x03",
     "Winter": "\x02\x0311Winter\x03\x02",
+    "Rain": "\x0311Rain\x03",
+    "Freezing": "\x02\x03FREEZING\x03\x02",
+    "Stagnation": "\x02Stagnation\x02",
+    "Freeze": "\x02\x0311FREEZE\x03\x02",
+    "Chill": "\x0311Chill\x03",
+    "Coastal": "\x02Coastal\x02",
+    "Storm": "\x02*Storm*\x02",
+    "Blizzard": "\x0311Blizzard\x03",
+    "Snow": "\x0311Snow\x03",
 }
 
 county_list = "http://alerts.weather.gov/cap/{0}.php?x=3"
@@ -213,7 +223,12 @@ def nws_lookup(jenni, input):
                 if i > 1:
                     break
                 jenni.reply(key)
-                jenni.reply(warnings_dict[key][:510])
+                response = textwrap.wrap(warnings_dict[key], 450)
+                resp_len = len(response)
+                q = 1
+                for resp in response:
+                    jenni.reply("Part %s of %s: %s" % (str(q).zfill(2), str(resp_len).zfill(2), resp))
+                    q += 1
                 i += 1
             jenni.reply(more_info.format(location, master_url))
         else:
@@ -224,6 +239,7 @@ def nws_lookup(jenni, input):
             jenni.reply(more_info.format(location, master_url))
 nws_lookup.commands = ['nws']
 nws_lookup.priority = 'high'
+nws_lookup.thread = True
 
 
 def warns_control(jenni, input):
@@ -290,7 +306,8 @@ def weather_feed(jenni, input):
                     status = entry['cap_status']
                     urgency = entry['cap_urgency']
                 except:
-                    jenni.msg(jenni.logchan_pm, "No entry available.")
+                    jenni.msg(jenni.logchan_pm, "No entry available. See stdout for more information.")
+                    print time.time(), str(entry)
 
                 ch_state = "{0}-{1}-{2}".format(CHANNEL, "us", state.lower())
 
@@ -312,15 +329,21 @@ def weather_feed(jenni, input):
                             title = title.replace(condition, conditions[condition])
 
                     state = capitalize_all(state)
-                    line1 = "\x02[\x0302{1}\x03] {0}\x02"
+                    line1 = "\x02[\x0302{1}\x03] Part {2} of {3}: {0}\x02"
                     line2 = "{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}"
-                    areas = textwrap.wrap(area, 475)
+                    areas = textwrap.wrap(area, 450)
+                    len_areas = len(areas)
+                    counter_areas = 1
                     for each in areas:
-                        jenni.msg(ch_state, line1.format(each, state))
+                        jenni.msg(ch_state, line1.format(each, state, str(counter_areas).zfill(2), str(len_areas).zfill(2)))
+                        counter_areas += 1
                     jenni.msg(ch_state, line2.format(title, cert, severity, status, urgency))
-                    summaries = textwrap.wrap(summary, 500)
+                    summaries = textwrap.wrap(summary, 450)
+                    len_summaries = len(summaries)
+                    counter_summaries = 1
                     for each in summaries:
-                        jenni.msg(ch_state, each)
+                        jenni.msg(ch_state, "Part %s of %s: %s" % (str(counter_summaries).zfill(2), str(len_summaries).zfill(2), each))
+                        counter_summaries += 1
                 conn.commit()
                 c.close()
             time.sleep(60)

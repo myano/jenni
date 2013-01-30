@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-roulette.py - Jenni Roulette Game Module
-Copyright 2010, Kenneth Sham
+roulette.py - jenni Roulette Game Module
+Copyright 2010-2013, Kenneth Sham
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

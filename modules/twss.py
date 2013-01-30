@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-twss.py - Jenni's That's What She Said Module
+twss.py - jenni's That's What She Said Module
 Copyright 2011 - Joel Friedly and Matt Meinwald
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 This module detects common phrases that many times can be responded with

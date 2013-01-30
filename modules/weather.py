@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """
-weather.py - Jenni Weather Module
-Copyright 2008, Sean B. Palmer, inamidst.com
+weather.py - jenni Weather Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re, urllib
@@ -15,7 +18,7 @@ r_from = re.compile(r'(?i)([+-]\d+):00 from')
 
 def location(name):
     name = urllib.quote(name.encode('utf-8'))
-    uri = 'http://ws.geonames.org/searchJSON?q=%s&maxRows=1' % name
+    uri = 'https://ws.geonames.org/searchJSON?q=%s&maxRows=1' % name
     for i in xrange(10):
         u = urllib.urlopen(uri)
         if u is not None: break
@@ -312,10 +315,10 @@ def f_weather(self, origin, match, args):
 
             if isinstance(temp, int):
                 f = round((temp * 1.8) + 32, 2)
-                temp = u'%s\u2109 (%s\u2103)'.encode('utf-8') % (f, temp)
+                temp = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, temp)
     else: pressure = '?mb'
     if isinstance(temp, int):
-        temp = u'%s\u2103'.encode('utf-8') % temp
+        temp = u'%s\u00B0C'.encode('utf-8') % temp
 
     if cond:
         conds = cond

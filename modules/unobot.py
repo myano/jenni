@@ -357,8 +357,6 @@ class UnoBot:
         nickk = nick
         if nick:
             nickk = (nick).lower()
-        print "NICK:",nick
-        print "NICK2:", nickk
         ret = list()
         for c in sorted(cards):
             if c in ['W', 'WD4']:

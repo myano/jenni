@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-school.py - Jenni Class Schedule Module
-Copyright 2010-2011, Michael Yanovich, yanovich.net
+school.py - jenni Class Schedule Module
+Copyright 2010-2013, Michael Yanovich (yanovich.net)
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

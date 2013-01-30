@@ -1,20 +1,23 @@
 #!/usr/bin/env python
 """
-search.py - Jenni Web Search Module
-Copyright 2008-9, Sean B. Palmer, inamidst.com
+search.py - jenni Web Search Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2013, Edward Powell (embolalia.net)
+Copyright 2008-2013 Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
 import re
 import web
+import json
 
 class Grab(web.urllib.URLopener):
     def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Jenni)'
+        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0'
         web.urllib.URLopener.__init__(self, *args)
         self.addheader('Referer', 'https://github.com/myano/jenni')
     def http_error_default(self, url, fp, errcode, errmsg, headers):
@@ -154,11 +157,26 @@ def duck_search(query):
     m = r_duck.search(bytes)
     if m: return web.decode(m.group(1))
 
+def duck_api(query):
+    uri = web.urllib.quote(query)
+    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1'%query
+    results = json.loads(web.get(uri))
+    if results['Redirect']:
+        return results['Redirect']
+    else:
+        return None
+
 def duck(jenni, input):
     query = input.group(2)
     if not query: return jenni.reply('.ddg what?')
 
     query = query.encode('utf-8')
+
+    result = duck_api(query)
+    if result:
+        jenni.reply(result)
+        return
+
     uri = duck_search(query)
     if uri:
         jenni.reply(uri)

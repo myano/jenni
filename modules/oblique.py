@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """
 oblique.py - Web Services Interface
-Copyright 2008-9, Sean B. Palmer, inamidst.com
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re, urllib
@@ -108,7 +111,7 @@ def snippet(jenni, input):
     search = urllib.quote(input.group(2).encode('utf-8'))
     py = "BeautifulSoup.BeautifulSoup(re.sub('<.*?>|(?<= ) +', '', " + \
           "''.join(chr(ord(c)) for c in " + \
-          "eval(urllib.urlopen('http://ajax.googleapis.com/ajax/serv" + \
+          "eval(urllib.urlopen('https://ajax.googleapis.com/ajax/serv" + \
           "ices/search/web?v=1.0&q=" + search + "').read()" + \
           ".replace('null', 'None'))['responseData']['resul" + \
           "ts'][0]['content'].decode('unicode-escape')).replace(" + \

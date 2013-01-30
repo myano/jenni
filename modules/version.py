@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
-version.py - Jenni Version Module
-Copyright 2009, Silas Baronda
+version.py - jenni Version Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, Silas Baronda
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 

@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # vim: set fileencoding=UTF-8 :
 """
-ham.py - Ham Radio Module
-Copyright 2011, Michael Yanovich, yanovich.net
+ham.py - jenni Ham Radio Module
+Copyright 2011-2013, Michael Yanovich (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:
- * Jenni: https://github.com/myano/jenni/
+ * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 
 This contains a collection of lookups and calls for ham radio enthusiasts.

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 """
-wiktionary.py - Jenni Wiktionary Module
-Copyright 2009, Sean B. Palmer, inamidst.com
+wiktionary.py - jenni Wiktionary Module
+Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-http://inamidst.com/phenny/
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
 
 import re
 import web
 
-uri = 'http://en.wiktionary.org/w/index.php?title=%s&printable=yes'
+uri = 'https://en.wiktionary.org/w/index.php?title=%s&printable=yes'
 r_tag = re.compile(r'<[^>]+>')
 r_ul = re.compile(r'(?ims)<ul>.*?</ul>')
 
