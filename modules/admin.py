@@ -53,7 +53,7 @@ def msg(jenni, input):
         if a.lower() == "nickserv": return
         if a.lower() == "chanserv" and "drop" in b: return
     helper = False
-    if a in jenni.config.helpers and input.host in jenni.config.helpers[a]:
+    if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
         helper = True
     if input.admin or helper:
         jenni.msg(a, b)
@@ -65,7 +65,7 @@ def me(jenni, input):
     if input.sender.startswith('#'): return
     a, b = input.group(2), input.group(3)
     helper = False
-    if a in jenni.config.helpers and input.host in jenni.config.helpers[a]:
+    if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
         helper = True
     if input.admin or helper:
         if a and b:
