@@ -43,7 +43,12 @@ def create_default_config(fn):
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
-    exclude = ['admin', 'adminchannel', 'ai', 'resp', 'school']
+    exclude = ['admin', 'adminchannel', 'ai', 'nws', 'resp', 'rss', 'school']
+
+    helpers = {
+        '#channel1': ['a.somedomain.tld', 'b.anotherdomain.tld'],
+        '##channel2': ['some/other/hostmask'],
+        }
 
     # Enable raw logging of everything jenni sees
     logging = False

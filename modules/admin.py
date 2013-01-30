@@ -52,7 +52,10 @@ def msg(jenni, input):
     if not input.owner:
         if a.lower() == "nickserv": return
         if a.lower() == "chanserv" and "drop" in b: return
-    if input.admin:
+    helper = False
+    if a in jenni.config.helpers and input.host in jenni.config.helpers[a]:
+        helper = True
+    if input.admin or helper:
         jenni.msg(a, b)
 msg.rule = (['msg'], r'(#?\S+) (.+)')
 msg.priority = 'low'
@@ -60,8 +63,12 @@ msg.priority = 'low'
 def me(jenni, input):
     # Can only be done in privmsg by an admin
     if input.sender.startswith('#'): return
-    if input.admin:
-        if input.group(2) and input.group(3):
+    a, b = input.group(2), input.group(3)
+    helper = False
+    if a in jenni.config.helpers and input.host in jenni.config.helpers[a]:
+        helper = True
+    if input.admin or helper:
+        if a and b:
             msg = '\x01ACTION %s\x01' % input.group(3)
             jenni.msg(input.group(2), msg, x=True)
 me.rule = (['me'], r'(#?\S+) (.*)')
