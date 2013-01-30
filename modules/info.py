@@ -19,7 +19,10 @@ def fchannels():
 
 def doc(jenni, input):
     """Shows a command's documentation, and possibly an example."""
-    name = input.group(1)
+    if input.group(1) == "help":
+        name = input.group(2)
+    else:
+        name = input.group(1)
     name = name.lower()
 
     if jenni.doc.has_key(name):
@@ -33,6 +36,9 @@ doc.priority = 'low'
 def commands(jenni, input):
     # This function only works in private message
     #if input.sender.startswith('#'): return
+    if input.group(1) == "help" and input.group(2):
+        doc(jenni, input)
+        return
     names = ', '.join(sorted(jenni.doc.iterkeys()))
     jenni.reply("I am sending you a private message of all my commands!")
     jenni.msg(input.nick, 'Commands I recognise: ' + names + '.')
