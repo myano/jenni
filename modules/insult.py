@@ -27,7 +27,7 @@ def insult(jenni, input):
     except IOError as e:
         generateDatabase(jenni, insultFilename)
         fn = open(insultFilename, "r")
-    lines = fn.readlines()
+    lines = uc.encode(fn.readlines())
     fn.close()
     random.seed()
     jenni.say(target + ': ' + random.choice(lines))
