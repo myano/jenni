@@ -27,10 +27,10 @@ def insult(jenni, input):
     except IOError as e:
         generateDatabase(jenni, insultFilename)
         fn = open(insultFilename, "r")
-    lines = uc.encode(fn.readlines())
+    lines = fn.readlines()
     fn.close()
     random.seed()
-    jenni.say(target + ': ' + random.choice(lines))
+    jenni.say(target + ': ' + uc.encode(random.choice(lines)))
 
 insult.commands = ['i']
 insult.priority = 'medium'
