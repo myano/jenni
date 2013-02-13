@@ -196,6 +196,7 @@ TimeZones.update(TZ3)
 
 r_local = re.compile(r'\([a-z]+_[A-Z]+\)')
 
+
 @deprecated
 def f_time(self, origin, match, args):
     """Returns the current time."""
@@ -250,6 +251,7 @@ f_time.commands = ['t']
 f_time.name = 't'
 f_time.example = '.t UTC'
 
+
 def beats(jenni, input):
     """Shows the internet time in Swatch beats."""
     beats = ((time.time() + 3600) % 86400) / 86.4
@@ -257,10 +259,11 @@ def beats(jenni, input):
     jenni.say('@%03i' % beats)
 beats.commands = ['beats']
 beats.priority = 'low'
-beats. rate = 30
+
 
 def divide(input, by):
     return (input / by), (input % by)
+
 
 def yi(jenni, input):
     """Shows whether it is currently yi or not."""
@@ -272,7 +275,7 @@ def yi(jenni, input):
     else: jenni.say('Not yet...')
 yi.commands = ['yi']
 yi.priority = 'low'
-yi.rate = 30
+
 
 def tock(jenni, input):
     """Shows the time from the USNO's atomic clock."""
@@ -282,7 +285,7 @@ def tock(jenni, input):
     jenni.say('"' + info['Date'] + '" - tycho.usno.navy.mil')
 tock.commands = ['tock']
 tock.priority = 'high'
-tock.rate = 30
+
 
 def npl(jenni, input):
     """Shows the time from NPL's SNTP server."""
@@ -304,6 +307,59 @@ def npl(jenni, input):
 npl.commands = ['npl']
 npl.priority = 'high'
 npl.rate = 30
+
+
+def easter(jenni, input):
+    """.easter <yyyy> -- calculate the date for Easter given a year"""
+    bad_input = "Please input a valid year!"
+    text = input.group(2)
+    if not text:
+        year = datetime.datetime.now().year
+    elif text and len(text.split()) == 1:
+        year = text
+    else:
+        jenni.reply(bad_input)
+        return
+    try:
+        year = int(year)
+    except:
+        jenni.reply(bad_input)
+        return
+
+    month, day = IanTaylorEasterJscr(year)
+
+    verb = "is"
+    if year < datetime.datetime.now().year:
+        verb = "was"
+    elif year == datetime.datetime.now().year and datetime.datetime(year, month, day) <= datetime.datetime.now():
+        verb = "was"
+
+    if month == 3:
+        month = "March"
+    elif month == 4:
+        month = "April"
+    else:
+        jenni.reply("Calculation of Easter failed.")
+        return
+
+    jenni.reply("In the year %s, (Western) Easter %s: %s %s" % (year, verb, day, month))
+easter.commands = ['easter']
+
+
+def IanTaylorEasterJscr(year):
+    # https://en.wikipedia.org/wiki/Computus#Software
+    a = year % 19
+    b = year >> 2
+    c = b // 25 + 1
+    d = (c * 3) >> 2
+    e = ((a * 19) - ((c * 8 + 5) // 25) + d + 15) % 30
+    e += (29578 - a - e * 32) >> 10
+    e -= ((year % 7) + b - d + e + 2) % 7
+    d = e >> 5
+    day = e - d * 31
+    month = d + 3
+    return month, day
+
 
 if __name__ == '__main__':
     print __doc__.strip()
