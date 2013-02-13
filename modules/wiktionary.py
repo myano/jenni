@@ -76,6 +76,10 @@ def format(word, definitions, number=2):
 
 def w(jenni, input):
     word = input.group(2)
+    if not word:
+        jenni.reply("You want the definition for what?")
+        return
+    word = (word).lower()
     etymology, definitions = wiktionary(word)
     if not definitions:
         jenni.say("Couldn't get any definitions for %s." % word)
@@ -90,9 +94,9 @@ def w(jenni, input):
     if len(result) > 300:
         result = result[:295] + '[...]'
     jenni.say(result)
-w.commands = ['w']
+w.commands = ['w', 'dict']
 w.example = '.w bailiwick'
-w.rate = 30
+w.rate = 10
 
 if __name__ == '__main__':
     print __doc__.strip()
