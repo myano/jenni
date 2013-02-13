@@ -49,7 +49,7 @@ try:
 except:
     print "ERROR: No bitly.txt found."
 
-url_finder = re.compile(r'(?u)(%s?(http|https|ftp)?(:?/?/?\S+\.\S+/?\S+?))' % (EXCLUSION_CHAR))
+url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' % (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 
