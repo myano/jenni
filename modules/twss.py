@@ -72,9 +72,9 @@ def say_it(jenni, input):
     last = re.sub("[^\w\s]", "", formatted)
 say_it.rule = r"(.*)"
 say_it.priority = "low"
+say_it.rate = 20
 
 def add_twss(jenni, input):
-    print last
     txt = input.group(2)
     if txt:
         with open("modules/twss_user_added.txt", "a") as f:
@@ -84,6 +84,7 @@ def add_twss(jenni, input):
 add_twss.commands = ["twss"]
 add_twss.priority = "low"
 add_twss.threading = False
+add_twss.rate = 20
 
 if __name__ == '__main__':
     print __doc__.strip()
