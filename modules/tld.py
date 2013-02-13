@@ -9,21 +9,33 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import re, urllib2
+import re
+import urllib2
 import web
 
 uri = 'https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains'
 r_tag = re.compile(r'<(?!!)[^>]+>')
+page = web.get(uri)
+
+search_1 = r'(?i)<td><a href="\S+" title="\S+">\.{0}</a></td>\n(<td><a href=".*</a></td>\n)?<td>([A-Za-z0-9].*?)</td>\n<td>(.*)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
+search_2 = r'(?i)<td><a href="\S+" title="(\S+)">\.{0}</a></td>\n<td><a href=".*">(.*)</a></td>\n<td>([A-Za-z0-9].*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
+search_3 = r'<td><a href="\S+" title="\S+">.{0}</a></td>\n<td><span class="flagicon"><img.*?\">(.*?)</a></td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
+
 
 def gettld(jenni, input):
-    page = web.get(uri)
-    search = r'(?i)<td><a href="\S+" title="\S+">\.{0}</a></td>\n(<td><a href=".*</a></td>\n)?<td>([A-Za-z0-9].*?)</td>\n<td>(.*)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
-    search = search.format(input.group(2))
+    text = input.group(2)
+    if text and text.startswith("."):
+        text = text[1:]
+    if not text:
+        jenni.reply("You didn't provide any input.")
+        return
+    search = search_1
+    search = search.format(text)
     re_country = re.compile(search)
     matches = re_country.findall(page)
     if not matches:
-        search = r'(?i)<td><a href="\S+" title="(\S+)">\.{0}</a></td>\n<td><a href=".*">(.*)</a></td>\n<td>([A-Za-z0-9].*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
-        search = search.format(input.group(2))
+        search = search_2
+        search = search.format(text)
         re_country = re.compile(search)
         matches = re_country.findall(page)
     if matches:
@@ -39,8 +51,8 @@ def gettld(jenni, input):
                 matches[3], matches[4])
         jenni.reply(reply)
     else:
-        search = r'<td><a href="\S+" title="\S+">.{0}</a></td>\n<td><span class="flagicon"><img.*?\">(.*?)</a></td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n<td[^>]*>(.*?)</td>\n'
-        search = search.format(unicode(input.group(2)))
+        search = search_3
+        search = search.format(unicode(text))
         re_country = re.compile(search)
         matches = re_country.findall(page)
         if matches:
@@ -55,11 +67,10 @@ def gettld(jenni, input):
                 dict_val["notes"] = dict_val["notes"][:400] + "..."
             reply = "%s (%s, %s). IDN: %s, DNSSEC: %s, SLD: %s" % (dict_val["country"], dict_val["expl"], dict_val["notes"], dict_val["idn"], dict_val["dnssec"], dict_val["sld"])
         else:
-            reply = "No matches found for TLD: {0}".format(unicode(input.group(2)))
+            reply = "No matches found for TLD: {0}".format(unicode(text))
         jenni.reply(reply)
 gettld.commands = ['tld']
-gettld.thread = False
-gettld.rate = 30
+gettld.rate = 10
 
 if __name__ == '__main__':
     print __doc__.strip()
