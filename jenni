@@ -29,12 +29,21 @@ def check_python_version():
 def create_default_config(fn):
     f = open(fn, 'w')
     output = """\
+    # Lines that begin with a "#" are comments.
+    # Remove the "#" from the beginning of a line to make those lines active.
+
     nick = 'jenni'
     host = 'irc.example.net'
     port = 6667
     channels = ['#example', '#test']
+
+    # Channel jenni will report all private messages sent to her to.
+    # This includes server notices.
+    # logchan_pm = '#jenni-log'
+
+    # You can also specify nick@hostmask
+    # For example: yano@unaffiliated/yano
     owner = 'yournickname'
-    logchan_pm = '#jenni-log'
 
     # password is the NickServ password, serverpass is the server password
     # password = 'example'
@@ -45,12 +54,15 @@ def create_default_config(fn):
     # But admin.py is disabled by default, as follows:
     exclude = ['admin', 'adminchannel', 'ai', 'nws', 'resp', 'rss', 'school']
 
+    # This allows one to allow specific people to use ".msg channel message here"
+    # in specific channels.
     helpers = {
         '#channel1': ['a.somedomain.tld', 'b.anotherdomain.tld'],
         '##channel2': ['some/other/hostmask'],
         }
 
-    # Enable raw logging of everything jenni sees
+    # Enable raw logging of everything jenni sees.
+    # logged to the folder 'log'
     logging = False
 
     # Block modules from specific channels
