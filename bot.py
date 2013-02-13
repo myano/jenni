@@ -123,7 +123,7 @@ class Jenni(irc.Bot):
 
             if not hasattr(func, 'rate'):
                 if hasattr(func, 'commands'):
-                    func.rate = 20
+                    func.rate = 5
                 else:
                     func.rate = 0
 
