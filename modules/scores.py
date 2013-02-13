@@ -92,15 +92,22 @@ class Scores:
 
     def view_scores(self, jenni, input):
 
-        def top10(channel):
+        def ten(channel, ranking):
             channel = channel.lower()
             if channel not in self.scores_dict:
                 return self.STRINGS["nochan"].format(channel)
             q = 0
             top_scores = list()
-            str_say = "\x02Top 10 (for %s):\x02" % (channel)
+            if ranking == 'b':
+                tob = 'Bottom'
+            elif ranking == 't':
+                tob= 'Top'
+            str_say = "\x02%s 10 (for %s):\x02" % (tob, channel)
+            sort = True
+            if ranking == 'b':
+                sort = False
             scores = sorted(self.scores_dict[channel].iteritems(),
-                            key=lambda (k, v): (v[0] - v[1]), reverse=True)
+                            key=lambda (k, v): (v[0] - v[1]), reverse=sort)
             for key, value in scores:
                 top_scores.append(self.str_score(key, channel))
                 if len(scores) == q + 1:
@@ -128,9 +135,9 @@ class Scores:
         current_channel = input.sender
         current_channel = current_channel.lower()
 
-        if len(line) == 0:
+        if len(line) == 0 or (len(line) == 1 and line[0] == 'top'):
             ## .scores
-            t10 = top10(current_channel)
+            t10 = ten(current_channel, 't')
             jenni.say(t10)
 
         elif len(line) == 1 and not line[0].startswith("#"):
@@ -139,12 +146,17 @@ class Scores:
 
         elif len(line) == 1 and line[0].startswith("#"):
             ## .scores <channel>
-            t10_chan = top10(line[0])
+            t10_chan = ten(line[0], 't')
             jenni.say(t10_chan)
 
-        elif len(line) == 2 and line[1] != "all":
+        elif len(line) == 2 and line[0].startswith("#") and line[1] != "all":
             ## .scores <channel> <nick>
             jenni.say(given_user(line[1], line[0]))
+
+        elif len(line) == 2 and not line[0].startswith("#") and line[1].startswith("#"):
+            ## .scores bottom <channel>
+            b10 = ten(line[1], 'b')
+            jenni.say(b10)
 
         elif len(line) == 2:
             ## .scores <nick> all
@@ -232,7 +244,7 @@ def addpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, True)
 addpoint_command.commands = ['addpoint']
 addpoint_command.priority = 'high'
-addpoint_command.rate = 300
+addpoint_command.rate = 30
 
 
 def rmpoint_command(jenni, input):
@@ -243,15 +255,14 @@ def rmpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, False)
 rmpoint_command.commands = ['rmpoint']
 rmpoint_command.priority = 'high'
-rmpoint_command.rate = 300
+rmpoint_command.rate = 30
 
 
 def view_scores(jenni, input):
-    """.scores - Lists all users and their point values in the system."""
+    """.scores <channel> <user> - Lists all users and their point values in the system. channel and user parameters are optional"""
     scores.view_scores(jenni, input)
 view_scores.commands = ['scores']
 view_scores.priority = 'medium'
-view_scores.rate = 300
 
 
 def setpoint(jenni, input):
