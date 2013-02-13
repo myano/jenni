@@ -9,24 +9,27 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+from lxml import etree
 import random
+import web
+
 
 random.seed()
 
+
 def xkcd(jenni, input):
     """.xkcd - Generates a url for a random XKCD clip."""
-    import urllib2
-    from lxml import etree
 
-    body = urllib2.urlopen("https://xkcd.com/rss.xml").readlines()[1]
+    page = web.get("https://xkcd.com/rss.xml")
+    body = page.split("\n")[1]
     parsed = etree.fromstring(body)
     newest = etree.tostring(parsed.findall("channel/item/link")[0])
     max_int = int(newest.split("/")[-3])
-    website = "https://xkcd.com/%d/" % random.randint(0,max_int+1)
+    website = "https://xkcd.com/%d/" % random.randint(0, max_int + 1)
     jenni.say(website)
 xkcd.commands = ['xkcd']
 xkcd.priority = 'low'
-xkcd.rate = 30
+xkcd.rate = 10
 
 if __name__ == '__main__':
     print __doc__.strip()
