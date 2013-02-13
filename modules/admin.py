@@ -53,8 +53,9 @@ def msg(jenni, input):
         if a.lower() == "nickserv": return
         if a.lower() == "chanserv" and "drop" in b: return
     helper = False
-    if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
-        helper = True
+    if hasattr(jenni.config, 'helpers'):
+        if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
+            helper = True
     if input.admin or helper:
         jenni.msg(a, b)
 msg.rule = (['msg'], r'(#?\S+) (.+)')
