@@ -34,6 +34,7 @@ BITLY_TRIGGER_LEN_TITLE = 35
 BITLY_TRIGGER_LEN_NOTITLE = 80
 EXCLUSION_CHAR = "!"
 IGNORE = ["git.io"]
+PROXY = True
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
@@ -84,7 +85,10 @@ def find_title(url):
     ## follow re-directs, if someone pastes a bitly of a tinyurl, etc..
     page = str()
     while True:
-        req = urllib2.Request(uri, headers={'Accept':'text/html'})
+        proxy_link = str()
+        if PROXY:
+            proxy_link += "http://freesite.concealme.com/proxy/"
+        req = urllib2.Request(proxy_link + uri, headers={'Accept':'text/html'})
         req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0')
         u = urllib2.urlopen(req)
         info = u.info()
@@ -154,7 +158,7 @@ def find_title(url):
         else:
             return x
 
-    title = remove_spaces (title)
+    title = remove_spaces(title)
 
     re_dcc = re.compile(r'(?i)dcc\ssend')
     title = re.sub(re_dcc, '', title)
@@ -294,6 +298,34 @@ def show_title_demand (jenni, input):
         jenni.say('[ %s ] - %s' % (r[0], r[1]))
 show_title_demand.commands = ['title']
 show_title_demand.priority = 'high'
+
+def proxy_change(jenni, input):
+    """.proxy (on|off|status) -- enable/disable proxy for automatic URL titles"""
+    if not input.admin: return
+    global PROXY
+    txt = input.group(2)
+    if txt:
+        txt = (txt).lower()
+
+    statement = str()
+    if txt == "on" or txt == "enable":
+        PROXY = True
+        statement = "enabled"
+    elif txt == "off" or txt == "disable":
+        PROXY = False
+        statement = "disabled"
+    elif txt == "status" or not txt:
+        if PROXY: status = "enabled"
+        else: status = "disabled"
+        jenni.reply("Proxy for automatic titles is currently, %s." % (status))
+        return
+
+    if statement:
+        jenni.reply("Proxy for automatic titles has been, %s." % (statement))
+    else:
+        jenni.reply("To enable the proxy use, '.proxy on'. To disable the proxy use, '.proxy off'.")
+proxy_change.commands = ['proxy']
+proxy_change.priority = 'high'
 
 if __name__ == '__main__':
     print __doc__.strip()
