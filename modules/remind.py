@@ -101,7 +101,7 @@ scaling = {
 }
 
 periods = '|'.join(scaling.keys())
-p_command = r'\.in ([0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
+p_command = r'\.in (\-?[0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
 r_command = re.compile(p_command)
 
 def remind(jenni, input):

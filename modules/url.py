@@ -301,7 +301,7 @@ show_title_demand.priority = 'high'
 
 def proxy_change(jenni, input):
     """.proxy (on|off|status) -- enable/disable proxy for automatic URL titles"""
-    if not input.admin: return
+    if not input.owner: return
     global PROXY
     txt = input.group(2)
     if txt:
@@ -317,7 +317,7 @@ def proxy_change(jenni, input):
     elif txt == "status" or not txt:
         if PROXY: status = "enabled"
         else: status = "disabled"
-        jenni.reply("Proxy for automatic titles is currently, %s." % (status))
+        jenni.reply("Proxy for automatic titles is currently: %s." % (status))
         return
 
     if statement:
