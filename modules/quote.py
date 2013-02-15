@@ -31,7 +31,6 @@ addquote.rate = 30
 def retrievequote(jenni, input):
     """.quote <number> -- displays a given quote"""
     text = input.group(2)
-    number = int()
     fn = open("quotes.txt", "r")
     lines = fn.readlines()
     MAX = len(lines)
@@ -39,13 +38,15 @@ def retrievequote(jenni, input):
     random.seed()
     try:
         number = int(text)
+        if number < 0:
+            number = MAX - abs(number) + 1
     except:
-        number = random.randint(1,MAX)
-    k = 1
-    for line in lines:
-        if k == number:
-            jenni.reply("Quote %s of %s: " % (number, MAX) + line)
-        k += 1
+        number = random.randint(1, MAX)
+    if not (0 <= number <= MAX):
+        jenni.reply("I'm not sure which quote you would like to see.")
+    else:
+        line = lines[number - 1]
+        jenni.reply("Quote %s of %s: " % (number, MAX) + line)
 retrievequote.commands = ['quote']
 retrievequote.priority = 'low'
 retrievequote.example = '.quote'
