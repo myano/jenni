@@ -166,12 +166,16 @@ class Bot(asynchat.async_chat):
         # print line
         if line.startswith(':'):
             source, line = line[1:].split(' ', 1)
-        else: source = None
+        else:
+            source = None
 
         if ' :' in line:
             argstr, text = line.split(' :', 1)
-        else: argstr, text = line, ''
-        args = argstr.split()
+            args = argstr.split()
+            args.append(text)
+        else:
+            args = line.split()
+            text = args[-1]
 
         origin = Origin(self, source, args)
         self.dispatch(origin, tuple([text] + args))
