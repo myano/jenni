@@ -601,7 +601,10 @@ class UnoBot:
 unobot = UnoBot ()
 
 def uno(jenni, input):
-    unobot.start(jenni, input.nick)
+    if input.sender is not CHANNEL:
+        jenni.reply("Please join %s to play uno!" % (CHANNEL))
+    elif input.sender is CHANNEL:
+        unobot.start(jenni, input.nick)
 uno.commands = ['uno']
 uno.priority = 'low'
 uno.thread = False
