@@ -15,7 +15,7 @@ It also automatically displays the "title" of any URL pasted into the channel.
 
 import re
 from htmlentitydefs import name2codepoint
-from modules import unicode
+from modules import unicode as uc
 import urllib2
 import urlparse
 import socket
@@ -144,10 +144,6 @@ def find_title(url):
 
     title = r_entity.sub(e, title)
 
-    if title:
-        title = unicode.decode(title)
-    else: title = 'None'
-
     title = title.replace('\n', '')
     title = title.replace('\r', '')
 
@@ -160,8 +156,13 @@ def find_title(url):
 
     title = remove_spaces(title)
 
-    re_dcc = re.compile(r'(?i)dcc\ssend')
-    title = re.sub(re_dcc, '', title)
+    t2 = uc.remove_control_chars(title)
+
+    title = re.sub(r'(?i)dcc\ssend', '', t2)
+
+    if title:
+        title = uc.decode(title)
+    else: title = 'No title - Could not unicode-ify it'
 
     if title:
         return title
@@ -182,7 +183,7 @@ def short(text):
         k = len(a)
         i = 0
         while i < k:
-            b = unicode.decode(a[i][0])
+            b = uc.decode(a[i][0])
             if not b.startswith("http://bit.ly") or not b.startswith("http://j.mp/"):
                 url = "http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt" % (bitly_user, bitly_api_key, urllib2.quote(b))
                 shorter = web.get(url)
@@ -242,9 +243,9 @@ def get_results(text):
     i = 0
     display = list()
     while i < k:
-        url = unicode.encode(a[i][0])
-        url = unicode.decode(url)
-        url = unicode.iriToUri(url)
+        url = uc.encode(a[i][0])
+        url = uc.decode(url)
+        url = uc.iriToUri(url)
         url = remove_nonprint(url)
         domain = getTLD(url)
         if "//" in domain:
@@ -293,7 +294,7 @@ def show_title_demand (jenni, input):
 
     for r in results:
         if r[0] is None: continue
-        if doUseBitLy(r[1]): r[1] = r[2]
+        if doUseBitLy(r[0], r[1]): r[1] = r[2]
         else: r[1] = getTLD(r[1])
         jenni.say('[ %s ] - %s' % (r[0], r[1]))
 show_title_demand.commands = ['title']

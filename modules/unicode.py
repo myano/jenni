@@ -13,17 +13,23 @@ import re
 import unicodedata
 import urlparse
 
+all_chars = (unichr(i) for i in xrange(0x110000))
+control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
+control_char_re = re.compile('[%s]' % re.escape(control_chars))
 
-def meh(jenni, input):
+
+def supercombiner(jenni, input):
+    """.sc -- displays the infamous supercombiner"""
     s = 'u'
     for i in xrange(1, 3000):
         if unicodedata.category(unichr(i)) == "Mn":
             s += unichr(i)
         if len(s) > 100:
             break
+    s = remove_control_chars(s)
     jenni.say(s)
-meh.commands = ['sc']
-meh.rate = 30
+supercombiner.commands = ['sc']
+supercombiner.rate = 30
 
 
 def decode(bytes):
@@ -65,6 +71,10 @@ def iriToUri(iri):
             part.encode('utf-8'))
         for parti, part in enumerate(parts)
     )
+
+
+def remove_control_chars(s):
+    return control_char_re.sub('', s)
 
 
 if __name__ == '__main__':
