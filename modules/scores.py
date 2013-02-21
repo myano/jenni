@@ -153,7 +153,7 @@ class Scores:
             ## .scores <channel> <nick>
             jenni.say(given_user(line[1], line[0]))
 
-        elif len(line) == 2 and not line[0].startswith("#") and line[1].startswith("#"):
+        elif len(line) == 2 and not line[0].startswith("#") and line[1].startswith("#") and line[0] == "botom":
             ## .scores bottom <channel>
             b10 = ten(line[1], 'b')
             jenni.say(b10)
@@ -192,10 +192,14 @@ class Scores:
             jenni.say(self.STRINGS["invalid"])
             return
 
+        if add < 0 or sub < 0:
+            jenni.reply("You are doing it wrong.")
+            return
+
         if channel not in self.scores_dict:
             self.scores_dict[channel] = dict()
 
-        self.scores_dict[channel][nick] = [add, sub]
+        self.scores_dict[channel][nick] = [int(add), int(sub)]
         self.save()
         jenni.say(self.str_score(nick, channel))
 

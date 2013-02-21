@@ -82,37 +82,45 @@ def f_remind(jenni, input):
     if not os.path.exists(jenni.tell_filename):
         return
 
-    if len(tellee) > 20:
-        return jenni.reply('That nickname is too long.')
-
     timenow = time.strftime('%d %b %H:%MZ', time.gmtime())
-    if not tellee in (teller.lower(), jenni.nick, 'me'): # @@
-        # @@ <deltab> and year, if necessary
-        warn = False
-        if not jenni.reminders.has_key(tellee):
-            jenni.reminders[tellee] = [(teller, verb, timenow, msg)]
+    whogets = list()
+    for tellee in tellee.split(","):
+        if len(tellee) > 20:
+            jenni.say("Nickname %s is too long." % (tellee))
+            continue
+        if not tellee in (teller.lower(), jenni.nick, 'me'): # @@
+            warn = False
+            if not tellee in whogets:
+                whogets.append(tellee)
+                if tellee not in jenni.reminders:
+                    jenni.reminders[tellee] = [(teller, verb, timenow, msg)]
+                else:
+                    # if len(jenni.reminders[tellee]) >= maximum:
+                    #   warn = True
+                    jenni.reminders[tellee].append((teller, verb, timenow, msg))
+    response = str()
+    if teller.lower() == tellee:
+        response = 'You can %s yourself that.' % (verb)
+    elif tellee.lower() == jenni.nick.lower():
+        response = "Hey, I'm not as stupid as Monty you know!"
+    else:
+        response = "I'll pass that on when %s is around."
+        if len(whogets) > 1:
+            listing = ", ".join(whogets[:-1]) + " or " + whogets[-1]
+            response = response % (listing)
         else:
-            # if len(jenni.reminders[tellee]) >= maximum:
-            #     warn = True
-            jenni.reminders[tellee].append((teller, verb, timenow, msg))
-        # @@ Stephanie's augmentation
-        response = "I'll pass that on when %s is around." % tellee_original
-        # if warn: response += (" I'll have to use a pastebin, though, so " +
-        #                              "your message may get lost.")
+            response = response % (whogets[0])
 
+    if not whogets: # Only get cute if there are not legits
         rand = random.random()
         if rand > 0.9999: response = "yeah, yeah"
         elif rand > 0.999: response = "yeah, sure, whatever"
 
-        jenni.reply(response)
-    elif teller.lower() == tellee:
-        jenni.say('You can %s yourself that.' % verb)
-    else: jenni.say("Hey, I'm not as stupid as Monty you know!")
+    jenni.reply(response)
 
     dumpReminders(jenni.tell_filename, jenni.reminders) # @@ tell
 f_remind.rule = ('$nick', ['[tT]ell', '[aA]sk'], r'(\S+) (.*)')
 f_remind.commands = ['tell', 'to']
-f_remind.rate = 20
 
 def getReminders(jenni, channel, key, tellee):
     lines = []
