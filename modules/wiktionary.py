@@ -82,7 +82,7 @@ def w(jenni, input):
     word = (word).lower()
     etymology, definitions = wiktionary(word)
     if not definitions:
-        jenni.say("Couldn't get any definitions for %s." % word)
+        jenni.say("Couldn't get any definitions for %s at Wiktionary." % word)
         return
 
     result = format(word, definitions)
@@ -94,7 +94,7 @@ def w(jenni, input):
     if len(result) > 300:
         result = result[:295] + '[...]'
     jenni.say(result)
-w.commands = ['w', 'dict']
+w.commands = ['dict', 'define']
 w.example = '.w bailiwick'
 w.rate = 10
 

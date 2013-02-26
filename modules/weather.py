@@ -414,7 +414,6 @@ def f_weather(self, origin, match, args):
 
     self.msg(origin.sender, format.encode('utf-8') % args)
 f_weather.rule = (['weather'], r'(.*)')
-f_weather.rate = 30
 
 
 def fucking_weather(jenni, input):
@@ -447,7 +446,6 @@ def fucking_weather(jenni, input):
         response += " " + conditions[0]
     jenni.reply(response)
 fucking_weather.commands = ['fucking_weather', 'fw']
-fucking_weather.rate = 10
 fucking_weather.priority = 'low'
 
 

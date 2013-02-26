@@ -178,9 +178,8 @@ def wik(jenni, input):
         jenni.say(result)
     else: jenni.say('Can\'t find anything in Wikipedia for "%s".' % origterm)
 
-wik.commands = ['wik', 'wiki']
+wik.commands = ['w', 'wik', 'wiki']
 wik.priority = 'high'
-wik.rate = 10
 
 if __name__ == '__main__':
     print __doc__.strip()

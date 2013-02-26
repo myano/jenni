@@ -264,7 +264,7 @@ def get_results(text):
     return display
 
 def show_title_auto (jenni, input):
-    if input.startswith('.title ') or input.startswith('.bitly '): return
+    if input.startswith('.title ') or input.startswith('.bitly ') or input.startswith('.isup '): return
     if len(re.findall("\([\d]+\sfiles\sin\s[\d]+\sdirs\)", input)) == 1: return
     try:
         results = get_results(input)
