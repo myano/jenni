@@ -51,7 +51,7 @@ def msg(jenni, input):
     if (not a) or (not b): return
     if not input.owner:
         if a.lower() == "nickserv": return
-        if a.lower() == "chanserv" and "drop" in b: return
+        if a.lower() == "chanserv": return
     helper = False
     if hasattr(jenni.config, 'helpers'):
         if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
