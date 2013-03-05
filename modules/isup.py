@@ -39,6 +39,7 @@ def isup(jenni, input):
     else:
         jenni.say(site + ' is down from here.')
 isup.commands = ['isup']
+isup.example = ".isup google.com"
 
 if __name__ == '__main__':
     print __doc__.strip()
