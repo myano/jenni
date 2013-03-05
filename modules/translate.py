@@ -78,6 +78,7 @@ tr.priority = 'low'
 
 def tr2(jenni, input):
     """Translates a phrase, with an optional language hint."""
+    if not input.group(2): return jenni.say("No input provided.")
     command = input.group(2).encode('utf-8')
 
     def langcode(p):
