@@ -30,8 +30,8 @@ import web
 # this variable is to determine when to use bitly. If the URL is more
 # than this length, it'll display a bitly URL instead. To disable bit.ly, put None
 # even if it's set to None, triggering .bitly command will still work!
-BITLY_TRIGGER_LEN_TITLE = 35
-BITLY_TRIGGER_LEN_NOTITLE = 80
+BITLY_TRIGGER_LEN_TITLE = 15
+BITLY_TRIGGER_LEN_NOTITLE = 78
 EXCLUSION_CHAR = "!"
 IGNORE = ["git.io"]
 PROXY = True
@@ -73,7 +73,7 @@ def find_title(url):
 
     for item in IGNORE:
         if item in uri:
-            return
+            return False, 'ignored'
 
     if not re.search('^((https?)|(ftp))://', uri):
         uri = 'http://' + uri
@@ -89,8 +89,11 @@ def find_title(url):
         if PROXY:
             proxy_link += "http://freesite.concealme.com/proxy/"
         req = urllib2.Request(proxy_link + uri, headers={'Accept':'text/html'})
-        req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0')
-        u = urllib2.urlopen(req)
+        req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0')
+        try:
+            u = urllib2.urlopen(req)
+        except Exception, e:
+            return False, e
         info = u.info()
         page = u.read()
         u.close()
@@ -107,12 +110,12 @@ def find_title(url):
 
         redirects += 1
         if redirects >= 10:
-            return "Too many re-directs."
+            return False, "Too many re-directs."
 
     try: mtype = info['content-type']
     except: return
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
-        return
+        return False, str(mtype)
 
     content = page
     regex = re.compile('<(/?)title( [^>]+)?>', re.IGNORECASE)
@@ -120,9 +123,9 @@ def find_title(url):
     regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
     content = regex.sub('', content)
     start = content.find('<title>')
-    if start == -1: return
+    if start == -1: return False, 'NO <title> found'
     end = content.find('</title>', start)
-    if end == -1: return
+    if end == -1: return False, 'NO </title> found'
     content = content[start+7:end]
     content = content.strip('\n').rstrip().lstrip()
     title = content
@@ -165,9 +168,9 @@ def find_title(url):
     else: title = 'No title - Could not unicode-ify it'
 
     if title:
-        return title
+        return True, title
     else:
-        return 'No title'
+        return False, 'No title, not sure why'
 
 def short(text):
     """
@@ -184,11 +187,13 @@ def short(text):
         i = 0
         while i < k:
             b = uc.decode(a[i][0])
-            if not b.startswith("http://bit.ly") or not b.startswith("http://j.mp/"):
+            if not b.startswith("http://bit.ly") and not b.startswith("http://j.mp/"):
                 url = "http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt" % (bitly_user, bitly_api_key, urllib2.quote(b))
                 shorter = web.get(url)
                 shorter.strip()
                 bitlys.append([b, shorter])
+            else:
+                bitlys.append([b, b])
             i += 1
         return bitlys
     except:
@@ -242,6 +247,7 @@ def get_results(text):
     k = len(a)
     i = 0
     display = list()
+    passs = False
     while i < k:
         url = uc.encode(a[i][0])
         url = uc.decode(url)
@@ -251,52 +257,74 @@ def get_results(text):
         if "//" in domain:
             domain = domain.split('//')[1]
         if not url.startswith(EXCLUSION_CHAR):
-            try:
-                page_title = find_title(url)
-            except:
-                page_title = None # if it can't access the site fail silently
+            passs, page_title = find_title(url)
             if bitly_loaded: # and (page_title is not None or page_title == INVALID_WEBSITE):
                 bitly = short(url)
                 bitly = bitly[0][1]
             else: bitly = url
             display.append([page_title, url, bitly])
         i += 1
-    return display
+    return passs, display
 
 def show_title_auto (jenni, input):
-    if input.startswith('.title ') or input.startswith('.bitly ') or input.startswith('.isup '): return
-    if len(re.findall("\([\d]+\sfiles\sin\s[\d]+\sdirs\)", input)) == 1: return
-    try:
-        results = get_results(input)
-    except: return
-    if results is None: return
+    if input.startswith('.title ') or input.startswith('.bitly ') or input.startswith('.isup '):
+        return
+    if len(re.findall("\([\d]+\sfiles\sin\s[\d]+\sdirs\)", input)) == 1: return jenni.reply('directory')
+    status, results = get_results(input)
+    if results is None: return jenni.reply("huh")
 
     k = 1
     for r in results:
+        returned_title = r[0]
+        orig = r[1]
+        bitly_link = r[2]
+
         if k > 3: break
         k += 1
 
-        useBitLy = doUseBitLy(r[0], r[1])
+        useBitLy = doUseBitLy(returned_title, orig)
         if r[0] is None:
-            if useBitLy: displayBitLy(jenni, r[1], r[2])
+            if useBitLy:
+                displayBitLy(jenni, orig, bitly_link)
             continue
-        if useBitLy: r[1] = r[2]
-        else: r[1] = getTLD(r[1])
-        jenni.say('[ %s ] - %s' % (r[0], r[1]))
+
+        reg_format = '[ %s ] - %s'
+        response = str()
+
+        if status:
+            if useBitLy:
+                response = reg_format % (returned_title, bitly_link)
+            else:
+                response = reg_format % (returned_title, getTLD(orig))
+        elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
+            response = '(%s) - %s' % (returned_title, bitly_link)
+
+        if response:
+            jenni.say(response)
 show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 show_title_auto.priority = 'high'
 
 def show_title_demand (jenni, input):
-    results = get_results(input.group(2))
+    txt = input.group(2)
+    if not txt:
+        return jenni.reply('Pleaes give me a URL')
+    status, results = get_results(input.group(2))
     if results is None:
-        jenni.reply('No title found.')
-        return
+        return jenni.reply('No title found.')
 
     for r in results:
-        if r[0] is None: continue
-        if doUseBitLy(r[0], r[1]): r[1] = r[2]
-        else: r[1] = getTLD(r[1])
-        jenni.say('[ %s ] - %s' % (r[0], r[1]))
+        returned_title = r[0]
+        orig = r[1]
+        bitly_link = r[2]
+
+        if returned_title is None:
+            continue
+
+        if status:
+            response = '[ %s ]' % (returned_title)
+        else:
+            response = '(%s)' % (returned_title)
+        jenni.reply(response)
 show_title_demand.commands = ['title']
 show_title_demand.priority = 'high'
 
@@ -316,8 +344,10 @@ def proxy_change(jenni, input):
         PROXY = False
         statement = "disabled"
     elif txt == "status" or not txt:
-        if PROXY: status = "enabled"
-        else: status = "disabled"
+        if PROXY:
+            status = "enabled"
+        else:
+            status = "disabled"
         jenni.reply("Proxy for automatic titles is currently: %s." % (status))
         return
 
