@@ -50,8 +50,9 @@ def msg(jenni, input):
     a, b = input.group(2), input.group(3)
     if (not a) or (not b): return
     if not input.owner:
-        if a.lower() == "nickserv": return
-        if a.lower() == "chanserv": return
+        al = a.lower()
+        if al == 'chanserv' or al == 'nickserv' or al == 'hostserv' or al == 'memoserv' or al == 'saslserv' or al == 'operserv':
+            return
     helper = False
     if hasattr(jenni.config, 'helpers'):
         if a in jenni.config.helpers and (input.host in jenni.config.helpers[a] or (input.nick).lower() in jenni.config.helpers[a]):
