@@ -11,12 +11,22 @@ More info:
 
 import random
 
+
 def interjection(jenni, input):
-    jenni.say(input.nick + '!')
+    """response to interjections"""
+    nick = input.nick
+    jenni.say(nick + '!')
 interjection.rule = r'($nickname!)'
 interjection.priority = 'high'
-interjection.thread = False
-interjection.rate = 30
+interjection.example = '$nickname!'
+
+
+def f_ping(jenni, input):
+    """ping jenni in a channel or pm"""
+    jenni.reply("ping!")
+f_ping.rule = r'(?i)$nickname[:,]?\sping'
+f_ping.priority = 'high'
+f_ping.example = '$nickname: ping!'
 
 if __name__ == '__main__':
     print __doc__.strip()
