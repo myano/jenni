@@ -31,7 +31,6 @@ def ask(jenni, input):
 ask.commands = ['ask']
 ask.priority = 'low'
 ask.example = '.ask today or tomorrow or next week'
-ask.rate = 20
 
 if __name__ == '__main__':
     print __doc__.strip()
