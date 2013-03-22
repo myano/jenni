@@ -17,9 +17,7 @@ def about(u, cp=None, name=None):
     if cp is None:
         cp = ord(u)
     if name is None:
-        try: name = unicodedata.name(u)
-        except ValueError:
-            return 'U+%04X (No name found)' % cp
+        name = unicodedata.name(u, "No Name Found")
 
     if not unicodedata.combining(u):
         template = 'U+%04X %s (%s)'
