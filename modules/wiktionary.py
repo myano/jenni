@@ -74,7 +74,7 @@ def format(word, definitions, number=2):
             result += ', '.join(n)
     return result.strip(' .,')
 
-def w(jenni, input):
+def define(jenni, input):
     word = input.group(2)
     if not word:
         jenni.reply("You want the definition for what?")
@@ -94,9 +94,8 @@ def w(jenni, input):
     if len(result) > 300:
         result = result[:295] + '[...]'
     jenni.say(result)
-w.commands = ['dict', 'define']
-w.example = '.w bailiwick'
-w.rate = 10
+define.commands = ['dict', 'define', 'word']
+define.example = '.w bailiwick'
 
 if __name__ == '__main__':
     print __doc__.strip()
