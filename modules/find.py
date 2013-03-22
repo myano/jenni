@@ -13,14 +13,9 @@ This module will fix spelling errors if someone corrects them
 using the sed notation (s///) commonly found in vi/vim.
 """
 
+from modules import unicode as uc
 import os, re
 
-
-def give_me_unicode(obj, encoding="utf-8"):
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
-    return obj
 
 def load_db():
     """ load lines from find.txt to search_dict """
@@ -33,7 +28,8 @@ def load_db():
     search_file.close()
     search_dict = dict()
     for line in lines:
-        line = give_me_unicode(line)
+        line = uc.decode(line)
+        line = uc.encode(line)
         a = line.replace(r'\n', '')
         new = a.split(r',')
         if len(new) < 3: continue
@@ -52,7 +48,7 @@ def load_db():
             if len(result) > 0:
                 result = result[:-1]
         if result:
-            search_dict[channel][nick].append(result)
+            search_dict[channel][nick].append(uc.decode(result))
     return search_dict
 
 def save_db(search_dict):
@@ -62,13 +58,15 @@ def save_db(search_dict):
         if channel is not "":
             for nick in search_dict[channel]:
                 for line in search_dict[channel][nick]:
-                    channel_utf = (channel).encode("utf-8")
-                    search_file.write(channel)
+                    channel_utf = uc.encode(channel)
+                    search_file.write(channel_utf)
                     search_file.write(",")
-                    nick = (nick).encode("utf-8")
+                    nick = uc.encode(nick)
                     search_file.write(nick)
                     search_file.write(",")
-                    line_utf = (line).encode("utf-8")
+                    line_utf = line
+                    if not type(str()) == type(line):
+                        line_utf = uc.encode(line)
                     search_file.write(line_utf)
                     search_file.write("\n")
     search_file.close()
