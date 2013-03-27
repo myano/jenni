@@ -248,7 +248,7 @@ def addpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, True)
 addpoint_command.commands = ['addpoint']
 addpoint_command.priority = 'high'
-addpoint_command.rate = 30
+addpoint_command.rate = 180
 
 
 def rmpoint_command(jenni, input):
@@ -259,14 +259,15 @@ def rmpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, False)
 rmpoint_command.commands = ['rmpoint']
 rmpoint_command.priority = 'high'
-rmpoint_command.rate = 30
+rmpoint_command.rate = 180
 
 
 def view_scores(jenni, input):
     """.scores <channel> <user> - Lists all users and their point values in the system. channel and user parameters are optional"""
     scores.view_scores(jenni, input)
-view_scores.commands = ['scores']
+view_scores.commands = ['points', 'point', 'scores', 'score']
 view_scores.priority = 'medium'
+view_scores.rate = 180
 
 
 def setpoint(jenni, input):
