@@ -13,12 +13,11 @@ This module will record all URLs to bitly via an api key and account.
 It also automatically displays the "title" of any URL pasted into the channel.
 """
 
+import json
 import re
 from htmlentitydefs import name2codepoint
 from modules import unicode as uc
 import urllib2
-import urlparse
-import socket
 import web
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
@@ -31,24 +30,24 @@ import web
 # than this length, it'll display a bitly URL instead. To disable bit.ly, put None
 # even if it's set to None, triggering .bitly command will still work!
 BITLY_TRIGGER_LEN_TITLE = 15
-BITLY_TRIGGER_LEN_NOTITLE = 78
-EXCLUSION_CHAR = "!"
-IGNORE = ["git.io"]
-PROXY = True
+BITLY_TRIGGER_LEN_NOTITLE = 70
+EXCLUSION_CHAR = '!'
+IGNORE = ['git.io']
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
+BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py']
 
 try:
-    file = open("bitly.txt", "r")
+    file = open('bitly.txt', 'r')
     key = file.read()
-    key = key.split(",")
+    key = key.split(',')
     bitly_api_key = str(key[0].strip())
     bitly_user = str(key[1].strip())
     file.close()
     bitly_loaded = 1
 except:
-    print "ERROR: No bitly.txt found."
+    print 'ERROR: No bitly.txt found.'
 
 url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' % (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
@@ -64,7 +63,7 @@ noteuri.priority = 'low'
 
 def find_title(url):
     """
-    This finds the title when provided with a string of a URL."
+    This finds the title when provided with a string of a URL.
     """
     uri = url
 
@@ -78,42 +77,36 @@ def find_title(url):
     if not re.search('^((https?)|(ftp))://', uri):
         uri = 'http://' + uri
 
-    if "twitter.com" in uri:
+    if 'twitter.com' in uri:
         uri = uri.replace('#!', '?_escaped_fragment_=')
 
-    redirects = 0
-    ## follow re-directs, if someone pastes a bitly of a tinyurl, etc..
     page = str()
-    while True:
-        proxy_link = str()
-        if PROXY:
-            proxy_link += "http://freesite.concealme.com/proxy/"
-        req = urllib2.Request(proxy_link + uri, headers={'Accept':'text/html'})
-        req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0')
-        try:
-            u = urllib2.urlopen(req)
-        except Exception, e:
-            return False, e
-        info = u.info()
-        page = u.read()
-        u.close()
+    pyurl = 'https://tumbolia.appspot.com/py/'
+    code = r'import simplejson;'
+    code += r"req=urllib2.Request('%s', headers={'Accept':'text/html'});"
+    code += r"req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1;"
+    code += r"rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
+    code += "rtn=dict(); rtn['headers'] = u.headers.dict;"
+    code += "rtn['read'] = u.read(); rtn['url'] = u.url;"
+    code += "rtn['geturl'] = u.geturl(); print simplejson.dumps(rtn)"
+    query = uc.encode(code % uri)
+    try:
+        u = web.get(pyurl + web.quote(query))
+    except Exception, e:
+        return False, e
 
-        if not isinstance(info, list):
-            status = '200'
-        else:
-            status = str(info[1])
-            info = info[0]
-        if status.startswith('3'):
-            uri = urlparse.urljoin(uri, info['Location'])
-        else:
-            break
+    try:
+        useful = json.loads(u)
+    except:
+        print 'Failed to parse JSON for:', uri, 'because:', u,
+        return False, u
+    info = useful['headers']
+    page = useful['read']
 
-        redirects += 1
-        if redirects >= 10:
-            return False, "Too many re-directs."
-
-    try: mtype = info['content-type']
-    except: return
+    try:
+        mtype = info['content-type']
+    except:
+        return False, 'MTYPE: '  #+ str(info)
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return False, str(mtype)
 
@@ -151,8 +144,8 @@ def find_title(url):
     title = title.replace('\r', '')
 
     def remove_spaces(x):
-        if "  " in x:
-            x = x.replace("  ", " ")
+        if '  ' in x:
+            x = x.replace('  ', ' ')
             return remove_spaces(x)
         else:
             return x
@@ -164,8 +157,9 @@ def find_title(url):
     title = re.sub(r'(?i)dcc\ssend', '', t2)
 
     if title:
-        title = uc.decode(title)
-    else: title = 'No title - Could not unicode-ify it'
+        title = uc.encode(title)
+    else:
+        title = 'No title - Could not unicode-ify it'
 
     if title:
         return True, title
@@ -187,8 +181,8 @@ def short(text):
         i = 0
         while i < k:
             b = uc.decode(a[i][0])
-            if not b.startswith("http://bit.ly") and not b.startswith("http://j.mp/"):
-                url = "http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt" % (bitly_user, bitly_api_key, urllib2.quote(b))
+            if not b.startswith('http://bit.ly') and not b.startswith('http://j.mp/'):
+                url = 'http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt' % (bitly_user, bitly_api_key, urllib2.quote(b))
                 shorter = web.get(url)
                 shorter.strip()
                 bitlys.append([b, shorter])
@@ -254,7 +248,7 @@ def get_results(text):
         url = uc.iriToUri(url)
         url = remove_nonprint(url)
         domain = getTLD(url)
-        if "//" in domain:
+        if '//' in domain:
             domain = domain.split('//')[1]
         if not url.startswith(EXCLUSION_CHAR):
             passs, page_title = find_title(url)
@@ -267,11 +261,14 @@ def get_results(text):
     return passs, display
 
 def show_title_auto (jenni, input):
-    if input.startswith('.title ') or input.startswith('.bitly ') or input.startswith('.isup '):
+    for each in BLOCKED_MODULES:
+        if input.startswith('.%s ' % (each)):
+            ## Don't want it to show duplicate titles
+            return
+    if len(re.findall('\([\d]+\sfiles\sin\s[\d]+\sdirs\)', input)) == 1:
+        ## Directory Listing of files
         return
-    if len(re.findall("\([\d]+\sfiles\sin\s[\d]+\sdirs\)", input)) == 1: return jenni.reply('directory')
     status, results = get_results(input)
-    if results is None: return jenni.reply("huh")
 
     k = 1
     for r in results:
@@ -283,10 +280,6 @@ def show_title_auto (jenni, input):
         k += 1
 
         useBitLy = doUseBitLy(returned_title, orig)
-        if r[0] is None:
-            if useBitLy:
-                displayBitLy(jenni, orig, bitly_link)
-            continue
 
         reg_format = '[ %s ] - %s'
         response = str()
@@ -309,8 +302,6 @@ def show_title_demand (jenni, input):
     if not txt:
         return jenni.reply('Pleaes give me a URL')
     status, results = get_results(input.group(2))
-    if results is None:
-        return jenni.reply('No title found.')
 
     for r in results:
         returned_title = r[0]
@@ -327,36 +318,6 @@ def show_title_demand (jenni, input):
         jenni.reply(response)
 show_title_demand.commands = ['title']
 show_title_demand.priority = 'high'
-
-def proxy_change(jenni, input):
-    """.proxy (on|off|status) -- enable/disable proxy for automatic URL titles"""
-    if not input.owner: return
-    global PROXY
-    txt = input.group(2)
-    if txt:
-        txt = (txt).lower()
-
-    statement = str()
-    if txt == "on" or txt == "enable":
-        PROXY = True
-        statement = "enabled"
-    elif txt == "off" or txt == "disable":
-        PROXY = False
-        statement = "disabled"
-    elif txt == "status" or not txt:
-        if PROXY:
-            status = "enabled"
-        else:
-            status = "disabled"
-        jenni.reply("Proxy for automatic titles is currently: %s." % (status))
-        return
-
-    if statement:
-        jenni.reply("Proxy for automatic titles has been, %s." % (statement))
-    else:
-        jenni.reply("To enable the proxy use, '.proxy on'. To disable the proxy use, '.proxy off'.")
-proxy_change.commands = ['proxy']
-proxy_change.priority = 'high'
 
 if __name__ == '__main__':
     print __doc__.strip()
