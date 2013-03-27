@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+chat.py - jenni's Chat Module
+Copyright 2013, Michael Yanovich (yanovich.net)
+Licensed under the Eiffel Forum License 2.
+
+More info:
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
+"""
 
 
 import cleverbot
@@ -46,9 +55,11 @@ def chat(jenni, input):
                     return
         msgo = mycb.Ask(msgi)
     else:
+        ## anything else
         return
     if msgo:
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
+        response = re.sub('(?i)bot', 'human', msgo)
         if pm:
             jenni.say(response)
         else:
