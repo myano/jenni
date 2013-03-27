@@ -13,10 +13,13 @@ More info:
 This contains a collection of lookups and calls for ham radio enthusiasts.
 """
 
+from modules import unicode as uc
 import re
 import web
 
-re_look = re.compile('<FONT FACE="Arial, Helvetica, sans-serif" SIZE=4>(.*)<BR>')
+re_look = re.compile('(?i)<FONT FACE="Arial, Helvetica, sans-serif" SIZE=4>(.*?)<br>(.*)</tr>')
+re_more = re.compile('(?i)<B>(.*?)</B></FONT></td>\n(.*</td>)')
+re_tag = re.compile(r'<[^>]+>')
 
 morse = {
         "a": ".-",
@@ -112,17 +115,41 @@ def reverse_lookup(v, d=morse):
             result = k
     return result
 
-def lookup(jenni, input):
+def cs(jenni, input):
+    '''.cs <callsign> -- queries qth.com for call sign information'''
     cs = input.group(2).upper()
-    link = "http://www.qth.com/callsign.php?cs=" + unicode(cs)
+    try:
+        link = "http://www.qth.com/callsign.php?cs=" + uc.decode(web.quote(cs))
+    except Exception, e:
+        print e
+        return jenni.say('Failed to obtain data from qth.com')
     page = web.get(link)
-    name = re_look.findall(page)
-    if name:
-        jenni.say("Name: " + name[0] + ", more information available at: " + link)
+    info = re_look.findall(page)
+    more_info = re_more.findall(page)
+    if info and more_info:
+        info = info[0]
+        name = info[0]
+        name = re_tag.sub(' ', info[0]).strip()
+        address = re_tag.sub(' ', info[1]).strip()
+        extra = dict()
+        for each in more_info:
+            extra[each[0].strip()] = re_tag.sub('', each[1].strip()).strip()
+        response = '(%s) ' % (web.quote(cs))
+        response += 'Name: %s, Address: %s. '  # More information is available at: %s'
+        response = response % (name, address)
+        for each in more_info:
+            temp = re_tag.sub('', each[1].strip())
+            if not temp:
+                temp = 'N/A'
+            response += '%s: %s. ' % (each[0].strip(), temp)
+        #response = response % (name, address, link)
+        response += 'More information is available at: %s' % (link)
     else:
-        jenni.say('No matches found')
-lookup.commands = ['cs']
-lookup.rate = 30
+        response = 'No matches found.'
+    jenni.say(response)
+cs.commands = ['cs']
+cs.example = '.cs W8LT'
+cs.rate = 30
 
 def cw(jenni, input):
     re_cw = re.compile("[\.\- ]+")
