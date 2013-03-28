@@ -80,25 +80,34 @@ def find_title(url):
     if 'twitter.com' in uri:
         uri = uri.replace('#!', '?_escaped_fragment_=')
 
-    page = str()
-    pyurl = 'https://tumbolia.appspot.com/py/'
-    code = r'import simplejson;'
-    code += r"req=urllib2.Request('%s', headers={'Accept':'text/html'});"
-    code += r"req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1;"
-    code += r"rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
-    code += "rtn=dict(); rtn['headers'] = u.headers.dict;"
-    code += "rtn['read'] = u.read(); rtn['url'] = u.url;"
-    code += "rtn['geturl'] = u.geturl(); print simplejson.dumps(rtn)"
-    query = uc.encode(code % uri)
+    uri = uc.decode(uri)
+
+    pyurl = u'https://tumbolia.appspot.com/py/'
+    code = 'import simplejson;'
+    code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
+    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1;"
+    code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
+    code += "rtn=dict();"
+    code += "rtn['headers'] = u.headers.dict;"
+    code += "contents = u.read();"
+    code += "con = str();"
+    code += r''' exec "try: con=(contents).decode('utf-8')\nexcept: con=(contents).decode('iso-8859-1')"; '''
+    code += "rtn['read'] = con;"
+    code += "rtn['url'] = u.url;"
+    code += "rtn['geturl'] = u.geturl();"
+    code += r"print simplejson.dumps(rtn)"
+    query = code % uri
     try:
-        u = web.get(pyurl + web.quote(query))
+        temp = web.quote(query)
+        u = web.get(pyurl + temp)
     except Exception, e:
         return False, e
 
     try:
         useful = json.loads(u)
     except:
-        print 'Failed to parse JSON for:', uri, 'because:', u,
+        print 'query:', query
+        print 'Failed to parse JSON for:', uri, 'because:', u[:300],
         return False, u
     info = useful['headers']
     page = useful['read']
