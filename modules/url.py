@@ -106,7 +106,6 @@ def find_title(url):
     try:
         useful = json.loads(u)
     except:
-        print 'query:', query
         print 'Failed to parse JSON for:', uri, 'because:', u[:300],
         return False, u
     info = useful['headers']
@@ -139,13 +138,17 @@ def find_title(url):
         entity = m.group()
         if entity.startswith('&#x'):
             cp = int(entity[3:-1],16)
-            return unichr(cp).encode('utf-8')
+            meep = unichr(cp)
         elif entity.startswith('&#'):
             cp = int(entity[2:-1])
-            return unichr(cp).encode('utf-8')
+            meep = unichr(cp)
         else:
             char = name2codepoint[entity[1:-1]]
-            return unichr(char).encode('utf-8')
+            meep = unichr(char)
+        try:
+            return uc.decode(meep)
+        except:
+            return uc.decode(uc.encode(meep))
 
     title = r_entity.sub(e, title)
 
@@ -161,19 +164,21 @@ def find_title(url):
 
     title = remove_spaces(title)
 
-    t2 = uc.remove_control_chars(title)
+    new_title = str()
+    for char in title:
+        unichar = uc.encode(char)
+        if len(list(uc.encode(char))) <= 3:
+            new_title += uc.encode(char)
+    title = new_title
 
-    title = re.sub(r'(?i)dcc\ssend', '', t2)
+    title = re.sub(r'(?i)dcc\ssend', '', title)
 
     if title:
-        title = uc.encode(title)
-    else:
-        title = 'No title - Could not unicode-ify it'
-
-    if title:
+        print "new_title:", title
+        print "new_title:", list(title)
         return True, title
     else:
-        return False, 'No title, not sure why'
+        return False, 'No Title'
 
 def short(text):
     """

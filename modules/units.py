@@ -10,12 +10,17 @@ More info:
 '''
 
 import re
+import time
 import web
 
 
 def btc(jenni, input):
     '''.btc -- display the current prices for Bitcoins'''
-    page = web.get('http://www.ounce.me/')
+    try:
+        page = web.get('http://www.ounce.me/')
+    except Exception, e:
+        print time.time(), btc, e
+        return jenni.reply('Failed to reach ounce.me')
     prices = re.compile('(?i)(Bitcoin.*?)\|').findall(page)
     updated = re.compile('<span class="date">(.*?)</span>').findall(page)
     response = ' | '.join(x.strip() for x in prices)

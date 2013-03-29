@@ -13,9 +13,8 @@ import re
 import unicodedata
 import urlparse
 
-all_chars = (unichr(i) for i in xrange(0x110000))
 control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
-control_char_re = re.compile('[%s]' % re.escape(control_chars))
+control_char_re = re.compile(u'[%s]' % re.escape(control_chars))
 
 
 def supercombiner(jenni, input):
@@ -26,37 +25,36 @@ def supercombiner(jenni, input):
             s += unichr(i)
         if len(s) > 100:
             break
-    s = remove_control_chars(s)
     jenni.say(s)
 supercombiner.commands = ['sc']
 supercombiner.rate = 30
 
 
-def decode(bytes):
+def decode(bit):
     try:
-        if isinstance(bytes, str) or isinstance(bytes, unicode):
-            text = bytes.decode('utf-8')
+        if isinstance(bit, str) or isinstance(bit, unicode):
+            text = bit.decode('utf-8')
         else:
             text = str()
     except UnicodeDecodeError:
         try:
-            text = bytes.decode('iso-8859-1')
+            text = bit.decode('iso-8859-1')
         except UnicodeDecodeError:
-            text = bytes.decode('cp1252')
+            text = bit.decode('cp1252')
     return text
 
 
-def encode(bytes):
+def encode(bit):
     try:
-        if isinstance(bytes, str) or isinstance(bytes, unicode):
-            text = bytes.encode('utf-8')
+        if isinstance(bit, str) or isinstance(bit, unicode):
+            text = bit.encode('utf-8')
         else:
             text = str()
     except UnicodeEncodeError:
         try:
-            text = bytes.encode('iso-8859-1')
+            text = bit.encode('iso-8859-1')
         except UnicodeEncodeError:
-            text = bytes.encode('cp1252')
+            text = bit.encode('cp1252')
     return text
 
 
