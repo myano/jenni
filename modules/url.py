@@ -27,8 +27,8 @@ import web
 # R_d67798xkjc87sdx6x8c7kjc87,myusername
 
 # this variable is to determine when to use bitly. If the URL is more
-# than this length, it'll display a bitly URL instead. To disable bit.ly, put None
-# even if it's set to None, triggering .bitly command will still work!
+# than this length, it'll display a bitly URL instead. To disable bit.ly,
+# put None even if it's set to None, triggering .bitly command will still work!
 BITLY_TRIGGER_LEN_TITLE = 15
 BITLY_TRIGGER_LEN_NOTITLE = 70
 EXCLUSION_CHAR = '!'
@@ -49,9 +49,11 @@ try:
 except:
     print 'ERROR: No bitly.txt found.'
 
-url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' % (EXCLUSION_CHAR))
+url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' %
+                        (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
+
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
@@ -60,6 +62,7 @@ def noteuri(jenni, input):
     jenni.bot.last_seen_uri[input.sender] = uri
 noteuri.rule = r'(?u).*(http[s]?://[^<> "\x01]+)[,.]?'
 noteuri.priority = 'low'
+
 
 def find_title(url):
     """
@@ -82,6 +85,7 @@ def find_title(url):
 
     uri = uc.decode(uri)
 
+    ## proxy the lookup of the headers through .py
     pyurl = u'https://tumbolia.appspot.com/py/'
     code = 'import simplejson;'
     code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
@@ -91,7 +95,8 @@ def find_title(url):
     code += "rtn['headers'] = u.headers.dict;"
     code += "contents = u.read();"
     code += "con = str();"
-    code += r''' exec "try: con=(contents).decode('utf-8')\nexcept: con=(contents).decode('iso-8859-1')"; '''
+    code += r'''exec "try: con=(contents).decode('utf-8')\n'''
+    code += '''except: con=(contents).decode('iso-8859-1')";'''
     code += "rtn['read'] = con;"
     code += "rtn['url'] = u.url;"
     code += "rtn['geturl'] = u.geturl();"
@@ -114,7 +119,7 @@ def find_title(url):
     try:
         mtype = info['content-type']
     except:
-        return False, 'MTYPE: '  #+ str(info)
+        return False, 'mtype failed'
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return False, str(mtype)
 
@@ -124,10 +129,12 @@ def find_title(url):
     regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
     content = regex.sub('', content)
     start = content.find('<title>')
-    if start == -1: return False, 'NO <title> found'
+    if start == -1:
+        return False, 'NO <title> found'
     end = content.find('</title>', start)
-    if end == -1: return False, 'NO </title> found'
-    content = content[start+7:end]
+    if end == -1:
+        return False, 'NO </title> found'
+    content = content[start + 7:end]
     content = content.strip('\n').rstrip().lstrip()
     title = content
 
@@ -137,7 +144,7 @@ def find_title(url):
     def e(m):
         entity = m.group()
         if entity.startswith('&#x'):
-            cp = int(entity[3:-1],16)
+            cp = int(entity[3:-1], 16)
             meep = unichr(cp)
         elif entity.startswith('&#'):
             cp = int(entity[2:-1])
@@ -180,14 +187,17 @@ def find_title(url):
     else:
         return False, 'No Title'
 
+
 def short(text):
     """
-    This function creates a bitly url for each url in the provided "text" string.
+    This function creates a bitly url for each url in the provided string.
     The return type is a list.
     """
 
-    if not bitly_loaded: return list()
-    if not text: return list()
+    if not bitly_loaded:
+        return list()
+    if not text:
+        return list()
     bitlys = list()
     try:
         a = re.findall(url_finder, text)
@@ -195,8 +205,12 @@ def short(text):
         i = 0
         while i < k:
             b = uc.decode(a[i][0])
-            if not b.startswith('http://bit.ly') and not b.startswith('http://j.mp/'):
-                url = 'http://api.j.mp/v3/shorten?login=%s&apiKey=%s&longUrl=%s&format=txt' % (bitly_user, bitly_api_key, urllib2.quote(b))
+            if not b.startswith('http://bit.ly') and \
+                    not b.startswith('http://j.mp/'):
+                longer = urllib2.quote(b)
+                url = 'http://api.j.mp/v3/shorten?login=%s' % (bitly_user)
+                url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
+                                                             longer)
                 shorter = web.get(url)
                 shorter.strip()
                 bitlys.append([b, shorter])
@@ -207,8 +221,10 @@ def short(text):
     except:
         return
 
-def generateBitLy (jenni, input):
-    if not bitly_loaded: return
+
+def generateBitLy(jenni, input):
+    if not bitly_loaded:
+        return
     bitly = short(input)
     idx = 7
     for b in bitly:
@@ -216,10 +232,13 @@ def generateBitLy (jenni, input):
 generateBitLy.commands = ['bitly']
 generateBitLy.priority = 'high'
 
-def displayBitLy (jenni, url, shorten):
-    if url is None or shorten is None: return
+
+def displayBitLy(jenni, url, shorten):
+    if url is None or shorten is None:
+        return
     u = getTLD(url)
     jenni.say('%s  -  %s' % (u, shorten))
+
 
 def remove_nonprint(text):
     new = str()
@@ -229,19 +248,25 @@ def remove_nonprint(text):
             new += char
     return new
 
-def getTLD (url):
+
+def getTLD(url):
     url = url.strip()
     url = remove_nonprint(url)
     idx = 7
-    if url.startswith('https://'): idx = 8
-    elif url.startswith('ftp://'): idx = 6
+    if url.startswith('https://'):
+        idx = 8
+    elif url.startswith('ftp://'):
+        idx = 6
     u = url[idx:]
     f = u.find('/')
-    if f == -1: u = url
-    else: u = url[0:idx] + u[0:f]
+    if f == -1:
+        u = url
+    else:
+        u = url[0:idx] + u[0:f]
     return remove_nonprint(u)
 
-def doUseBitLy (title, url):
+
+def doUseBitLy(title, url):
     BTL = None
     if title:
         BTL = BITLY_TRIGGER_LEN_TITLE
@@ -249,8 +274,10 @@ def doUseBitLy (title, url):
         BTL = BITLY_TRIGGER_LEN_NOTITLE
     return bitly_loaded and BTL is not None and len(url) > BTL
 
+
 def get_results(text):
-    if not text: return list()
+    if not text:
+        return list()
     a = re.findall(url_finder, text)
     k = len(a)
     i = 0
@@ -266,15 +293,17 @@ def get_results(text):
             domain = domain.split('//')[1]
         if not url.startswith(EXCLUSION_CHAR):
             passs, page_title = find_title(url)
-            if bitly_loaded: # and (page_title is not None or page_title == INVALID_WEBSITE):
+            if bitly_loaded:
                 bitly = short(url)
                 bitly = bitly[0][1]
-            else: bitly = url
+            else:
+                bitly = url
             display.append([page_title, url, bitly])
         i += 1
     return passs, display
 
-def show_title_auto (jenni, input):
+
+def show_title_auto(jenni, input):
     for each in BLOCKED_MODULES:
         if input.startswith('.%s ' % (each)):
             ## Don't want it to show duplicate titles
@@ -290,7 +319,8 @@ def show_title_auto (jenni, input):
         orig = r[1]
         bitly_link = r[2]
 
-        if k > 3: break
+        if k > 3:
+            break
         k += 1
 
         useBitLy = doUseBitLy(returned_title, orig)
@@ -311,7 +341,8 @@ def show_title_auto (jenni, input):
 show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 show_title_auto.priority = 'high'
 
-def show_title_demand (jenni, input):
+
+def show_title_demand(jenni, input):
     txt = input.group(2)
     if not txt:
         return jenni.reply('Pleaes give me a URL')
