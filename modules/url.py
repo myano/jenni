@@ -181,8 +181,6 @@ def find_title(url):
     title = re.sub(r'(?i)dcc\ssend', '', title)
 
     if title:
-        print "new_title:", title
-        print "new_title:", list(title)
         return True, title
     else:
         return False, 'No Title'
