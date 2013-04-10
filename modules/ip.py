@@ -14,65 +14,56 @@ More info:
 This module has been imported from Willie.
 """
 
+from modules import unicode as uc
+import json
 import re
 import socket
 import web
 
-base = "http://whatismyipaddress.com/ip/"
-r_tag = re.compile(r'<(?!!)[^>]+>')
-
-def grab_info(ip):
-    rdict = dict()
-    answer = web.get(base + ip)
-    if answer:
-        results = re.compile("th>(\S+?):<.*?<td>(.*?)</td>").findall(answer)
-        for x in results:
-            rdict[x[0]] = r_tag.sub("", x[1]).strip()
-    return rdict
-
-def gen_response(rdict, ip=False):
-    response = str()
-    if not ip:
-        response = "Hostname: " + rdict['Hostname']
-    response += " | ISP: " + rdict['ISP']
-    response += " | Organization: " + rdict['Organization']
-    response += " | Type: " + rdict['Type']
-    response += " | Assignment: " + rdict['Assignment']
-    response += " | Location: " + rdict['City']
-    response += ", " + rdict['State/Region']
-    response += ", " + rdict['Country'] + "."
-    return response
-
-
-def getipv4(q):
-    resp = str()
-    for x in q:
-        ip = x[-1][0]
-        try:
-            resp += gen_response(grab_info(ip), True)
-        except:
-            continue
-        if resp:
-            return resp, ip
+base = 'http://freegeoip.net/json/'
+re_ip = re.compile('(?i)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
 
 
 def ip_lookup(jenni, input):
-    hip = input.group(2)
-    if not hip:
+    txt = input.group(2)
+    if not txt:
         return jenni.reply("No search term!")
-    query = hip.encode('utf-8')
-    answer = grab_info(query)
+    txt = uc.encode(txt)
+    query = uc.decode(txt)
     response = "[IP/Host Lookup] "
-    if answer:
-        response += gen_response(answer)
-    else:
-        q = socket.getaddrinfo(query, 80)
-        try:
-            resp, ip = getipv4(q)
-            response += "IP Address: " + str(ip)
-            response += resp
-        except:
-            response += "No results currently found for: %s" % (hip)
+    page = web.get(base + txt)
+    try:
+        results = json.loads(page)
+    except:
+        print str(page)
+        return jenni.reply('Did not receive proper JSON from %s' % (base))
+    if results:
+        print 'query', str(query)
+        print 'matches', re_ip.findall(query)
+        if re_ip.findall(query):
+            ## IP Address
+            try:
+                hostname = socket.gethostbyaddr(query)[0]
+            except:
+                hostname = 'Unknown Host'
+            response += 'Hostname: ' + str(hostname)
+        else:
+            ## Host name
+            response += 'IP: ' + results['ip']
+        spacing = ' |'
+        for param in results:
+            if not results[param]:
+                results[param] = 'N/A'
+        if 'city' in results:
+            response += '%s City: %s' % (spacing, results['city'])
+        if 'region_name' in results:
+            response += '%s State: %s' % (spacing, results['region_name'])
+        if 'country_name' in results:
+            response += '%s Country: %s' % (spacing, results['country_name'])
+        if 'zip' in results:
+            response += '%s ZIP: %s' % (spacing, results['zip'])
+        response += '%s Latitude: %s' % (spacing, results['latitude'])
+        response += '%s Longitutde: %s' % (spacing, results['longitude'])
     jenni.reply(response)
 ip_lookup.commands = ['ip', 'iplookup', 'host']
 ip_lookup.example = ".iplookup 8.8.8.8"
