@@ -73,10 +73,10 @@ def btc(jenni, input):
         status, page = btc_page()
         if not status:
             jenni.reply(page)
-        prices = re.compile('(?i)(Bitcoin.*?)\|').findall(page)
+        prices = re.compile('(?i)((?:Bitcoin|Mt).*?)\|').findall(page)
         updated = re.compile('<span class="date">(.*?)</span>').findall(page)
         amount = usd_price()
-        response = ' | '.join(x.strip() for x in prices[:4])
+        response = ' | '.join(x.strip() for x in prices[:6])
         if usd_price:
             response += ' | Lolcat Index = $'
             lolcat = amount * 160

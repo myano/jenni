@@ -42,7 +42,7 @@ SCOREFILE = "/home/jenni/jenni/unoscores.txt"
 # But this calls for a way to allow others to stop it after the game has been idle for a while.
 # After this set time, anyone can stop the game via .unostop
 # Set the time ___in minutes___ here: (default is 5 mins)
-INACTIVE_TIMEOUT = 5
+INACTIVE_TIMEOUT = 3
 
 STRINGS = {
     'ALREADY_STARTED': '\x0300,01Game already started by %s! Type join to join!',
@@ -285,14 +285,8 @@ class UnoBot:
             ret.append(a)
             ret.append(a)
 
-        if len(self.playerOrder) <= 4:
+        if len(self.playerOrder) > 4:
             ret *= 2
-            random.shuffle(ret)
-        elif len(self.playerOrder) > 4:
-            ret *= 3
-            random.shuffle(ret)
-        elif len(self.playerOrder) > 6:
-            ret *= 4
             random.shuffle(ret)
 
         random.shuffle(ret)
@@ -619,7 +613,8 @@ unostop.rate = 0
 
 def join(jenni, input):
     unobot.join(jenni, input)
-join.rule = '^(join|.join)$'
+join.commands = ['join']
+join.rule = '^(join)(\s)*$'
 join.priority = 'low'
 join.thread = False
 join.rate = 0

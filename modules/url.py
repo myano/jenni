@@ -302,6 +302,7 @@ def get_results(text):
 
 
 def show_title_auto(jenni, input):
+    '''No command - Automatically displays titles for URLs'''
     for each in BLOCKED_MODULES:
         if input.startswith('.%s ' % (each)):
             ## Don't want it to show duplicate titles
@@ -328,7 +329,7 @@ def show_title_auto(jenni, input):
 
         if status:
             if useBitLy:
-                response = reg_format % (returned_title, bitly_link)
+                response = reg_format % (uc.decode(returned_title), bitly_link)
             else:
                 response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
@@ -341,6 +342,7 @@ show_title_auto.priority = 'high'
 
 
 def show_title_demand(jenni, input):
+    '''.title http://google.com/ -- forcibly show titles for a given URL'''
     txt = input.group(2)
     if not txt:
         return jenni.reply('Pleaes give me a URL')
