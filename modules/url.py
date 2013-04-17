@@ -333,7 +333,7 @@ def show_title_auto(jenni, input):
             else:
                 response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
-            response = '(%s) - %s' % (returned_title, bitly_link)
+            response = '%s' % (bitly_link)
 
         if response:
             jenni.say(response)
