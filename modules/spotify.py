@@ -35,25 +35,30 @@ class NotModifiedError(Exception):
         super(NotModifiedError, self).__init__(
             "The data hasn't changed since your last request.")
 
+
 class ForbiddenError(Exception):
     def __init__(self):
         super(ForbiddenError, self).__init__(
             "The rate-limiting has kicked in.  Please try again later.")
+
 
 class NotFoundException(LookupError):
     def __init__(self):
         super(NotFoundException, self).__init__(
             "Could not find that Spotify URI.")
 
+
 class BadRequestException(LookupError):
     def __init__(self):
         super(BadRequestException, self).__init__(
             "The request was not understood.")
 
+
 class InternalServerError(Exception):
     def __init__(self):
         super(InternalServerError, self).__init__(
             "The server encounted an unexpected problem.")
+
 
 class ServiceUnavailable(Exception):
     def __init__(self):
@@ -67,7 +72,7 @@ SpotifyStatusCodes = {
     404: NotFoundException,
     500: InternalServerError,
     503: ServiceUnavailable
-    }
+}
 
 
 class Spotify:
@@ -101,19 +106,22 @@ class Spotify:
 def notify(jenni, recipient, text):
     jenni.write(('NOTICE', recipient), text)
 
+
 def print_album(jenni, album):
     jenni.say(album['name'])
-    jenni.say("   Artist: %s"% album['artist'])
-    jenni.say("   Released: %s"%album['released'])
+    jenni.say("   Artist: %s" % album['artist'])
+    jenni.say("   Released: %s" % album['released'])
+
 
 def print_artist(jenni, artist):
     jenni.say("Artist: %s" % artist['name'])
+
 
 def print_track(jenni, track):
     length = str(timedelta(seconds=track['length']))[2:7]
     if length[0] == '0':
         length = length[1:]
-    jenni.say("%s by %s" % (track['name'],track['artists'][0]['name']))
+    jenni.say("%s by %s" % (track['name'], track['artists'][0]['name']))
     jenni.say("   Length: %s" % length)
     jenni.say("   Album: \"%s\" " % track['album']['name'])
 
@@ -133,7 +141,7 @@ def query(jenni, input):
         'track': print_track,
         'album': print_album,
         'artist': print_artist
-        }
+    }
 
     try:
         type = result['info']['type']
