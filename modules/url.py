@@ -37,6 +37,7 @@ IGNORE = ['git.io']
 # do not edit below this line unless you know what you're doing
 bitly_loaded = 0
 BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py']
+recent_links = dict()
 
 try:
     file = open('bitly.txt', 'r')
@@ -70,9 +71,6 @@ def find_title(url):
     """
     uri = url
 
-    if not uri and hasattr(self, 'last_seen_uri'):
-        uri = self.last_seen_uri.get(origin.sender)
-
     for item in IGNORE:
         if item in uri:
             return False, 'ignored'
@@ -89,7 +87,7 @@ def find_title(url):
     pyurl = u'https://tumbolia.appspot.com/py/'
     code = 'import simplejson;'
     code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
-    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1;"
+    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
     code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
     code += "rtn=dict();"
     code += "rtn['headers'] = u.headers.dict;"
@@ -111,7 +109,7 @@ def find_title(url):
     try:
         useful = json.loads(u)
     except:
-        print 'Failed to parse JSON for:', uri, 'because:', u[:300],
+        print 'Failed to parse JSON for:', uri, 'because:', u[:50].replace('\n', r'\n'),
         return False, u
     info = useful['headers']
     page = useful['read']
@@ -273,7 +271,7 @@ def doUseBitLy(title, url):
     return bitly_loaded and BTL is not None and len(url) > BTL
 
 
-def get_results(text):
+def get_results(text, manual=False):
     if not text:
         return list()
     a = re.findall(url_finder, text)
@@ -289,16 +287,34 @@ def get_results(text):
         domain = getTLD(url)
         if '//' in domain:
             domain = domain.split('//')[1]
+
+        bitly = url
+
         if not url.startswith(EXCLUSION_CHAR):
+            if not manual:
+                if bitly_loaded:
+                    bitly = short(url)
+                    bitly = bitly[0][1]
             passs, page_title = find_title(url)
-            if bitly_loaded:
-                bitly = short(url)
-                bitly = bitly[0][1]
-            else:
-                bitly = url
-            display.append([page_title, url, bitly])
+            if not passs:
+                passs, page_title = find_title(url)
+            display.append([page_title, url, bitly, passs])
+        else:
+            ## has exclusion character
+            if manual:
+                ## only process excluded URLs if .title is used
+                url = url[1:]
+                passs, page_title = find_title(url)
+                display.append([page_title, url, bitly, passs])
         i += 1
-    return passs, display
+
+    ## check to make sure at least 1 URL worked correctly
+    overall_pass = False
+    for x in display:
+        if x[-1] == True:
+            overall_pass = True
+
+    return overall_pass, display
 
 
 def show_title_auto(jenni, input):
@@ -317,6 +333,7 @@ def show_title_auto(jenni, input):
         returned_title = r[0]
         orig = r[1]
         bitly_link = r[2]
+        link_pass = r[3]
 
         if k > 3:
             break
@@ -327,7 +344,7 @@ def show_title_auto(jenni, input):
         reg_format = '[ %s ] - %s'
         response = str()
 
-        if status:
+        if status and link_pass:
             if useBitLy:
                 response = reg_format % (uc.decode(returned_title), bitly_link)
             else:
@@ -343,26 +360,48 @@ show_title_auto.priority = 'high'
 
 def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
-    txt = input.group(2)
-    if not txt:
-        return jenni.reply('Pleaes give me a URL')
-    status, results = get_results(input.group(2))
+    uri = input.group(2)
+    if not uri:
+        channel = (input.sender).lower()
+        if channel in recent_links:
+            uri = recent_links[channel][-1]
+        else:
+            return jenni.reply('No recent links seen in this channel.')
+
+    status, results = get_results(uri, True)
 
     for r in results:
         returned_title = r[0]
         orig = r[1]
         bitly_link = r[2]
+        link_pass = r[3]
 
         if returned_title is None:
             continue
 
-        if status:
+        if status and link_pass:
             response = '[ %s ]' % (returned_title)
         else:
             response = '(%s)' % (returned_title)
         jenni.reply(response)
 show_title_demand.commands = ['title']
 show_title_demand.priority = 'high'
+
+
+def collect_links(jenni, input):
+    global recent_links
+    txt = input
+    channel = (input.sender).lower()
+
+    if channel not in recent_links:
+        recent_links[channel] = list()
+
+    recent_links[channel].append(input)
+
+    if len(recent_links[channel]) > 1:
+        recent_links[channel] = recent_links[channel][-1:]
+collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
+collect_links.priority = 'low'
 
 if __name__ == '__main__':
     print __doc__.strip()
