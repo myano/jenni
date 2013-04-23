@@ -81,6 +81,10 @@ def find_title(url):
     if 'twitter.com' in uri:
         uri = uri.replace('#!', '?_escaped_fragment_=')
 
+    if 'imgur' in uri:
+        a = uri.split('.')
+        uri = a[0][:-1] + '.'.join(a[1:-1])
+
     uri = uc.decode(uri)
 
     ## proxy the lookup of the headers through .py
