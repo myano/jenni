@@ -180,7 +180,7 @@ def latex(jenni, input):
     a = web.get(url)
     a = a.replace("http:", "https:")
     jenni.reply(a)
-latex.commands = ['tex']
+latex.commands = ['tex', 'latex']
 latex.priority = 'high'
 
 if __name__ == '__main__':
