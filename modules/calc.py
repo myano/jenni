@@ -63,11 +63,15 @@ def py(jenni, input):
         return jenni.reply('No code provided.')
     query = code.encode('utf-8')
     uri = 'https://tumbolia.appspot.com/py/'
-    answer = web.get(uri + web.urllib.quote(query))
-    if answer:
-        jenni.say(answer)
-    else:
-        jenni.reply('Sorry, no result.')
+    try:
+        answer = web.get(uri + web.urllib.quote(query))
+        if answer:
+            jenni.say(answer)
+        else:
+            jenni.reply('Sorry, no result.')
+    except Exception, e:
+        jenni.reply('The server did not return an answer.')
+        print '[.py]', e
 py.commands = ['py', 'python']
 py.example = '.py print "Hello world, %s!" % ("James")'
 
