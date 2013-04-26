@@ -12,6 +12,7 @@ More info:
 import datetime as dt
 import json
 import re
+import time
 import web
 
 exchange_rates = dict()
@@ -52,7 +53,8 @@ def btc(jenni, input):
             if each['currency'] == 'USD':
                 if 'USD' not in exchange_rates:
                     exchange_rates['USD'] = dict()
-                exchange_rates['USD'][each['symbol'].replace('USD', '')] = each['close']
+                exchange_rates['USD'][each['symbol'].replace(
+                    'USD', '')] = each['close']
         last_check = dt.datetime.now()
 
     response = '1 BTC (in USD) = '
@@ -61,12 +63,28 @@ def btc(jenni, input):
     for each in symbols:
         if each.replace('USD', '') in exchanges:
             response += '%s: %s | ' % (each, exchange_rates['USD'][each])
-    response += 'lolcat (mtgox) index: %s | ' % (ppnum(float(exchange_rates['USD']['mtgox']) * 160))
+    response += 'lolcat (mtgox) index: %s | ' % (ppnum(float(
+        exchange_rates['USD']['mtgox']) * 160))
     response += 'last updated at: ' + str(last_check)
     jenni.reply(response)
 btc.commands = ['btc']
 btc.example = '.btc'
 btc.rate = 5
+
+
+def fbtc(jenni, input):
+    page = web.get('http://thefuckingbitcoin.com/')
+    price = re.search('<p id="lastPrice">(\S+)</p>', page)
+    remarks = re.search('<p id="remark">(.*?)</p><p id="remarkL2">(.*?)</p>',
+                        page)
+    remarks = remarks.groups()
+    resp = str()
+    resp += '1 BTC == %s USD. ' % price.groups()
+    if remarks:
+        resp += '%s %s' % (remarks[0], remarks[1])
+    jenni.reply(resp)
+fbtc.commands = ['fbtc']
+fbtc.example = '.fbtc'
 
 
 if __name__ == '__main__':
