@@ -149,7 +149,6 @@ def cs(jenni, input):
     jenni.say(response)
 cs.commands = ['cs']
 cs.example = '.cs W8LT'
-cs.rate = 30
 
 def cw(jenni, input):
     re_cw = re.compile("[\.\- ]+")
@@ -177,7 +176,6 @@ def cw(jenni, input):
                 output += " "
     jenni.reply(output)
 cw.commands = ['cw']
-cw.rate = 15
 cw.thread = True
 
 if __name__ == '__main__':
