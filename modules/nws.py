@@ -355,7 +355,7 @@ def weather_feed(jenni, input):
                         counter_summaries += 1
                 conn.commit()
                 c.close()
-            time.sleep(60)
+            time.sleep(15)
 
 if __name__ == '__main__':
     print __doc__.strip()
