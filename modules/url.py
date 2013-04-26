@@ -35,7 +35,7 @@ EXCLUSION_CHAR = '!'
 IGNORE = ['git.io']
 
 # do not edit below this line unless you know what you're doing
-bitly_loaded = 0
+bitly_loaded = False
 BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py']
 recent_links = dict()
 
@@ -46,7 +46,7 @@ try:
     bitly_api_key = str(key[0].strip())
     bitly_user = str(key[1].strip())
     file.close()
-    bitly_loaded = 1
+    bitly_loaded = True
 except:
     print 'ERROR: No bitly.txt found.'
 
@@ -354,7 +354,11 @@ def show_title_auto(jenni, input):
             else:
                 response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
-            response = '%s' % (bitly_link)
+            if useBitLy:
+                response = '%s' % (bitly_link)
+            else:
+                ## Fail silently, link can't be bitly'ed and no title was found
+                pass
 
         if response:
             jenni.say(response)
