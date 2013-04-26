@@ -615,7 +615,8 @@ unostop.thread = False
 unostop.rate = 0
 
 def join(jenni, input):
-    unobot.join(jenni, input)
+    if input.sender == CHANNEL:
+        unobot.join(jenni, input)
 join.commands = ['join']
 join.rule = '^join$'
 join.priority = 'low'
