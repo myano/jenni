@@ -39,10 +39,7 @@ def btc(jenni, input):
     global exchange_rates
     global last_check
     now = dt.datetime.now()
-    print 'now: ', now
-    print 'last: ', last_check
     if (not exchange_rates) or (now - last_check > dt.timedelta(minutes=15)):
-    #if now - last_check > 900:
         status, page = btc_page()
         if status:
             json_page = json.loads(page)
