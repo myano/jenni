@@ -32,7 +32,7 @@ import web
 BITLY_TRIGGER_LEN_TITLE = 15
 BITLY_TRIGGER_LEN_NOTITLE = 70
 EXCLUSION_CHAR = '!'
-IGNORE = ['git.io']
+IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
@@ -298,7 +298,8 @@ def get_results(text, manual=False):
             if not manual:
                 if bitly_loaded:
                     bitly = short(url)
-                    bitly = bitly[0][1]
+                    if bitly:
+                        bitly = bitly[0][1]
             passs, page_title = find_title(url)
             if not passs:
                 passs, page_title = find_title(url)
