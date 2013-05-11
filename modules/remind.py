@@ -39,7 +39,10 @@ def dump_database(name, data):
 
 def setup(jenni):
     jenni.rfn = filename(jenni)
+
+    # jenni.sending.acquire()
     jenni.rdb = load_database(jenni.rfn)
+    # jenni.sending.release()
 
     def monitor(jenni):
         time.sleep(5)
@@ -54,7 +57,10 @@ def setup(jenni):
                             jenni.msg(channel, nick + ': ' + message)
                         else: jenni.msg(channel, nick + '!')
                     del jenni.rdb[oldtime]
+
+                # jenni.sending.acquire()
                 dump_database(jenni.rfn, jenni.rdb)
+                # jenni.sending.release()
             time.sleep(2.5)
 
     targs = (jenni,)
@@ -101,7 +107,7 @@ scaling = {
 }
 
 periods = '|'.join(scaling.keys())
-p_command = r'\.in (\-?[0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
+p_command = r'\.in ([0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
 r_command = re.compile(p_command)
 
 def remind(jenni, input):
@@ -134,7 +140,58 @@ def remind(jenni, input):
         jenni.reply('Okay, will remind%s' % w)
     else: jenni.reply('Okay, will remind in %s secs' % duration)
 remind.commands = ['in']
-remind.rate = 30
+
+r_time = re.compile(r'^([0-9]{2}[:.][0-9]{2})')
+r_zone = re.compile(r'( ?([A-Za-z]+|[+-]\d\d?))')
+
+import calendar
+from clock import TimeZones
+
+def at(jenni, input):
+    bytes = input[4:]
+
+    m = r_time.match(bytes)
+    if not m:
+        return jenni.reply("Sorry, didn't understand the time spec.2")
+    t = m.group(1).replace('.', ':')
+    bytes = bytes[len(t):]
+
+    m = r_zone.match(bytes)
+    if not m:
+        return jenni.reply("Sorry, didn't understand the zone spec.3")
+    z = m.group(2)
+    bytes = bytes[len(m.group(1)):].strip().encode("utf-8")
+
+    if z.startswith('+') or z.startswith('-'):
+        tz = int(z)
+
+    if TimeZones.has_key(z):
+        tz = TimeZones[z]
+    else: return jenni.reply("Sorry, didn't understand the time zone.4")
+
+    d = time.strftime("%Y-%m-%d", time.gmtime())
+    d = time.strptime(("%s %s" % (d, t)).encode("utf-8"), "%Y-%m-%d %H:%M")
+
+    d = int(calendar.timegm(d) - (3600 * tz))
+    duration = int((d - time.time()) / 60)
+
+    if duration < 1:
+        return jenni.reply("Sorry, that date is this minute or in the past. And only times in the same day are supported!")
+
+    # jenni.say("%s %s %s" % (t, tz, d))
+
+    reminder = (input.sender, input.nick, bytes)
+    # jenni.say(str((d, reminder)))
+    try: jenni.rdb[d].append(reminder)
+    except KeyError: jenni.rdb[d] = [reminder]
+
+    jenni.sending.acquire()
+    dump_database(jenni.rfn, jenni.rdb)
+    jenni.sending.release()
+
+    jenni.reply("Reminding at %s %s - in %s minute(s)" % (t, z, duration))
+at.commands = ['at']
 
 if __name__ == '__main__':
     print __doc__.strip()
+
