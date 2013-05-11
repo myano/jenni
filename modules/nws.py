@@ -130,6 +130,12 @@ stop = False
 CHANNEL = '##weather'
 running = False
 
+def colourize(text):
+    for condition in conditions:
+        if condition in text:
+            text = text.replace(condition, conditions[condition])
+    return text
+
 
 def nws_lookup(jenni, input):
     ''' Look up weather watches, warnings, and advisories. '''
@@ -204,10 +210,10 @@ def nws_lookup(jenni, input):
     feed = feedparser.parse(master_url)
     warnings_dict = dict()
     for item in feed.entries:
-        if nomsg[:51] == item['title']:
-            return jenni.reply(nomsg.format(location))
+        if nomsg[:51] == colourize(item['title']):
+            return jenni.say(nomsg.format(location))
         else:
-            warnings_dict[unicode(item['title'])] = unicode(item['summary'])
+            warnings_dict[colourize(unicode(item['title']))] = unicode(item['summary'])
 
     if len(warnings_dict) > 0:
         if input.sender.startswith('#'):
@@ -216,21 +222,21 @@ def nws_lookup(jenni, input):
             for key in warnings_dict:
                 if i > 1:
                     break
-                jenni.reply(key)
+                jenni.say(key)
                 response = textwrap.wrap(warnings_dict[key], 450)
                 resp_len = len(response)
                 q = 1
                 for resp in response:
-                    jenni.reply('Part %s of %s: %s' % (str(q).zfill(2), str(resp_len).zfill(2), resp))
+                    jenni.say('Part %s of %s: %s' % (str(q).zfill(2), str(resp_len).zfill(2), resp))
                     q += 1
                 i += 1
-            jenni.reply(more_info.format(location, master_url))
+            jenni.say(more_info.format(location, master_url))
         else:
             ## if queried in private message
             for key in warnings_dict:
-                jenni.reply(key)
-                jenni.reply(warnings_dict[key])
-            jenni.reply(more_info.format(location, master_url))
+                jenni.say(key)
+                jenni.say(warnings_dict[key])
+            jenni.say(more_info.format(location, master_url))
 nws_lookup.commands = ['nws']
 nws_lookup.priority = 'high'
 nws_lookup.thread = True
@@ -333,9 +339,10 @@ def weather_feed(jenni, input):
                         if states[st] == state.lower():
                             state = st[0].upper() + st[1:]
 
-                    for condition in conditions:
-                        if condition in title:
-                            title = title.replace(condition, conditions[condition])
+                    #for condition in conditions:
+                    #    if condition in title:
+                    #        title = title.replace(condition, conditions[condition])
+                    title = colourize(title)
 
                     state = capitalize_all(state)
                     line1 = '\x02[\x0302{1}\x03] Part {2} of {3}: {0}\x02'
@@ -355,7 +362,7 @@ def weather_feed(jenni, input):
                         counter_summaries += 1
                 conn.commit()
                 c.close()
-            time.sleep(15)
+            time.sleep(2)
 
 if __name__ == '__main__':
     print __doc__.strip()
