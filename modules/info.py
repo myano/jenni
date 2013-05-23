@@ -109,7 +109,7 @@ def stats(jenni, input):
     reply = 'power users: '
     k = 1
     for count, user in userank:
-        if ' ' not in user:
+        if ' ' not in user and '.' not in user:
             reply += '%s (%s), ' % (user, count)
             k += 1
             if k > 10:
