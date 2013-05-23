@@ -113,7 +113,6 @@ def find_title(url):
     try:
         useful = json.loads(u)
     except:
-        print 'Failed to parse JSON for:', uri, 'because:', u[:50].replace('\n', r'\n'),
         return False, u
     info = useful['headers']
     page = useful['read']
