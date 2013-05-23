@@ -35,11 +35,8 @@ def ip_lookup(jenni, input):
     try:
         results = json.loads(page)
     except:
-        print str(page)
         return jenni.reply('Did not receive proper JSON from %s' % (base))
     if results:
-        print 'query', str(query)
-        print 'matches', re_ip.findall(query)
         if re_ip.findall(query):
             ## IP Address
             try:
