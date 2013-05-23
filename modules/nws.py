@@ -11,14 +11,15 @@ This module allows one to query the National Weather Service for active
 watches, warnings, and advisories that are present.
 '''
 
+import copy
 import feedparser
 import re
-import time
-import urllib
-import web
 import sqlite3
 import string
 import textwrap
+import time
+import urllib
+import web
 
 states = {
         'alabama': 'al',
@@ -128,7 +129,6 @@ more_info = 'Complete weather watches, warnings, and advisories for {0}, availab
 warning_list = 'http://alerts.weather.gov/cap/us.php?x=1'
 stop = False
 CHANNEL = '##weather'
-running = False
 
 def colourize(text):
     for condition in conditions:
@@ -244,29 +244,16 @@ nws_lookup.thread = True
 
 def warns_control(jenni, input):
     global stop
-    global running
     if not input.admin:
         return jenni.reply('You need to be an admin to use this!')
 
     if input.group(2) == 'start':
         stop = False
-        if running:
-            return jenni.reply('It is already running!')
-        running = True
         jenni.reply('Starting...')
         weather_feed(jenni, input)
     elif input.group(2) == 'stop':
         stop = True
-        if not running:
-            return jenni.reply('It isn\'t running!')
-        else:
-            jenni.reply('Stopping...')
-    else:
-        response = 'NWS module is currently: '
-        if running:
-            jenni.reply(response + 'running')
-        else:
-            jenni.reply(response + 'not running')
+        jenni.reply('Stopping...')
 warns_control.commands = ['warns']
 warns_control.priority = 'high'
 warns_control.thread = True
@@ -274,7 +261,6 @@ warns_control.thread = True
 
 def weather_feed(jenni, input):
     global stop
-    global running
     conn = sqlite3.connect('nws.db')
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS nws ( area text, state text, title text )')
@@ -295,17 +281,16 @@ def weather_feed(jenni, input):
                 conn.commit()
                 c.close()
                 stop = False
-                running = False
                 return jenni.reply('Checking... I\'m comleteply stopped. (stopped in "Master")')
             parsed = feedparser.parse(warning_list)
             if not len(parsed['entries']) > 0:
                 continue
-            for entity in parsed['entries']:
+            all_entries = parsed['entries']
+            for entity in all_entries:
                 if stop:
                     conn.commit()
                     c.close()
                     stop = False
-                    running = False
                     return jenni.reply('Checking... I\'m completely stopped. (stopped inside XML Parse)')
                 entry = entity
                 try:
@@ -362,7 +347,6 @@ def weather_feed(jenni, input):
                         counter_summaries += 1
                 conn.commit()
                 c.close()
-            time.sleep(2)
 
 if __name__ == '__main__':
     print __doc__.strip()
