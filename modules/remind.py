@@ -145,7 +145,7 @@ r_time = re.compile(r'^([0-9]{2}[:.][0-9]{2})')
 r_zone = re.compile(r'( ?([A-Za-z]+|[+-]\d\d?))')
 
 import calendar
-from clock import TimeZones
+from modules import clock
 
 def at(jenni, input):
     bytes = input[4:]
@@ -165,8 +165,8 @@ def at(jenni, input):
     if z.startswith('+') or z.startswith('-'):
         tz = int(z)
 
-    if TimeZones.has_key(z):
-        tz = TimeZones[z]
+    if clock.TimeZones.has_key(z):
+        tz = clock.TimeZones[z]
     else: return jenni.reply("Sorry, didn't understand the time zone.4")
 
     d = time.strftime("%Y-%m-%d", time.gmtime())

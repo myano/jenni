@@ -244,7 +244,10 @@ def f_time(self, origin, match, args):
                 error = "Sorry, I don't know about the '%s' timezone." % tz
                 self.msg(origin.sender, origin.nick + ': ' + error)
         else:
-            timenow = time.gmtime(time.time() + (t * 3600))
+            try:
+                timenow = time.gmtime(time.time() + (t * 3600))
+            except:
+                return self.reply('Time requested is too far away.')
             msg = time.strftime("%a, %d %b %Y %H:%M:%S " + str(tz), timenow)
             self.msg(origin.sender, msg)
 f_time.commands = ['t']
