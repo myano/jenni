@@ -36,7 +36,7 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py']
+BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny']
 recent_links = dict()
 
 try:
@@ -374,7 +374,7 @@ def show_title_demand(jenni, input):
         if channel in recent_links:
             uri = recent_links[channel][-1]
         else:
-            return jenni.reply('No recent links seen in this channel.')
+            return jenni.say('No recent links seen in this channel.')
 
     status, results = get_results(uri, True)
 
@@ -391,25 +391,57 @@ def show_title_demand(jenni, input):
             response = '[ %s ]' % (returned_title)
         else:
             response = '(%s)' % (returned_title)
-        jenni.reply(response)
+        jenni.say(response)
 show_title_demand.commands = ['title']
 show_title_demand.priority = 'high'
 
 
 def collect_links(jenni, input):
+    add_links(input)
+collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
+collect_links.priority = 'low'
+
+
+def add_links(link, incoming=False):
     global recent_links
-    txt = input
-    channel = (input.sender).lower()
+    if not incoming:
+        ## assume incoming is 'input'
+        incoming = link
+    channel = (incoming.sender).lower()
 
     if channel not in recent_links:
         recent_links[channel] = list()
 
-    recent_links[channel].append(input)
+    recent_links[channel].append(link)
 
     if len(recent_links[channel]) > 1:
         recent_links[channel] = recent_links[channel][-1:]
-collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
-collect_links.priority = 'low'
+
+
+def unbitly(jenni, input):
+    url = input.group(2)
+    if not url.startswith(('http://', 'https://')):
+        url = 'http://' + url
+    pyurl = u'https://tumbolia.appspot.com/py/'
+    code = "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
+    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
+    code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
+    code += 'print u.geturl();'
+    url = url.replace("'", r"\'")
+    query = code % url.strip()
+    try:
+        temp = web.quote(query)
+        u = web.get(pyurl + temp)
+    except:
+        return jenni.say('Failed to grab URL: %s' % (url))
+    if u.startswith(('http://', 'https://')):
+        jenni.say(u)
+    else:
+        jenni.say('Failed to obtain final destination.')
+unbitly.commands = ['unbitly', 'untiny']
+unbitly.priority = 'low'
+unbitly.example = '.unbitly http://git.io/6fY4OQ'
+
 
 if __name__ == '__main__':
     print __doc__.strip()
