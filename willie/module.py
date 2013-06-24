@@ -19,6 +19,8 @@ Copyright © 2013, Elad Alfassa <elad@fedoraproject.org>
 Licensed under the Eiffel Forum License 2.
 """
 
+import sys
+
 NOLIMIT = 1
 """Return value for ``callable``\s, which supresses rate limiting for the call.
 
@@ -246,6 +248,23 @@ def rate(value):
     return add_attribute
 
 
+def _get_example_test(function, example_str, example_result):
+    def test():
+        assert True
+    return test
+
+
+def _insert_into_module(test, module_name, base_name):
+    test.__module__ = module_name
+    module = sys.modules[module_name]
+    # Make sure the test method does not overwrite anything.
+    for i in xrange(1000):
+        test.__name__ = "test_example_%s_%s" % (base_name, i)
+        if not hasattr(module, test.__name__):
+            break
+    setattr(module, test.__name__, test)
+
+
 def example(example_str, example_result=None):
     """Decorator. Equivalent to func.example = example_str.
 
@@ -255,6 +274,23 @@ def example(example_str, example_result=None):
         if not hasattr(function, "example"):
             function.example = []
 
+        if example_result:
+            test = _get_example_test(function, example_str, example_result)
+            _insert_into_module(test, function.__module__, function.__name__)
+
         function.example.append((example_str, example_result))
         return function
     return add_attribute
+
+
+def run_example_tests(filename, coverage=False):
+    import pytest
+    from multiprocessing import cpu_count
+
+    args = [filename, '-v']
+    if cpu_count() > 1:
+        args.extend(["-n", str(cpu_count())])
+    if coverage:
+        args.extend(["--cov", __file__, "--cov-report", "html"])
+
+    pytest.main(args)

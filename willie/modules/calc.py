@@ -9,7 +9,7 @@ http://willie.dfbta.net
 
 import re
 from willie import web
-from willie.module import commands, example
+from willie.module import commands, example, run_example_tests
 from socket import timeout
 import string
 import HTMLParser
@@ -92,3 +92,7 @@ def wa(bot, trigger):
         waOutputArray = []
     else:
         bot.reply('Sorry, no result.')
+
+
+if __name__ == "__main__":
+    run_example_tests(__file__)
