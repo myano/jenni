@@ -37,7 +37,7 @@ def calculate(q):
 
 
 @commands('c', 'calc')
-@example('.c 5 + 3')
+@example('.c 5 + 3', '8')
 def c(bot, trigger):
     """Google calculator."""
     if not trigger.group(2):
@@ -47,7 +47,7 @@ def c(bot, trigger):
 
 
 @commands('py')
-@example('.py len([1,2,3])')
+@example('.py len([1,2,3])', '3')
 def py(bot, trigger):
     """Evaluate a Python expression."""
     query = trigger.group(2)

@@ -11,8 +11,7 @@ willie.module.priority
 willie.module.event
 willie.module.rate
 willie.module.example
-"""
-"""
+
 willie/module.py - Willie IRC Bot (http://willie.dftba.net/)
 Copyright 2013, Ari Koivula, <ari@koivu.la>
 Copyright © 2013, Elad Alfassa <elad@fedoraproject.org>
@@ -247,12 +246,15 @@ def rate(value):
     return add_attribute
 
 
-def example(value):
-    """Decorator. Equivalent to func.example = value.
+def example(example_str, example_result=None):
+    """Decorator. Equivalent to func.example = example_str.
 
     Usage example for a callable.
     """
     def add_attribute(function):
-        function.example = value
+        if not hasattr(function, "example"):
+            function.example = []
+
+        function.example.append((example_str, example_result))
         return function
     return add_attribute
