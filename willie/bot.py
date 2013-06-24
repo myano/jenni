@@ -375,7 +375,7 @@ class Willie(irc.Bot):
             # At least for now, only account for the first command listed.
             if func.__doc__ and hasattr(func, 'commands') and func.commands[0]:
                 if hasattr(func, 'example'):
-                    example = func.example[0][0]
+                    example = func.example[0]["example"]
                     example = example.replace('$nickname', str(self.nick))
                 else:
                     example = None

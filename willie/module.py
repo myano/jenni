@@ -265,7 +265,7 @@ def _insert_into_module(test, module_name, base_name):
     setattr(module, test.__name__, test)
 
 
-def example(example_str, example_result=None):
+def example(example_str, example_result=None, privmsg=False, admin=False):
     """Decorator. Equivalent to func.example = example_str.
 
     Usage example for a callable.
@@ -278,7 +278,11 @@ def example(example_str, example_result=None):
             test = _get_example_test(function, example_str, example_result)
             _insert_into_module(test, function.__module__, function.__name__)
 
-        function.example.append((example_str, example_result))
+        record = {"example": example_str,
+                "result": example_result,
+                "privmsg": privmsg,
+                "admin": admin, }
+        function.example.append(record)
         return function
     return add_attribute
 
