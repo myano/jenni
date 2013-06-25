@@ -22,6 +22,7 @@ import irc
 from db import WillieDB
 from tools import stderr, stdout, Nick, PriorityQueue, released
 import module
+import willie.config
 
 
 class Willie(irc.Bot):
@@ -447,26 +448,8 @@ class Willie(irc.Bot):
 
             if hasattr(func, 'commands'):
                 for command in func.commands:
-                    # This regexp match equivalently and produce the same
-                    # groups 1 and 2 as the old regexp: r'^%s(%s)(?: +(.*))?$'
-                    # The only differences should be handling all whitespace
-                    # like spaces and the addition of groups 3-6.
-                    pattern = r"""
-                    {prefix}({command}) # Command as group 1.
-                    (?:\s+              # Whitespace to end command.
-                    (                   # Rest of the line as group 2.
-                    (?:(\S+))?          # Parameters 1-4 as groups 3-6.
-                    (?:\s+(\S+))?
-                    (?:\s+(\S+))?
-                    (?:\s+(\S+))?
-                    .*                  # Accept anything after the parameters.
-                                        # Leave it up to the module to parse
-                                        # the line.
-                    ))?                 # Group 2 must be None, if there are no
-                                        # parameters.
-                    $                   # EoL, so there are no partial matches.
-                    """.format(prefix=self.config.prefix, command=command)
-                    regexp = re.compile(pattern, re.IGNORECASE | re.VERBOSE)
+                    prefix = self.config.prefix
+                    regexp = module.get_command_regexp(prefix, command)
                     bind(self, func.priority, regexp, func)
 
             if hasattr(func, 'interval'):
@@ -574,18 +557,12 @@ class Willie(irc.Bot):
 
             s.host = origin.host
             if s.sender is not s.nick:  # no ops in PM
-                try:
-                    s.ops = self.ops[s.sender]
-                except:
-                    s.ops = []
+                s.ops = self.ops.get(s.sender, [])
                 """
                 List of channel operators in the channel the message was
                 recived in
                 """
-                try:
-                    s.halfplus = self.halfplus[s.sender]
-                except:
-                    s.halfplus = []
+                s.halfplus = self.halfplus.get(s.sender, [])
                 """
                 List of channel half-operators in the channel the message was
                 recived in
@@ -593,10 +570,7 @@ class Willie(irc.Bot):
                 s.isop = (s.nick in s.ops or
                           s.nick in s.halfplus)
                 """True if the user is half-op or an op"""
-                try:
-                    s.voices = self.voices[s.sender]
-                except:
-                    s.voices = []
+                s.voices = self.voices.get(s.sender, [])
                 """
                 List of channel operators in the channel the message was
                 recived in
@@ -741,5 +715,34 @@ class Willie(irc.Bot):
 
         return False
 
-if __name__ == '__main__':
-    print __doc__
+
+class MockWillie(Willie):
+    def __init__(self):
+        # Don't initialize anything on purpose.
+        self.nick = "Willie"
+        self.user = "willie"
+
+        self.ops = {}
+        self.halfplus = {}
+        self.voices = {}
+
+        self.config = willie.config.Config('', load=False)
+        self._init_config()
+
+    def _init_config(self):
+        cfg = self.config
+        cfg.parser.set('core', 'admins', '')
+        cfg.parser.set('core', 'owner', 'OwnerNick')
+
+
+class MockWillieWrapper(Willie.WillieWrapper):
+    def __init__(self, bot, origin):
+        self.bot = self
+        self.origin = origin
+        self.output = []
+        self.channels = ["#channel"]
+
+    def _store(self, string, recipent=None):
+        self.output.append(string.strip())
+
+    say = reply = action = _store

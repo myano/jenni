@@ -20,6 +20,7 @@ Licensed under the Eiffel Forum License 2.
 """
 
 import sys
+import re
 
 NOLIMIT = 1
 """Return value for ``callable``\s, which supresses rate limiting for the call.
@@ -152,6 +153,29 @@ def commands(*command_list):
     return add_attribute
 
 
+def get_command_regexp(prefix, command):
+    # This regexp match equivalently and produce the same
+    # groups 1 and 2 as the old regexp: r'^%s(%s)(?: +(.*))?$'
+    # The only differences should be handling all whitespace
+    # like spaces and the addition of groups 3-6.
+    pattern = r"""
+        {prefix}({command}) # Command as group 1.
+        (?:\s+              # Whitespace to end command.
+        (                   # Rest of the line as group 2.
+        (?:(\S+))?          # Parameters 1-4 as groups 3-6.
+        (?:\s+(\S+))?
+        (?:\s+(\S+))?
+        (?:\s+(\S+))?
+        .*                  # Accept anything after the parameters.
+                            # Leave it up to the module to parse
+                            # the line.
+        ))?                 # Group 2 must be None, if there are no
+                            # parameters.
+        $                   # EoL, so there are no partial matches.
+        """.format(prefix=prefix, command=command)
+    return re.compile(pattern, re.IGNORECASE | re.VERBOSE)
+
+
 def nickname_commands(*command_list):
     """Decorator. Triggers on lines starting with "$nickname: command".
 
@@ -248,13 +272,48 @@ def rate(value):
     return add_attribute
 
 
-def _get_example_test(function, example_str, example_result):
+import willie.bot
+import willie.irc
+
+
+def _get_example_test(function, msg, result, privmsg=False, admin=False):
     def test():
+        bot = willie.bot.MockWillie()
+
+        nick = "NickName"
+        if privmsg:
+            sender = "#channel"
+        else:
+            sender = nick
+        hostmask = "%s!%s@%s" % (nick, "UserName", "example.com")
+
+        if admin:
+            bot.config.admins = nick
+
+        origin_args = ["PRIVMSG", sender, msg]
+        origin = willie.irc.Origin(bot, hostmask, origin_args)
+        mock_bot = willie.bot.MockWillieWrapper(bot, origin)
+
+        match = None
+        if hasattr(function, "commands"):
+            for command in function.commands:
+                regexp = get_command_regexp(".", command)
+                match = regexp.match(msg)
+                if match:
+                    break
+        assert match, "Example did not match any command."
+
+        trigger = willie.bot.Willie.Trigger(
+                msg, origin, msg, match, "PRIVMSG", origin_args, bot)
+        function(mock_bot, trigger)
+        assert mock_bot.output == result
         assert True
+
     return test
 
 
 def _insert_into_module(test, module_name, base_name):
+    print __name__, module_name, base_name
     test.__module__ = module_name
     module = sys.modules[module_name]
     # Make sure the test method does not overwrite anything.
@@ -265,36 +324,52 @@ def _insert_into_module(test, module_name, base_name):
     setattr(module, test.__name__, test)
 
 
-def example(example_str, example_result=None, privmsg=False, admin=False):
-    """Decorator. Equivalent to func.example = example_str.
+class example(object):
+    def __init__(self, example_str, example_result=None, privmsg=False, admin=False):
+        print __name__, example_str
+        self.example_str = example_str
+        self.example_result = example_result
+        self.privmsg = privmsg
+        self.admin = admin
 
-    Usage example for a callable.
-    """
-    def add_attribute(function):
+    def __call__(self, function):
         if not hasattr(function, "example"):
             function.example = []
 
-        if example_result:
-            test = _get_example_test(function, example_str, example_result)
+        if self.example_result:
+            if self.example_result is not None:
+                self.example_result = [self.example_result]
+            test = _get_example_test(function, self.example_str, self.example_result)
             _insert_into_module(test, function.__module__, function.__name__)
 
-        record = {"example": example_str,
-                "result": example_result,
-                "privmsg": privmsg,
-                "admin": admin, }
+        record = {"example": self.example_str,
+                "result": self.example_result,
+                "privmsg": self.privmsg,
+                "admin": self.admin, }
         function.example.append(record)
         return function
-    return add_attribute
 
 
-def run_example_tests(filename, coverage=False):
+def run_example_tests(
+        filename,
+        multithread=True,
+        verbose=False,
+        coverage=False,
+        covreport=None):
     import pytest
     from multiprocessing import cpu_count
 
-    args = [filename, '-v']
-    if cpu_count() > 1:
+    args = [filename, "-s"]
+    if verbose:
+        args.extend(['-v'])
+    if multithread and cpu_count() > 1:
         args.extend(["-n", str(cpu_count())])
     if coverage:
-        args.extend(["--cov", __file__, "--cov-report", "html"])
+        args.extend(["--cov-config", "coveragerc.txt"])
+        args.extend(["--cov", filename])
+    if covreport:
+        assert covreport in ("html", "xml", "annotate")
+        args.extend(["--cov-report", covreport])
+        
 
     pytest.main(args)
