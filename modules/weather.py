@@ -413,7 +413,7 @@ def f_weather(self, origin, match, args):
         args = (cover, temp, pressure, cond, wind, str(icao_code), time)
 
     self.msg(origin.sender, format.encode('utf-8') % args)
-f_weather.rule = (['weather'], r'(.*)')
+f_weather.rule = (['weather', 'wx'], r'(.*)')
 
 
 def fucking_weather(jenni, input):
