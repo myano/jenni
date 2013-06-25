@@ -48,8 +48,8 @@ SCOREFILE = "/home/jenni/jenni/unoscores.txt"
 INACTIVE_TIMEOUT = 3
 
 STRINGS = {
-    'ALREADY_STARTED': '\x0300,01Game already started by %s! Type join to join!',
-    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type join to join!',
+    'ALREADY_STARTED': '\x0300,01Game already started by %s! Type ".ujoin" to join!',
+    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type "ujoin" to join!',
     'GAME_STOPPED': '\x0300,01Game stopped.',
     'CANT_STOP': '\x0300,01%s is the game owner, you can\'t stop it! To force stop the game, please wait %s seconds.',
     'DEALING_IN': '\x0300,01Dealing %s into the game as player #%s!',
@@ -80,7 +80,7 @@ STRINGS = {
     'SKIPPED': '\x0300,01%s is skipped!',
     'REVERSED': '\x0300,01Order reversed!',
     'GAINS': '\x0300,01%s gains %s points!',
-    'SCORE_ROW': '\x0300,01#%s %s (%s points, %s games, %s won, %.2f points per game, %.2f percent wins)',
+    'SCORE_ROW': '\x0300,01%s: #%s %s (%s points, %s games, %s won, %.2f points per game, %.2f percent wins)',
     'GAME_ALREADY_DEALT': '\x0300,01Game has already been dealt, please wait until game is over or stopped.',
     'PLAYER_COLOR_ENABLED': '\x0300,01Hand card colors \x0309,01enabled\x0300,01! Format: <COLOR>/[<CARD>].  Example: R/[D2] is a red Draw Two. Type \'.uno-help\' for more help.',
     'PLAYER_COLOR_DISABLED': '\x0300,01Hand card colors \x0304,01disabled\x0300,01.',
@@ -273,10 +273,7 @@ class UnoBot:
         self.rankings("ppg")
         i = 1
         for z in self.prescores[:10]:
-            if self.game_on or self.deck:
-                jenni.notice(nickk, STRINGS['SCORE_ROW'] % (i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
-            else:
-                jenni.notice(nickk, STRINGS['SCORE_ROW'] % (i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
+            jenni.msg(nickk, 'ppg: ' + STRINGS['SCORE_ROW'] % (i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
             i += 1
 
     def createnewdeck(self):
@@ -497,7 +494,7 @@ class UnoBot:
     def showTopCard_demand(self, jenni):
         if not self.game_on or not self.deck:
             return
-        jenni.reply(STRINGS['TOP_CARD'] % (self.playerOrder[self.currentPlayer], self.renderCards(None, [self.topCard], 1)))
+        jenni.say(STRINGS['TOP_CARD'] % (self.playerOrder[self.currentPlayer], self.renderCards(None, [self.topCard], 1)))
 
     def leave(self, jenni, input):
         nickk = (input.nick).lower()
@@ -574,7 +571,7 @@ class UnoBot:
 
         if text[1] == "pw" or text[1] == "ppg":
             self.rankings(text[1])
-            self.rank_assist(jenni, input, text[2], "SCORE_ROW")
+            self.rank_assist(jenni, input, text[2], text[1])
 
         if not self.prescores:
             jenni.reply(STRINGS['NO_SCORES'])
@@ -585,14 +582,14 @@ class UnoBot:
             i = 1
             s = int(nicknum)
             for z in self.prescores[:s]:
-                jenni.notice(nickk, STRINGS[ranktype] % (i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
+                jenni.msg(nickk, STRINGS['SCORE_ROW'] % (ranktype, i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
                 i += 1
         else:
             j = 1
             t = str(nicknum)
             for y in self.prescores:
                 if y[0] == t:
-                    jenni.say(STRINGS[ranktype] % (j, y[0], y[3], y[1], y[2], float(y[3])/float(y[1]), float(y[2])/float(y[1])*100))
+                    jenni.say(STRINGS['SCORE_ROW'] % (ranktype, j, y[0], y[3], y[1], y[2], float(y[3])/float(y[1]), float(y[2])/float(y[1])*100))
                 j += 1
 
 unobot = UnoBot ()
@@ -617,8 +614,8 @@ unostop.rate = 0
 def join(jenni, input):
     if input.sender == CHANNEL:
         unobot.join(jenni, input)
-join.commands = ['join']
-join.rule = '^join$'
+join.commands = ['ujoin']
+join.rule = '^ujoin$'
 join.priority = 'low'
 join.thread = False
 join.rate = 0
@@ -719,8 +716,15 @@ unostats.thread = False
 unostats.rate = 0
 
 def uno_help(jenni, input):
-    jenni.reply("For rules, examples, and getting started: http://j.mp/esl47K")
-uno_help.commands = ['uno-help']
+    nick = input.group(2)
+    txt = 'For rules, examples, and getting started: http://j.mp/esl47K'
+    if nick:
+        nick = (nick).strip()
+        output = "%s: %s" % (nick, txt)
+    else:
+        output = txt
+    jenni.say(output)
+uno_help.commands = ['uno-help', 'unohelp']
 uno_help.priority = 'low'
 uno_help.thread = False
 uno_help.rate = 0
