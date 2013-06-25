@@ -18,6 +18,7 @@ import re
 from htmlentitydefs import name2codepoint
 from modules import unicode as uc
 import urllib2
+import time
 import web
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
@@ -48,7 +49,19 @@ try:
     file.close()
     bitly_loaded = True
 except:
-    print 'ERROR: No bitly.txt found.'
+    print 'WARNING: No bitly.txt found.'
+
+try:
+    f = open('simple_channels.txt', 'r')
+    channels = f.read()
+    channels = channels.split(',')
+    simple_channels = list()
+    for channel in channels:
+        simple_channels.append(channel.strip())
+    f.close()
+except:
+    print 'WARNING: No simple_channels.txt found'
+
 
 url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
@@ -88,38 +101,76 @@ def find_title(url):
     uri = uc.decode(uri)
 
     ## proxy the lookup of the headers through .py
-    pyurl = u'https://tumbolia.appspot.com/py/'
-    code = 'import simplejson;'
-    code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
-    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
-    code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
-    code += "rtn=dict();"
-    code += "rtn['headers'] = u.headers.dict;"
-    code += "contents = u.read();"
-    code += "con = str();"
-    code += r'''exec "try: con=(contents).decode('utf-8')\n'''
-    code += '''except: con=(contents).decode('iso-8859-1')";'''
-    code += "rtn['read'] = con;"
-    code += "rtn['url'] = u.url;"
-    code += "rtn['geturl'] = u.geturl();"
-    code += r"print simplejson.dumps(rtn)"
-    query = code % uri
-    try:
+    def remote_call():
+        pyurl = u'https://tumbolia.appspot.com/py/'
+        code = 'import simplejson;'
+        code += 'import time; unique = str(time.time());'
+        code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
+        code += "req.add_header('User-Agent', 'Mozilla/5.0"
+        code += "');"
+        code += "u=urllib2.urlopen(req);"
+        code += "rtn=dict();"
+        code += "rtn['headers'] = u.headers.dict;"
+        code += "contents = u.read();"
+        code += "con = str();"
+        code += r'''exec "try: con=(contents).decode('utf-8')\n'''
+        code += '''except: con=(contents).decode('iso-8859-1')";'''
+        code += "rtn['read'] = con;"
+        code += "rtn['url'] = u.url;"
+        code += "rtn['geturl'] = u.geturl();"
+        code += r"print simplejson.dumps(rtn)"
+        query = code % uri
         temp = web.quote(query)
         u = web.get(pyurl + temp)
-    except Exception, e:
-        return False, e
 
-    try:
-        useful = json.loads(u)
-    except:
-        return False, u
+        try:
+            useful = json.loads(u)
+            return True, useful
+        except Exception, e:
+            print "%s -- Failed to parse json from web resource. -- %s" % (time.time(), str(e))
+            return False, str(u)
+
+    status = False
+    k = 0
+    error_num = re.compile('HTTPError: HTTP Error (\S+):')
+    error_codes = ['301', '302', '403', '404', '410']
+    msg = str()
+    while not status:
+        status, msg = remote_call()
+
+        if status:
+            break
+
+        txt = error_num.findall(msg)
+        if txt:
+            txt = txt[0]
+            try:
+                txt = int(txt)
+            except:
+                break
+            if 500 <= txt <= 599:
+                break
+            if txt in error_codes:
+                break
+
+        k += 1
+
+        if k >= 5:
+            break
+        time.sleep(0.5)
+
+    if not status:
+        return False, msg
+
+    useful = msg
+
     info = useful['headers']
     page = useful['read']
 
     try:
         mtype = info['content-type']
     except:
+        print "failed mtype"
         return False, 'mtype failed'
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return False, str(mtype)
@@ -214,7 +265,7 @@ def short(text):
                 shorter.strip()
                 bitlys.append([b, shorter])
             else:
-                bitlys.append([b, b])
+                bitlys.append([b, str()])
             i += 1
         return bitlys
     except:
@@ -243,7 +294,7 @@ def remove_nonprint(text):
     new = str()
     for char in text:
         x = ord(char)
-        if x > 32 and x < 126:
+        if x > 32 and x <= 126:
             new += char
     return new
 
@@ -282,6 +333,9 @@ def get_results(text, manual=False):
     i = 0
     display = list()
     passs = False
+    channel = str()
+    if hasattr(text, 'sender'):
+        channel = text.sender
     while i < k:
         url = uc.encode(a[i][0])
         url = uc.decode(url)
@@ -296,12 +350,11 @@ def get_results(text, manual=False):
         if not url.startswith(EXCLUSION_CHAR):
             if not manual:
                 if bitly_loaded:
-                    bitly = short(url)
-                    if bitly:
-                        bitly = bitly[0][1]
+                    if channel and channel not in simple_channels:
+                        bitly = short(url)
+                        if bitly:
+                            bitly = bitly[0][1]
             passs, page_title = find_title(url)
-            if not passs:
-                passs, page_title = find_title(url)
             display.append([page_title, url, bitly, passs])
         else:
             ## has exclusion character
@@ -346,13 +399,17 @@ def show_title_auto(jenni, input):
         useBitLy = doUseBitLy(returned_title, orig)
 
         reg_format = '[ %s ] - %s'
+        special_format = '[ %s ]'
         response = str()
 
         if status and link_pass:
-            if useBitLy:
+            if useBitLy and input.sender not in simple_channels:
                 response = reg_format % (uc.decode(returned_title), bitly_link)
             else:
-                response = reg_format % (returned_title, getTLD(orig))
+                if input.sender in simple_channels:
+                    response = special_format % (returned_title)
+                else:
+                    response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
             if useBitLy:
                 response = '%s' % (bitly_link)
