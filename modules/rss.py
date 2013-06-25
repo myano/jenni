@@ -188,7 +188,7 @@ def read_feeds(jenni):
             conn.commit()
         else:
             if DEBUG:
-                jenni.msg(feed_channel, u"Skipping previously read entry: %s %s" % (site_name_effect, entry.title))
+                jenni.msg(jenni.config.logchan_pm, u"Skipping previously read entry for %s: %s %s" % (feed_channel, site_name_effect, entry.title))
     cursor_recent.close()
     c.close()
 
