@@ -73,6 +73,7 @@ def save_db(search_dict):
 
 # Create a temporary log of the most recent thing anyone says.
 def collectlines(jenni, input):
+    """Creates a temporary storage of most recent lines for s///"""
     # don't log things in PM
     channel = (input.sender).encode("utf-8")
     nick = (input.nick).encode("utf-8")
@@ -98,6 +99,7 @@ collectlines.rule = r'.*'
 collectlines.priority = 'low'
 
 def findandreplace(jenni, input):
+    """s/old text/new text/ -- allows you to replace text from something you previously said"""
     # don't bother in PM
     channel = (input.sender).encode("utf-8")
     nick = (input.nick).encode("utf-8")
