@@ -125,7 +125,7 @@ re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
 re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z ]+)\]</a></td></tr>')
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 re_zip = re.compile(r'^(\d{5})\-?(\d{4})?$')
-more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1}'
+more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1} -- You may also PM the bot to get the full list.'
 warning_list = 'http://alerts.weather.gov/cap/us.php?x=1'
 stop = False
 CHANNEL = '##weather'
@@ -250,7 +250,7 @@ def warns_control(jenni, input):
     if input.group(2) == 'start':
         stop = False
         jenni.reply('Starting...')
-        weather_feed(jenni, input)
+        weather_feed(jenni)
     elif input.group(2) == 'stop':
         stop = True
         jenni.reply('Stopping...')
@@ -259,7 +259,7 @@ warns_control.priority = 'high'
 warns_control.thread = True
 
 
-def weather_feed(jenni, input):
+def weather_feed(jenni):
     global stop
     conn = sqlite3.connect('nws.db')
     c = conn.cursor()

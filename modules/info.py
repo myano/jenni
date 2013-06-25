@@ -72,7 +72,7 @@ def stats(jenni, input):
 
     ignore = set(['f_note', 'startup', 'message', 'noteuri',
                   'say_it', 'collectlines', 'oh_baby', 'chat',
-                  'collect_links'])
+                  'collect_links', 'bb_collect'])
     for (name, user), count in jenni.stats.iteritems():
         if name in ignore:
             continue

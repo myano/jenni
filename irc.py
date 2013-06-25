@@ -133,6 +133,11 @@ class Bot(asynchat.async_chat):
         try: asyncore.loop()
         except KeyboardInterrupt:
             sys.exit()
+        except Exception, e:
+            f = open('UNKNOWN.txt', 'w')
+            f.write('%s\t%s' % (str(time.time()), str(e)))
+            f.close()
+            print '[asyncore]', e
 
     def handle_connect(self):
         if self.verbose:

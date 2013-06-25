@@ -30,6 +30,7 @@ class Jenni(irc.Bot):
         if hasattr(config, "logging"): logging = config.logging
         else: logging = False
         args = (config.nick, config.name, config.channels, config.password, lc_pm, logging)
+        ## next, try putting a try/except around the following line
         irc.Bot.__init__(self, *args)
         self.config = config
         self.doc = {}
@@ -231,7 +232,6 @@ class Jenni(irc.Bot):
                     fname = func.func_code.co_filename.split('/')[-1].split('.')[0]
                     if fname in self.excludes[input.sender]:
                         # block function call if channel is blacklisted
-                        print 'Blocked:', input.sender, func.name, func.func_code.co_filename
                         return
         except Exception, e:
             print "Error attempting to block:", str(func.name)
