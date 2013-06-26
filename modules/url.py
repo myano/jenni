@@ -39,6 +39,7 @@ IGNORE = list()
 bitly_loaded = False
 BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny']
 recent_links = dict()
+simple_channels = list()
 
 try:
     file = open('bitly.txt', 'r')
@@ -55,7 +56,6 @@ try:
     f = open('simple_channels.txt', 'r')
     channels = f.read()
     channels = channels.split(',')
-    simple_channels = list()
     for channel in channels:
         simple_channels.append(channel.strip())
     f.close()
@@ -127,7 +127,7 @@ def find_title(url):
             useful = json.loads(u)
             return True, useful
         except Exception, e:
-            print "%s -- Failed to parse json from web resource. -- %s" % (time.time(), str(e))
+            #print "%s -- Failed to parse json from web resource. -- %s" % (time.time(), str(e))
             return False, str(u)
 
     status = False
