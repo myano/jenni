@@ -605,6 +605,8 @@ uno.thread = False
 uno.rate = 0
 
 def unostop(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.stop(jenni, input)
 unostop.commands = ['unostop']
 unostop.priority = 'low'
@@ -612,6 +614,8 @@ unostop.thread = False
 unostop.rate = 0
 
 def join(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     if input.sender == CHANNEL:
         unobot.join(jenni, input)
 join.commands = ['ujoin']
@@ -621,6 +625,8 @@ join.thread = False
 join.rate = 0
 
 def deal(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.deal(jenni, input)
 deal.commands = ['deal']
 deal.priority = 'low'
@@ -628,6 +634,8 @@ deal.thread = False
 deal.rate = 0
 
 def play(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.play(jenni, input)
 play.commands = ['play', 'p']
 play.priority = 'low'
@@ -635,6 +643,8 @@ play.thread = False
 play.rate = 0
 
 def draw(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.draw(jenni, input)
 draw.commands = ['draw', 'd', 'dr']
 draw.priority = 'low'
@@ -642,6 +652,8 @@ draw.thread = False
 draw.rate = 0
 
 def passs(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.passs(jenni, input)
 passs.commands = ['pass', 'pa']
 passs.priority = 'low'
@@ -663,6 +675,8 @@ show_user_cards.thread = False
 show_user_cards.rate = 0
 
 def top_card(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.showTopCard_demand(jenni)
 top_card.commands = ['top']
 top_card.priority = 'low'
@@ -670,6 +684,8 @@ top_card.thread = False
 top_card.rate = 0
 
 def leave(jenni, input):
+    if not (input.sender).startswith('#'):
+        return
     unobot.leave(jenni, input)
 leave.commands = ['leave']
 leave.priority = 'low'
