@@ -21,6 +21,10 @@ def isup(jenni, input):
     site = input.group(2)
     if not site:
         return jenni.reply("What site do you want to check?")
+    if ' ' in site:
+        idx = site.find(' ')
+        site = site[:idx+1]
+    site = (site).strip()
 
     if site[:6] != 'http://' and site[:7] != 'https://':
         if '://' in site:
