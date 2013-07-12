@@ -12,6 +12,7 @@ watches, warnings, and advisories that are present.
 '''
 
 import copy
+import datetime
 import feedparser
 import re
 import sqlite3
@@ -72,6 +73,16 @@ states = {
         'west virginia': 'wv',
         'wisconsin': 'wi',
         'wyoming': 'wy',
+}
+
+months = {
+        'January': 1,
+        'February': 2,
+        'March': 3,
+        'April': 4,
+        'May': 5,
+        'June': 6,
+        'July': 7,
 }
 
 conditions = {
@@ -216,24 +227,38 @@ def nws_lookup(jenni, input):
             warnings_dict[colourize(unicode(item['title']))] = unicode(item['summary'])
 
     if len(warnings_dict) > 0:
+        ## if we have any alerts...
+        ## let us sort it so the most recent thing is first, then second, etc...
+        warn_keys = warnings_dict.keys()
+        find_issue = re.compile('issued (\S+) (\S+) at (\S+):(\S+)(\S)M')
+        warn_keys_dt = dict()
+        for warn in warn_keys:
+            warn_dt = find_issue.findall(warn)
+            if len(warn_dt) > 0:
+                warn_dt = warn_dt[0]
+                month = months[warn_dt[0]]
+                day = int(warn_dt[1])
+                hour = int(warn_dt[2])
+                minute = int(warn_dt[3])
+                if warn_dt[-1] == 'P':
+                    if hour < 12:
+                        hour += 12
+                year = datetime.datetime.now().year
+
+                hour -= 1
+                warn_keys_dt[warn] = datetime.datetime(year, month, day, hour, minute)
+
+        warn_list_dt = sorted(warn_keys_dt, key=warn_keys_dt.get, reverse=True)
+        print 'warn_list_dt', warn_list_dt
+
         if input.sender.startswith('#'):
-            ## if queried in a channel
-            i = 1
-            for key in warnings_dict:
-                if i > 1:
-                    break
+            ## if queried in channel
+            for key in warn_list_dt:
                 jenni.say(key)
-                response = textwrap.wrap(warnings_dict[key], 450)
-                resp_len = len(response)
-                q = 1
-                for resp in response:
-                    jenni.say('Part %s of %s: %s' % (str(q).zfill(2), str(resp_len).zfill(2), resp))
-                    q += 1
-                i += 1
             jenni.say(more_info.format(location, master_url))
         else:
             ## if queried in private message
-            for key in warnings_dict:
+            for key in warn_list_dt:
                 jenni.say(key)
                 jenni.say(warnings_dict[key])
             jenni.say(more_info.format(location, master_url))
