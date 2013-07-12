@@ -98,16 +98,17 @@ def find_title(url):
         a = uri.split('.')
         uri = a[0][:-1] + '.'.join(a[1:-1])
 
+    if 'zerobin.net' in uri:
+        return True, 'ZeroBin'
+
     uri = uc.decode(uri)
 
     ## proxy the lookup of the headers through .py
     def remote_call():
         pyurl = u'https://tumbolia.appspot.com/py/'
         code = 'import simplejson;'
-        code += 'import time; unique = str(time.time());'
-        code += "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
-        code += "req.add_header('User-Agent', 'Mozilla/5.0"
-        code += "');"
+        code += "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
+        code += "req.add_header('User-Agent', 'Mozilla/5.0');"
         code += "u=urllib2.urlopen(req);"
         code += "rtn=dict();"
         code += "rtn['headers'] = u.headers.dict;"
@@ -118,8 +119,8 @@ def find_title(url):
         code += "rtn['read'] = con;"
         code += "rtn['url'] = u.url;"
         code += "rtn['geturl'] = u.geturl();"
-        code += r"print simplejson.dumps(rtn)"
-        query = code % uri
+        code += "print simplejson.dumps(rtn)"
+        query = code % repr(uri)
         temp = web.quote(query)
         u = web.get(pyurl + temp)
 
@@ -170,7 +171,7 @@ def find_title(url):
     try:
         mtype = info['content-type']
     except:
-        print "failed mtype"
+        print 'failed mtype:', str(info)
         return False, 'mtype failed'
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return False, str(mtype)
@@ -344,6 +345,8 @@ def get_results(text, manual=False):
         domain = getTLD(url)
         if '//' in domain:
             domain = domain.split('//')[1]
+        if 'i.imgur.com' in url and url.startswith('http://'):
+            url = url.replace('http:', 'https:')
 
         bitly = url
 
@@ -392,6 +395,9 @@ def show_title_auto(jenni, input):
         bitly_link = r[2]
         link_pass = r[3]
 
+        if bitly_link != orig:
+            bitly_link = bitly_link.replace('http:', 'https:')
+
         if k > 3:
             break
         k += 1
@@ -411,7 +417,7 @@ def show_title_auto(jenni, input):
                 else:
                     response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
-            if useBitLy:
+            if useBitLy and bitly_link != orig:
                 response = '%s' % (bitly_link)
             else:
                 ## Fail silently, link can't be bitly'ed and no title was found
