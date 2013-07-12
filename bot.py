@@ -124,9 +124,9 @@ class Jenni(irc.Bot):
 
             if not hasattr(func, 'rate'):
                 if hasattr(func, 'commands'):
-                    func.rate = 5
+                    func.rate = 3
                 else:
-                    func.rate = 0
+                    func.rate = -1
 
             if hasattr(func, 'rule'):
                 if isinstance(func.rule, str):
