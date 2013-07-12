@@ -70,7 +70,7 @@ def chat(jenni, input):
                 jenni.msg(jenni.config.logchan_pm, beginning + response)
         else:
             jenni.reply(response)
-chat.rule = r'($nickname[:,]?\s)?(.*)'
+chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 
 if __name__ == '__main__':
     print __doc__.strip()
