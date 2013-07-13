@@ -501,7 +501,7 @@ def unbitly(jenni, input):
         jenni.say(u)
     else:
         jenni.say('Failed to obtain final destination.')
-unbitly.commands = ['unbitly', 'untiny']
+unbitly.commands = ['unbitly', 'untiny', 'longurl']
 unbitly.priority = 'low'
 unbitly.example = '.unbitly http://git.io/6fY4OQ'
 
