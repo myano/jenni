@@ -228,8 +228,21 @@ def f_time(self, origin, match, args):
         msg = time.strftime("%a, %d %b %Y %H:%M:%S " + str(TZ), timenow)
         self.msg(origin.sender, msg)
     elif tz and tz[0] in ('+', '-') and 4 <= len(tz) <= 6:
-        timenow = time.gmtime(time.time() + (int(tz[:3]) * 3600))
-        msg = time.strftime("%a, %d %b %Y %H:%M:%S " + str(tz), timenow)
+        import re
+        ## handle invalid inputs and typos
+        ## ie: "--12" or "++8.5"
+        find_tz = re.compile('(\+|-)([\.\d]+)')
+        new_tz = find_tz.findall(tz)
+        if new_tz and len(new_tz[0]) > 1:
+            sign = new_tz[0][0]
+            tz_found = new_tz[0][1]
+            tz_final = float(tz_found) * int(str(sign) + '1')
+        else:
+            return ValueError
+        timenow = time.gmtime(time.time() + (float(tz_final) * 3600))
+        if tz_final % 1 == 0.0:
+            tz_final = int(tz_final)
+        msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (str(sign), str(abs(tz_final))), timenow)
         self.msg(origin.sender, msg)
     else:
         try: t = float(tz)
@@ -248,7 +261,15 @@ def f_time(self, origin, match, args):
                 timenow = time.gmtime(time.time() + (t * 3600))
             except:
                 return self.reply('Time requested is too far away.')
-            msg = time.strftime("%a, %d %b %Y %H:%M:%S " + str(tz), timenow)
+            if t >= 0:
+                sign = '+'
+            elif t < 0:
+                sign = '-'
+            tz = tz[1:]
+            if tz % 1 == 0.0:
+                ## if tz is a whole number
+                tz = int(tz)
+            msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (sign, str(tz)), timenow)
             self.msg(origin.sender, msg)
 f_time.commands = ['t']
 f_time.name = 't'
