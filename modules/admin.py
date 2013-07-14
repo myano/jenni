@@ -150,7 +150,7 @@ def blocks(jenni, input):
         if text[2] == 'nick':
             nicks.append(text[3])
         elif text[2] == 'hostmask':
-            masks.append(text[3].lower())
+            masks.append(text[3])
         else:
             jenni.reply(STRINGS['invalid'] % ('adding'))
             return
