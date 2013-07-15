@@ -805,6 +805,7 @@ def uno_get_names(jenni, input):
     for x in names:
         if x not in away_list:
             new_list.append(x)
+    new_list.remove(jenni.config.nick)
     new_list.sort()
     final_string = ', '.join(new_list)
     if user_triggered:
