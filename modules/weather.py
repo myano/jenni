@@ -420,7 +420,7 @@ def fucking_weather(jenni, input):
     """.fw (ZIP|City, State) -- provide a ZIP code or a city state pair to hear about the fucking weather"""
     text = input.group(2)
     if not text:
-        jenni.reply("INVALID FUCKING INPUT. PLEASE ENTER A FUCKING ZIP CODE, OR A FUCKING CITY-STATE PAIR.")
+        jenni.reply('INVALID FUCKING INPUT. PLEASE ENTER A FUCKING ZIP CODE, OR A FUCKING CITY-STATE PAIR.')
         return
     new_text = str()
     for x in text:
@@ -429,28 +429,38 @@ def fucking_weather(jenni, input):
         else:
             new_text += x
     try:
-        page = web.get("http://thefuckingweather.com/?where=%s" % (new_text))
+        page = web.get('http://thefuckingweather.com/?where=%s' % (new_text))
     except:
         return jenni.say("I COULDN'T ACCESS THE FUCKING SITE.")
     re_mark = re.compile('<p class="remark">(.*?)</p>')
     re_temp = re.compile('<span class="temperature" tempf="\S+">(\S+)</span>')
     re_condition = re.compile('<p class="large specialCondition">(.*?)</p>')
+    re_flavor = re.compile('<p class="flavor">(.*?)</p>')
+    re_location = re.compile('<span id="locationDisplaySpan" class="small">(.*?)</span>')
     temps = re_temp.findall(page)
     remarks = re_mark.findall(page)
+    conditions = re_condition.findall(page)
+    flavor = re_flavor.findall(page)
+    location = re_location.findall(page)
     response = str()
+    if location and location[0]:
+        response += location[0] + ': '
     if temps:
-        response += temps[0] + u"°F?! "
+        tempf = int(temps[0])
+        tempc = (tempf - 32.0) * (5 / 9.0)
+        response += u'%s°F?! %.1f°C?! ' % (str(tempf), tempc)
     if remarks:
         response += remarks[0]
     else:
         response += "I CAN'T FIND THAT SHIT."
-    conditions = re_condition.findall(page)
     if conditions:
-        response += " " + conditions[0]
-    jenni.reply(response)
+        response += ' ' + conditions[0]
+    if flavor:
+        response += ' -- ' + flavor[0].replace('  ', ' ')
+    jenni.say(response)
 fucking_weather.commands = ['fucking_weather', 'fw']
 fucking_weather.priority = 'low'
-
+fucking_weather.rate = 5
 
 if __name__ == '__main__':
     print __doc__.strip()
