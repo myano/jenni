@@ -37,7 +37,7 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny']
+BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny', 'longurl']
 recent_links = dict()
 simple_channels = list()
 
@@ -256,8 +256,7 @@ def short(text):
         i = 0
         while i < k:
             b = uc.decode(a[i][0])
-            if not b.startswith('http://bit.ly') and \
-                    not b.startswith('http://j.mp/'):
+            if '/j.mp' not in b and '/bit.ly' not in b:
                 longer = urllib2.quote(b)
                 url = 'http://api.j.mp/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
@@ -409,7 +408,7 @@ def show_title_auto(jenni, input):
         response = str()
 
         if status and link_pass:
-            if useBitLy and input.sender not in simple_channels:
+            if useBitLy and input.sender not in simple_channels and bitly_link:
                 response = reg_format % (uc.decode(returned_title), bitly_link)
             else:
                 if input.sender in simple_channels:
@@ -486,12 +485,12 @@ def unbitly(jenni, input):
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
     pyurl = u'https://tumbolia.appspot.com/py/'
-    code = "req=urllib2.Request(u'%s', headers={'Accept':'text/html'});"
+    code = "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
     code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
     code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
     code += 'print u.geturl();'
     url = url.replace("'", r"\'")
-    query = code % url.strip()
+    query = code % repr(url.strip())
     try:
         temp = web.quote(query)
         u = web.get(pyurl + temp)
