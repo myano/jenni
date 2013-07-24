@@ -65,6 +65,8 @@ help.priority = 'low'
 
 def stats(jenni, input):
     """Show information on command usage patterns."""
+    if input.sender == '##uno':
+        return
     commands = dict()
     users = dict()
     channels = dict()
