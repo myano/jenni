@@ -176,6 +176,9 @@ def read_feeds(jenni):
             except:
                 short_url = article_url
 
+            if 'j.mp' in short_url or 'bit.ly' in short_url:
+                short_url = short_url.replace('http:', 'https:')
+
             response = site_name_effect + " %s \x02%s\x02" % (entry.title, short_url)
             if entry.updated:
                 response += " - %s" % (entry.updated)
