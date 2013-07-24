@@ -49,7 +49,7 @@ INACTIVE_TIMEOUT = 3
 
 STRINGS = {
     'ALREADY_STARTED': '\x0300,01Game already started by %s! Type ".ujoin" to join!',
-    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type "ujoin" to join!',
+    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type ".ujoin" to join!',
     'GAME_STOPPED': '\x0300,01Game stopped.',
     'CANT_STOP': '\x0300,01%s is the game owner, you can\'t stop it! To force stop the game, please wait %s seconds.',
     'DEALING_IN': '\x0300,01Dealing %s into the game as player #%s!',
