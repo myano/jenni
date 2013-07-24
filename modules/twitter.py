@@ -10,6 +10,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+from modules import unicode as uc
 import re, time
 import web
 
@@ -21,6 +22,7 @@ r_anchor = re.compile(r'(?ims)(<a.*?</a>)')
 r_expanded = re.compile(r'(?ims)data-expanded-url=["\'](.*?)["\']')
 r_whiteline = re.compile(r'(?ims)[ \t]+[\r\n]+')
 r_breaks = re.compile(r'(?ims)[\r\n]+')
+r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 
 def entity(*args, **kargs):
     return web.entity(*args, **kargs).encode('utf-8')
@@ -36,6 +38,23 @@ def expand(tweet):
         return r_tag.sub('', anchor)
     return r_anchor.sub(replacement, tweet)
 
+def e(m):
+    entity = m.group()
+    if entity.startswith('&#x'):
+        cp = int(entity[3:-1], 16)
+        meep = unichr(cp)
+    elif entity.startswith('&#'):
+        cp = int(entity[2:-1])
+        meep = unichr(cp)
+    else:
+        char = name2codepoint[entity[1:-1]]
+        meep = unichr(char)
+    try:
+        return uc.decode(meep)
+    except:
+        return uc.decode(uc.encode(meep))
+
+
 def read_tweet(url):
     bytes = web.get(url)
     shim = '<div class="content clearfix">'
@@ -46,6 +65,7 @@ def read_tweet(url):
         text = expand(text)
         text = r_tag.sub('', text)
         text = text.strip()
+        text = r_entity.sub(e, text)
         text = r_whiteline.sub(' ', text)
         text = r_breaks.sub(' ', text)
         return decode(text)
