@@ -16,6 +16,8 @@ from modules import unicode as uc
 def addquote(jenni, input):
     '''.addquote <nick> something they said here -- adds the quote to the quote database.'''
     text = input.group(2)
+    if not text:
+        return jenni.say('No quote provided')
     fn = open('quotes.txt', 'a')
     output = uc.encode(text)
     fn.write(output)
