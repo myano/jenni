@@ -10,9 +10,12 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-from modules import unicode as uc
-import re, time
+from htmlentitydefs import name2codepoint
+import re
+import time
 import web
+
+from modules import unicode as uc
 
 r_username = re.compile(r'^[a-zA-Z0-9_]{1,15}$')
 r_link = re.compile(r'^https?://twitter.com/\S+$')
