@@ -60,7 +60,7 @@ def ip_lookup(jenni, input):
         if 'zip' in results:
             response += '%s ZIP: %s' % (spacing, results['zip'])
         response += '%s Latitude: %s' % (spacing, results['latitude'])
-        response += '%s Longitutde: %s' % (spacing, results['longitude'])
+        response += '%s Longitude: %s' % (spacing, results['longitude'])
     jenni.reply(response)
 ip_lookup.commands = ['ip', 'iplookup', 'host']
 ip_lookup.example = ".iplookup 8.8.8.8"
