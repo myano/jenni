@@ -256,7 +256,8 @@ def short(text):
         i = 0
         while i < k:
             b = uc.decode(a[i][0])
-            if '/j.mp' not in b and '/bit.ly' not in b:
+            ## make sure that it is not already a bitly shortened link
+            if '/j.mp' not in b and '/bit.ly' not in b and '/bitly.com' not in b:
                 longer = urllib2.quote(b)
                 url = 'http://api.j.mp/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
