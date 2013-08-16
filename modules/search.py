@@ -15,11 +15,23 @@ import re
 import web
 import json
 
+r_tag = re.compile(r'<(?!!)[^>]+>')
+
+
+def remove_spaces(x):
+    if '  ' in x:
+        x = x.replace('  ', ' ')
+        return remove_spaces(x)
+    else:
+        return x
+
+
 class Grab(web.urllib.URLopener):
     def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:10.0) Gecko/20100101 Firefox/10.0'
+        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0'
         web.urllib.URLopener.__init__(self, *args)
         self.addheader('Referer', 'https://github.com/myano/jenni')
+        self.addheader('Accept', '*/*')
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         return web.urllib.addinfourl(fp, [headers, errcode], "http:" + url)
 
@@ -150,12 +162,29 @@ def duck_search(query):
     query = web.urllib.quote(query)
     uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % query
     bytes = web.get(uri)
-    m = r_duck.search(bytes)
-    if m: return web.decode(m.group(1))
+    m = r_duck.findall(bytes)
+    if m:
+        for result in m:
+            if '/y.js?' not in result and '//ad.ddg.gg/' not in result:
+                output = result
+                break
+    else:
+        try:
+            from BeautifulSoup import BeautifulSoup
+            soup = BeautifulSoup(bytes)
+            zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+            output = r_tag.sub('', zero_click).strip()
+            output = output.replace('\n', '').replace('  ', ' ').replace('\t', '')
+            output = remove_spaces(output)
+            print 'output:', list(output)
+        except Exception, e:
+            print 'fuck:', e
+            output = 'No results found3.'
+    return web.decode((output).decode('utf-8'))
 
 def duck_api(query):
     uri = web.urllib.quote(query)
-    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1'%query
+    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1' % query
     results = json.loads(web.get(uri))
     if results['Redirect']:
         return results['Redirect']
@@ -169,6 +198,7 @@ def duck(jenni, input):
     query = query.encode('utf-8')
 
     result = duck_api(query)
+
     if result:
         jenni.reply(result)
         return
@@ -177,7 +207,7 @@ def duck(jenni, input):
     if uri:
         jenni.reply(uri)
         if not hasattr(jenni.bot, 'last_seen_uri'):
-            jenni.bot.last_seen_uri = {}
+            jenni.bot.last_seen_uri = dict()
         jenni.bot.last_seen_uri[input.sender] = uri
     else: jenni.reply("No results found for '%s'." % query)
 duck.commands = ['duck', 'ddg']
