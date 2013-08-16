@@ -83,6 +83,11 @@ months = {
         'May': 5,
         'June': 6,
         'July': 7,
+        'August': 8,
+        'September': 9,
+        'October': 10,
+        'November': 11,
+        'December': 12,
 }
 
 conditions = {
@@ -249,7 +254,7 @@ def nws_lookup(jenni, input):
                 warn_keys_dt[warn] = datetime.datetime(year, month, day, hour, minute)
 
         warn_list_dt = sorted(warn_keys_dt, key=warn_keys_dt.get, reverse=True)
-        print 'warn_list_dt', warn_list_dt
+        #print 'warn_list_dt', warn_list_dt
 
         if input.sender.startswith('#'):
             ## if queried in channel
