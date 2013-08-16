@@ -6,8 +6,11 @@ Installation &c.
 
 Enjoy!
 
+Optional:
+
 4. Run '**pip install feedparser**' to allow the optional rss.py and nws.py modules to work.
 5. Run '**pip install lxml**' to allow xkcd.py to work.
+6. Run '**pip install BeautifulSoup**' to allow better output from DuckDuckGo in search.py.
 
 For a list of contributions to the jenni fork see the file CREDITS.
 
