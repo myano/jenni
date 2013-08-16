@@ -266,7 +266,7 @@ def f_time(self, origin, match, args):
             elif t < 0:
                 sign = '-'
             tz = tz[1:]
-            if tz % 1 == 0.0:
+            if int(tz) % 1 == 0.0:
                 ## if tz is a whole number
                 tz = int(tz)
             msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (sign, str(tz)), timenow)
