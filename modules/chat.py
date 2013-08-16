@@ -44,7 +44,10 @@ def chat(jenni, input):
     if channel.startswith('#') and txt[0]:
         ## in a channel and prepended with jenni's name
         pm = False
-        msgo = mycb.Ask(msgi)
+        try:
+            msgo = mycb.Ask(msgi)
+        except Exception, e:
+            return
     elif not channel.startswith('#'):
         ## in a PM and not prepended with jenni's name
         pm = True
@@ -55,13 +58,15 @@ def chat(jenni, input):
             for x in nowords:
                 if spt.startswith(x):
                     return
-        msgo = mycb.Ask(msgi)
+        try:
+            msgo = mycb.Ask(msgi)
+        except:
+            return
     else:
-        ## anything else
         return
     if msgo:
-        rand_num = random.randint(0, 10)
-        time.sleep(3 + rand_num)
+        rand_num = random.randint(0, 20)
+        time.sleep(5 + rand_num)
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
         if pm:
             jenni.say(response)
@@ -69,7 +74,9 @@ def chat(jenni, input):
             if hasattr(jenni.config, 'logchan_pm'):
                 jenni.msg(jenni.config.logchan_pm, beginning + response)
         else:
-            jenni.reply(response)
+            delim = random.choice((',', ':'))
+            msg = '%s%s %s' % (input.nick, delim, response)
+            jenni.say(msg)
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 
 if __name__ == '__main__':
