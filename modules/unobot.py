@@ -273,7 +273,7 @@ class UnoBot:
         self.rankings("ppg")
         i = 1
         for z in self.prescores[:10]:
-            jenni.msg(nickk, 'ppg: ' + STRINGS['SCORE_ROW'] % (i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
+            jenni.msg(nickk, STRINGS['SCORE_ROW'] % ('ppg', i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
             i += 1
 
     def createnewdeck(self):
