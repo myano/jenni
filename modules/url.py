@@ -394,7 +394,7 @@ def show_title_auto(jenni, input):
         bitly_link = r[2]
         link_pass = r[3]
 
-        if bitly_link != orig:
+        if orig and bitly_link and bitly_link != orig and ('bit.ly' in bitly_link or 'j.mp' in bitly_link):
             bitly_link = bitly_link.replace('http:', 'https:')
 
         if k > 3:
