@@ -67,6 +67,7 @@ url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
+HTML_ENTITIES = { 'apos': "'" }
 
 
 def noteuri(jenni, input):
@@ -203,8 +204,15 @@ def find_title(url):
             cp = int(entity[2:-1])
             meep = unichr(cp)
         else:
-            char = name2codepoint[entity[1:-1]]
-            meep = unichr(char)
+            entity_stripped = entity[1:-1]
+            try:
+                char = name2codepoint[entity_stripped]
+                meep = unichr(char)
+            except:
+                if entity_stripped in HTML_ENTITIES:
+                    meep = HTML_ENTITIES[entity_stripped]
+                else:
+                    meep = str()
         try:
             return uc.decode(meep)
         except:
@@ -483,6 +491,8 @@ def add_links(link, incoming=False):
 
 def unbitly(jenni, input):
     url = input.group(2)
+    if not url:
+        return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
     pyurl = u'https://tumbolia.appspot.com/py/'
