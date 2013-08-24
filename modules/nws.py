@@ -187,7 +187,7 @@ def nws_lookup(jenni, input):
             prev1 = line
         if not url_part2:
             return jenni.reply('Could not find county.')
-        master_url = 'https://alerts.weather.gov/cap/' + url_part2
+        master_url = 'http://alerts.weather.gov/cap/' + url_part2
         location = text
     elif len(bits) == 1:
         ## zip code
