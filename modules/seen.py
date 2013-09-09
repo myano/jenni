@@ -16,8 +16,8 @@ from tools import deprecated
 @deprecated
 def f_seen(self, origin, match, args):
     """.seen <nick> - Reports when <nick> was last seen."""
-    if origin.sender == '#talis': return
-    if not match.group(2): return
+    if not match.group(2):
+        return self.msg(origin.sender, 'Please provide a nick.')
     nick = match.group(2).lower()
     if not hasattr(self, 'seen'):
         return self.msg(origin.sender, '?')
@@ -25,11 +25,12 @@ def f_seen(self, origin, match, args):
         channel, t = self.seen[nick]
         t = time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(t))
 
-        msg = "I last saw %s at %s on %s" % (nick, t, channel)
+        #msg = "I last saw %s at %s on %s" % (nick, t, channel)
+        msg = 'I last saw %s at %s in some channel.' % (nick, t)
         self.msg(origin.sender, str(origin.nick) + ': ' + msg)
     else: self.msg(origin.sender, "Sorry, I haven't seen %s around." % nick)
 f_seen.rule = (['seen'], r'(\S+)')
-f_seen.rate = 45
+f_seen.rate = 15
 
 @deprecated
 def f_note(self, origin, match, args):
