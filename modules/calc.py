@@ -95,6 +95,11 @@ def wa(jenni, input):
             char = unichr(int(char_code, 16))
             answer = answer.replace('\:' + char_code, char)
         waOutputArray = string.split(answer, ";")
+        newOutput = list()
+        for each in waOutputArray:
+            temp = each.replace('\/', '/')
+            newOutput.append(temp)
+        waOutputArray = newOutput
         if (len(waOutputArray) < 2):
             jenni.reply(answer)
         else:
