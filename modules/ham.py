@@ -163,6 +163,7 @@ def cw(jenni, input):
                 output += " "
                 code = code.replace(" ", "")
             output += reverse_lookup(code)
+        output = output.replace('  ', ' ')
         output = output.upper()
     else:
         ## TEXT
@@ -172,8 +173,13 @@ def cw(jenni, input):
             except KeyError:
                 output = "Non morse code character used."
                 break
+            '''
             if char != " ":
                 output += " "
+            elif char == " ":
+                output += " "
+            '''
+            output += " "
     jenni.reply(output)
 cw.commands = ['cw']
 cw.thread = True
