@@ -38,7 +38,6 @@ IGNORE = list()
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
 BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny', 'longurl']
-recent_links = dict()
 simple_channels = list()
 
 try:
@@ -72,9 +71,9 @@ HTML_ENTITIES = { 'apos': "'" }
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
-    if not hasattr(jenni.bot, 'last_seen_uri'):
-        jenni.bot.last_seen_uri = {}
-    jenni.bot.last_seen_uri[input.sender] = uri
+    if not hasattr(jenni, 'last_seen_uri'):
+        jenni.last_seen_uri = {}
+    jenni.last_seen_uri[input.sender] = uri
 noteuri.rule = r'(?u).*(http[s]?://[^<> "\x01]+)[,.]?'
 noteuri.priority = 'low'
 
@@ -108,7 +107,7 @@ def find_title(url):
     def remote_call():
         pyurl = u'https://tumbolia.appspot.com/py/'
         code = 'import simplejson;'
-        code += "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
+        code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
         code += "req.add_header('User-Agent', 'Mozilla/5.0');"
         code += "u=urllib2.urlopen(req);"
         code += "rtn=dict();"
@@ -440,10 +439,11 @@ show_title_auto.priority = 'high'
 def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
     uri = input.group(2)
+
     if not uri:
         channel = (input.sender).lower()
-        if channel in recent_links:
-            uri = recent_links[channel][-1]
+        if channel in jenni.last_seen_uri:
+            uri = jenni.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
 
@@ -468,31 +468,22 @@ show_title_demand.priority = 'high'
 
 
 def collect_links(jenni, input):
-    add_links(input)
+    link = input.groups()
+    channel = input.sender
+    link = link[0]
+    jenni.last_seen_uri[channel] = link
 collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 collect_links.priority = 'low'
-
-
-def add_links(link, incoming=False):
-    global recent_links
-    if not incoming:
-        ## assume incoming is 'input'
-        incoming = link
-    channel = (incoming.sender).lower()
-
-    if channel not in recent_links:
-        recent_links[channel] = list()
-
-    recent_links[channel].append(link)
-
-    if len(recent_links[channel]) > 1:
-        recent_links[channel] = recent_links[channel][-1:]
 
 
 def unbitly(jenni, input):
     url = input.group(2)
     if not url:
-        return jenni.say('No URL provided')
+        #return jenni.say('No URL provided')
+        if input.sender in jenni.last_seen_uri:
+            url = jenni.last_seen_uri[input.sender]
+        else:
+            return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
     pyurl = u'https://tumbolia.appspot.com/py/'
