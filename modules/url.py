@@ -91,7 +91,7 @@ def find_title(url):
     if not re.search('^((https?)|(ftp))://', uri):
         uri = 'http://' + uri
 
-    if 'twitter.com' in uri:
+    if 'twitter.com' in uri or 'google.com' in uri:
         uri = uri.replace('#!', '?_escaped_fragment_=')
 
     if 'i.imgur' in uri:
@@ -405,6 +405,9 @@ def show_title_auto(jenni, input):
         if orig and bitly_link and bitly_link != orig and ('bit.ly' in bitly_link or 'j.mp' in bitly_link):
             bitly_link = bitly_link.replace('http:', 'https:')
 
+        if returned_title == 'imgur: the simple image sharer':
+            return
+
         if k > 3:
             break
         k += 1
@@ -439,6 +442,9 @@ show_title_auto.priority = 'high'
 def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
     uri = input.group(2)
+
+    if 'http' not in uri:
+        uri = 'http://' + uri
 
     if not uri:
         channel = (input.sender).lower()
