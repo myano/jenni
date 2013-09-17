@@ -11,9 +11,10 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import re
-import web
 import json
+import re
+import urllib
+import web
 
 r_tag = re.compile(r'<(?!!)[^>]+>')
 
@@ -79,9 +80,9 @@ def g(jenni, input):
     uri = google_search(query)
     if uri:
         jenni.reply(uri)
-        if not hasattr(jenni.bot, 'last_seen_uri'):
-            jenni.bot.last_seen_uri = {}
-        jenni.bot.last_seen_uri[input.sender] = uri
+        if not hasattr(jenni, 'last_seen_uri'):
+            jenni.last_seen_uri = {}
+        jenni.last_seen_uri[input.sender] = uri
     elif uri is False: jenni.reply("Problem getting data from Google.")
     else: jenni.reply("No results found for '%s'." % query)
 g.commands = ['g']
@@ -148,68 +149,152 @@ def bing(jenni, input):
     uri = bing_search(query, lang)
     if uri:
         jenni.reply(uri)
-        if not hasattr(jenni.bot, 'last_seen_uri'):
-            jenni.bot.last_seen_uri = {}
-        jenni.bot.last_seen_uri[input.sender] = uri
+        if not hasattr(jenni, 'last_seen_uri'):
+            jenni.last_seen_uri = {}
+        jenni.last_seen_uri[input.sender] = uri
     else: jenni.reply("No results found for '%s'." % query)
 bing.commands = ['bing']
 bing.example = '.bing swhack'
 
-r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
+
+def duck_sanitize(incoming):
+    return web.decode((incoming).decode('utf-8'))
+
+
+def duck_zero_click_scrape(html):
+    '''Scrape DDG HTML page for Zero-Click'''
+    try:
+        ## prefer to use BeautifulSoup
+        from BeautifulSoup import BeautifulSoup
+    except:
+        ## if BS is not available, just fail out here
+        return str()
+
+    soup = BeautifulSoup(html)
+    zero_click = str()
+    if soup('div', {'class': 'zero-click-result'}):
+        zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+    output = r_tag.sub('', zero_click).strip()
+    output = output.replace('\n', '').replace('\t', '')
+    output = remove_spaces(output)
+    return output
+
 
 def duck_search(query):
-    query = query.replace('!', '')
-    query = web.urllib.quote(query)
-    uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % query
-    bytes = web.get(uri)
-    m = r_duck.findall(bytes)
-    if m:
-        for result in m:
-            if '/y.js?' not in result and '//ad.ddg.gg/' not in result:
-                output = result
-                break
+    '''Do a DuckDuckGo Search'''
+
+    ## grab results from the API for the query
+    duck_api_results = duck_api(query)
+
+    ## output is a string of the URL result
+
+    ## try to find the first result
+    if 'Results' in duck_api_results and min_size('Results', duck_api_results):
+        ## 'Results' is the most common place to look for the first result
+        output = duck_api_results['Results'][0]['FirstURL']
+    elif 'AbstractURL' in duck_api_results and min_size('AbstractURL', duck_api_results):
+        ## if there is no 'result', let's try AbstractURL
+        ## this is usually a wikipedia article
+        output = duck_api_results['AbstractURL']
+    elif 'RelatedTopics' in duck_api_results and min_size('RelatedTopics', duck_api_results):
+        ## if we still can't find a search result, let's grab a topic URL
+        ## this is usually vaguely related to the search query
+        ## many times this is a wikipedia result
+        for topic in duck_api_results['RelatedTopics']:
+            output = '%s - %s' % (topic['Name'], topic['Topics'][0]['FirstURL'])
+            if 'duckduckgo.com' in output:
+                ## as a last resort, DuckDuckGo will provide links to the query on its site
+                ## it doesn't appear to ever return a https URL
+                output = output.replace('http://', 'https://')
+            break
     else:
-        try:
-            from BeautifulSoup import BeautifulSoup
-            soup = BeautifulSoup(bytes)
-            zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
-            output = r_tag.sub('', zero_click).strip()
-            output = output.replace('\n', '').replace('  ', ' ').replace('\t', '')
-            output = remove_spaces(output)
-            print 'output:', list(output)
-        except Exception, e:
-            print 'fuck:', e
-            output = 'No results found3.'
-    return web.decode((output).decode('utf-8'))
+        ## if we still can't find a search result via the API
+        ## let's try scraping the html page
+        uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % web.urllib.quote(query)
+        page = web.get(uri)
+        r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
+        m = r_duck.findall(page)
+        output = str()
+        if m:
+            for result in m:
+                if '/y.js?' not in result and '//ad.ddg.gg/' not in result:
+                    ## ignore ads
+                    output = result
+                    break
+        else:
+            ## if we absolustely can't find a URL, let's try scraping the HTML
+            ## page for a zero_click info
+            output = duck_zero_click_scrape(page)
+    return duck_sanitize(output)
+
+def min_size(key, dictt):
+    ## I am lazy
+    return len(dictt[key]) > 0
 
 def duck_api(query):
-    uri = web.urllib.quote(query)
-    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1' % query
+    '''Send 'query' to DDG's API and return results as a dictionary'''
+    query = web.urllib.quote(query)
+    uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1&kp=-1' % query
+    results = web.get(uri)
     results = json.loads(web.get(uri))
-    if results['Redirect']:
-        return results['Redirect']
-    else:
+    return results
+
+def duck_zero_click_api(query):
+    output = list()
+    header = 'Zero Click: '
+    results = duck_api(query)
+    ## look for any possible Zero Click answers
+    if 'Redirect' in results and min_size('Redirect', results):
+        ## this is used when it is a !bang
+        output.append(header + results['Redirect'].strip())
+    if 'AbstractText' in results and min_size('AbstractText', results):
+        ## topic summary (with no HTML)
+        output.append(header + results['AbstractText'].strip())
+    if 'Answer' in results and min_size('Answer', results):
+        output.append(header + results['Answer'].strip())
+    if not output:
+        ## if we can't find anything in the API for Zero-Click
+        ## give up
         return None
 
+    return output
+
 def duck(jenni, input):
+    '''Perform a DuckDuckGo Search and Zero-Click lookup'''
     query = input.group(2)
-    if not query: return jenni.reply('.ddg what?')
+    if not query:
+        return jenni.reply('.ddg what?')
 
     query = query.encode('utf-8')
 
-    result = duck_api(query)
-
-    if result:
-        jenni.reply(result)
-        return
-
+    ## try to find a search result via the API
     uri = duck_search(query)
     if uri:
-        jenni.reply(uri)
-        if not hasattr(jenni.bot, 'last_seen_uri'):
-            jenni.bot.last_seen_uri = dict()
-        jenni.bot.last_seen_uri[input.sender] = uri
-    else: jenni.reply("No results found for '%s'." % query)
+        jenni.say(uri)
+        if not hasattr(jenni, 'last_seen_uri'):
+            jenni.last_seen_uri = dict()
+        jenni.last_seen_uri[input.sender] = uri
+
+    ## try to find any Zero-Click stuff
+    result = duck_zero_click_api(query)
+
+    ## loop through zero-click results
+    if result and len(result) >= 1:
+        k = 0
+        for each in result:
+            if len(each) > 0:
+                jenni.say(remove_spaces(each))
+                k += 1
+                if k > 3:
+                    ## only show 3 zero-click results
+                    ## we don't want to be too spammy
+                    break
+
+    ## if we didn't get a search result
+    ## nor did we get a Zero-Click result
+    ## fail
+    if not uri and (not result or not len(result) >= 1):
+        return jenni.reply("No results found for '%s'." % query)
 duck.commands = ['duck', 'ddg']
 
 def search(jenni, input):
