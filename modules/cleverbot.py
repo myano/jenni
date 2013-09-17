@@ -58,7 +58,7 @@ class Session(object):
 
     def Send(self):
         data = encode(self.keylist, self.arglist)
-        digest_txt = data[9:29]
+        digest_txt = data[9:35]
         new_hash = hashlib.md5(digest_txt).hexdigest()
         self.arglist[self.keylist.index('icognocheck')] = new_hash
         data = encode(self.keylist, self.arglist)

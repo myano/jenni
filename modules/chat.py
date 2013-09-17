@@ -46,7 +46,7 @@ def chat(jenni, input):
         pm = False
         try:
             msgo = mycb.Ask(msgi)
-        except Exception, e:
+        except:
             return
     elif not channel.startswith('#'):
         ## in a PM and not prepended with jenni's name
