@@ -85,8 +85,12 @@ def manage_rss(jenni, input):
         jenni.reply("Successfully removed values from database.")
     elif len(text) >= 4 and text[1] == 'del':
         # .rss del ##channel Site_Name
+        site_name = ' '.join(text[3:])
+        temp = input.group().split('"')
+        if len(temp) != 1:
+            site_name = temp[1]
         c.execute("DELETE FROM rss WHERE channel = ? and site_name = ?",
-                (channel, " ".join(text[3:]),))
+                (channel, site_name))
         conn.commit()
         c.close()
         jenni.reply("Successfully removed the site from the given channel.")
