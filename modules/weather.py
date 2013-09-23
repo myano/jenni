@@ -294,13 +294,21 @@ def f_weather(self, origin, match, args):
 
     if temp:
         if '/' in temp:
-            temp = temp.split('/')[0]
+            t = temp.split('/')
+            temp = t[0]
+            dew = t[1]
         else: temp = temp.split('.')[0]
         if temp.startswith('M'):
             temp = '-' + temp[1:]
-        try: temp = int(temp)
-        except ValueError: temp = '?'
-    else: temp = '?'
+        try:
+            temp = int(temp)
+            dew = int(dew)
+        except ValueError:
+            temp = '?'
+            dew = '?'
+    else:
+        temp = '?'
+        dew = '?'
 
     if pressure:
         if pressure.startswith('Q'):
@@ -319,9 +327,15 @@ def f_weather(self, origin, match, args):
             if isinstance(temp, int):
                 f = round((temp * 1.8) + 32, 2)
                 temp = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, temp)
+            if isinstance(dew, int):
+                f = round((dew * 1.8) + 32, 2)
+                dew = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, dew)
     else: pressure = '?mb'
+
     if isinstance(temp, int):
         temp = u'%s\u00B0C'.encode('utf-8') % temp
+    if isinstance(dew, int):
+        dew = u'%s\u00B0C'.encode('utf-8') % dew
 
     if cond:
         conds = cond
@@ -406,11 +420,11 @@ def f_weather(self, origin, match, args):
     #     args = (icao, time, cover, temp, pressure, cond, wind)
 
     if not cond:
-        format = u'%s, %s, %s, %s - %s %s'
-        args = (cover, temp, pressure, wind, str(icao_code), time)
+        format = 'Cover: %s, Temp: %s, Dew Point: %s, Pressure: %s, Wind: %s - %s %s'
+        args = (cover, temp, dew, pressure, wind, str(icao_code), time)
     else:
-        format = u'%s, %s, %s, %s, %s - %s, %s'
-        args = (cover, temp, pressure, cond, wind, str(icao_code), time)
+        format = 'Cover: %s, Temp: %s, Dew Point: %s, Pressure: %s, Condition: %s, Wind: %s - %s, %s'
+        args = (cover, temp, dew, pressure, cond, wind, str(icao_code), time)
 
     self.msg(origin.sender, format.encode('utf-8') % args)
 f_weather.rule = (['weather', 'wx'], r'(.*)')
@@ -429,7 +443,7 @@ def fucking_weather(jenni, input):
         else:
             new_text += x
     try:
-        page = web.get('http://thefuckingweather.com/?where=%s' % (new_text))
+        page = web.get('http://thefuckingweather.com/?where=%s' % (web.quote(new_text)))
     except:
         return jenni.say("I COULDN'T ACCESS THE FUCKING SITE.")
     re_mark = re.compile('<p class="remark">(.*?)</p>')
