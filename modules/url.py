@@ -37,7 +37,7 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['title', 'bitly', 'isup', 'py', 'unbitly', 'untiny', 'longurl']
+BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'unbitly', 'untiny',]
 simple_channels = list()
 
 try:
@@ -72,8 +72,8 @@ HTML_ENTITIES = { 'apos': "'" }
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
     if not hasattr(jenni, 'last_seen_uri'):
-        jenni.last_seen_uri = {}
-    jenni.last_seen_uri[input.sender] = uri
+        jenni.bot.last_seen_uri = {}
+    jenni.bot.last_seen_uri[input.sender] = uri
 noteuri.rule = r'(?u).*(http[s]?://[^<> "\x01]+)[,.]?'
 noteuri.priority = 'low'
 
@@ -443,13 +443,15 @@ def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
     uri = input.group(2)
 
-    if 'http' not in uri:
+    if uri and 'http' not in uri:
         uri = 'http://' + uri
 
     if not uri:
-        channel = (input.sender).lower()
-        if channel in jenni.last_seen_uri:
-            uri = jenni.last_seen_uri[channel]
+        channel = input.sender
+        if not hasattr(jenni, 'last_seen_uri'):
+            jenni.bot.last_seen_uri = dict()
+        if channel in jenni.bot.last_seen_uri:
+            uri = jenni.bot.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
 
@@ -477,7 +479,9 @@ def collect_links(jenni, input):
     link = input.groups()
     channel = input.sender
     link = link[0]
-    jenni.last_seen_uri[channel] = link
+    if not hasattr(jenni, 'last_seen_uri'):
+        jenni.bot.last_seen_uri = dict()
+    jenni.bot.last_seen_uri[channel] = link
 collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 collect_links.priority = 'low'
 
@@ -486,8 +490,8 @@ def unbitly(jenni, input):
     url = input.group(2)
     if not url:
         #return jenni.say('No URL provided')
-        if input.sender in jenni.last_seen_uri:
-            url = jenni.last_seen_uri[input.sender]
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
+            url = jenni.bot.last_seen_uri[input.sender]
         else:
             return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):

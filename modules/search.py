@@ -81,8 +81,8 @@ def g(jenni, input):
     if uri:
         jenni.reply(uri)
         if not hasattr(jenni, 'last_seen_uri'):
-            jenni.last_seen_uri = {}
-        jenni.last_seen_uri[input.sender] = uri
+            jenni.bot.last_seen_uri = {}
+        jenni.bot.last_seen_uri[input.sender] = uri
     elif uri is False: jenni.reply("Problem getting data from Google.")
     else: jenni.reply("No results found for '%s'." % query)
 g.commands = ['g']
@@ -150,8 +150,8 @@ def bing(jenni, input):
     if uri:
         jenni.reply(uri)
         if not hasattr(jenni, 'last_seen_uri'):
-            jenni.last_seen_uri = {}
-        jenni.last_seen_uri[input.sender] = uri
+            jenni.bot.last_seen_uri = {}
+        jenni.bot.last_seen_uri[input.sender] = uri
     else: jenni.reply("No results found for '%s'." % query)
 bing.commands = ['bing']
 bing.example = '.bing swhack'
@@ -246,7 +246,7 @@ def duck_zero_click_api(query):
     ## look for any possible Zero Click answers
     if 'Redirect' in results and min_size('Redirect', results):
         ## this is used when it is a !bang
-        output.append(header + results['Redirect'].strip())
+        output.append(results['Redirect'].strip())
     if 'AbstractText' in results and min_size('AbstractText', results):
         ## topic summary (with no HTML)
         output.append(header + results['AbstractText'].strip())
@@ -272,8 +272,8 @@ def duck(jenni, input):
     if uri:
         jenni.say(uri)
         if not hasattr(jenni, 'last_seen_uri'):
-            jenni.last_seen_uri = dict()
-        jenni.last_seen_uri[input.sender] = uri
+            jenni.bot.last_seen_uri = dict()
+        jenni.bot.last_seen_uri[input.sender] = uri
 
     ## try to find any Zero-Click stuff
     result = duck_zero_click_api(query)
