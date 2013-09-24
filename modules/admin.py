@@ -15,12 +15,21 @@ def join(jenni, input):
     '''Join the specified channel. This is an admin-only command.'''
     # Can only be done in privmsg by an admin
     if input.sender.startswith('#'): return
+    incoming = input.group(2)
+    inc = incoming.split(' ')
+    if len(inc) > 2:
+        ## 3 or more inputs
+        return jenni.say('Too many inputs.')
     if input.owner:
-        channel, key = input.group(1), input.group(2)
+        channel = inc[0]
+        key = str()
+        if len(inc) > 1:
+            ## 2 inputs
+            key = inc[1]
         if not key:
             jenni.write(['JOIN'], channel)
         else: jenni.write(['JOIN', channel, key])
-join.rule = r'\.join (#\S+)(?: *(\S+))?'
+join.commands = ['join']
 join.priority = 'low'
 join.example = '.join #example or .join #example key'
 
