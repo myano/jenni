@@ -105,7 +105,7 @@ def find_title(url):
 
     ## proxy the lookup of the headers through .py
     def remote_call():
-        pyurl = u'https://tumbolia.appspot.com/py/'
+        pyurl = u'http://tumbolia.appspot.com/py/'
         code = 'import simplejson;'
         code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
         code += "req.add_header('User-Agent', 'Mozilla/5.0');"
@@ -156,7 +156,7 @@ def find_title(url):
 
         k += 1
 
-        if k >= 5:
+        if k >= 3:
             break
         time.sleep(0.5)
 
@@ -496,7 +496,7 @@ def unbitly(jenni, input):
             return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
-    pyurl = u'https://tumbolia.appspot.com/py/'
+    pyurl = u'http://tumbolia.appspot.com/py/'
     code = "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
     code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
     code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
