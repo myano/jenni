@@ -68,7 +68,7 @@ def read_tweet(url):
         text = expand(text)
         text = r_tag.sub('', text)
         text = text.strip()
-        text = r_entity.sub(e, text)
+        text = r_entity.sub(e, uc.decode(text))
         text = r_whiteline.sub(' ', text)
         text = r_breaks.sub(' ', text)
         return decode(text)
