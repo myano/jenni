@@ -11,6 +11,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+import json
 import re
 import urllib
 import web
@@ -28,7 +29,7 @@ def location(name):
     bytes = u.read()
     u.close()
 
-    results = web.json(bytes)
+    results = json.loads(bytes)
     try: name = results['geonames'][0]['name']
     except IndexError:
         return '?', '?', '0', '0'

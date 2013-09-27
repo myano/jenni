@@ -46,7 +46,7 @@ def google_ajax(query):
     web.urllib._urlopener = Grab()
     bytes = web.get(uri + args)
     web.urllib._urlopener = handler
-    return web.json(bytes)
+    return json.loads(bytes)
 
 def google_search(query):
     results = google_ajax(query)

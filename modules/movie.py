@@ -11,8 +11,9 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import web
+import json
 import urllib2
+import web
 
 
 def movie(jenni, input):
@@ -26,7 +27,7 @@ def movie(jenni, input):
 
     uri = uri.encode('utf-8')
     page = web.get(uri)
-    data = web.json(page)
+    data = json.loads(page)
 
     if data['Response'] == 'False':
         if 'Error' in data:
