@@ -11,8 +11,12 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import re, urllib
+import json
+import time
+import urllib
+import urllib2
 import web
+
 
 def translate(text, input='auto', output='en'):
     raw = False
@@ -20,7 +24,6 @@ def translate(text, input='auto', output='en'):
         output = output[:-4]
         raw = True
 
-    import urllib2, json
     opener = urllib2.build_opener()
     opener.addheaders = [(
         'User-Agent', 'Mozilla/5.0' +
@@ -31,9 +34,32 @@ def translate(text, input='auto', output='en'):
     input, output = urllib.quote(input), urllib.quote(output)
     text = urllib.quote(text)
 
-    result = opener.open('https://translate.google.com/translate_a/t?' +
-        ('client=t&hl=en&sl=%s&tl=%s&multires=1' % (input, output)) +
-        ('&otf=1&ssel=0&tsel=0&uptl=en&sc=1&text=%s' % text)).read()
+    uri = 'http://translate.google.com/translate_a/t?'
+    params = {
+        'sl': input,
+        'tl': output,
+        'js': 'n',
+        'prev': '_t',
+        'hl': 'en',
+        'ie': 'UTF-8',
+        'text': text,
+        'client': 't',
+        'multires': '1',
+        'sc': '1',
+        'uptl': 'en',
+        'tsel': '0',
+        'ssel': '0',
+        'otf': '1',
+    }
+
+    for x in params:
+        uri += '&%s=%s' % (x, params[x])
+
+    result = opener.open(uri).read()
+
+    ## this is hackish
+    ## this makes the returned data parsable by the json module
+    result = result.replace(',,', ',').replace('[,', '["",')
 
     while ',,' in result:
         result = result.replace(',,', ',null,')
