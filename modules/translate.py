@@ -26,27 +26,27 @@ def translate(text, input='auto', output='en'):
 
     opener = urllib2.build_opener()
     opener.addheaders = [(
-        'User-Agent', 'Mozilla/5.0' +
-        '(X11; U; Linux i686)' +
+        'User-Agent', 'Mozilla/5.0 ' +
+        '(X11; U; Linux i686) ' +
         'Gecko/20071127 Firefox/2.0.0.11'
     )]
 
     input, output = urllib.quote(input), urllib.quote(output)
     text = urllib.quote(text)
 
-    uri = 'http://translate.google.com/translate_a/t?'
+    uri = 'https://translate.google.com/translate_a/t?'
     params = {
         'sl': input,
         'tl': output,
         'js': 'n',
         'prev': '_t',
-        'hl': 'en',
+        'hl': output,
         'ie': 'UTF-8',
         'text': text,
         'client': 't',
         'multires': '1',
         'sc': '1',
-        'uptl': 'en',
+        'uptl': output,
         'tsel': '0',
         'ssel': '0',
         'otf': '1',
@@ -68,8 +68,13 @@ def translate(text, input='auto', output='en'):
     if raw:
         return str(data), 'en-raw'
 
-    try: language = data[2] # -2][0][0]
-    except: language = '?'
+    try:
+        language = data[2] # -2][0][0]
+    except:
+        language = '?'
+
+    if isinstance(language, list):
+        language = data[-2][0][0]
 
     return ''.join(x[0] for x in data[0]), language
 
