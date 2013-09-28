@@ -252,7 +252,7 @@ addpoint_command.rate = 180
 
 
 def rmpoint_command(jenni, input):
-    """.rmpoint <nick> - Adds 1 point to the score system for <nick>."""
+    """.rmpoint <nick> - Removes 1 point to the score system for <nick>."""
     nick = input.group(2)
     if nick:
         nick = nick.strip().split()[0]
