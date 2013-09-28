@@ -92,7 +92,7 @@ def find_title(url):
         uri = 'http://' + uri
 
     if 'twitter.com' in uri or 'google.com' in uri:
-        uri = uri.replace('#!', '?_escaped_fragment_=')
+        uri = uri.replace('/#!', '/?_escaped_fragment_=')
 
     if 'i.imgur' in uri:
         a = uri.split('.')
