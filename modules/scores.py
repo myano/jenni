@@ -82,9 +82,10 @@ class Scores:
         for line in sfile:
             values = line.split(",")
             if len(values) == 4:
-                if values[0] not in self.scores_dict:
-                    self.scores_dict[values[0]] = dict()
-                self.scores_dict[values[0]][values[1]] = [int(values[2]),
+                channel = (values[0]).lower()
+                if channel not in self.scores_dict:
+                    self.scores_dict[channel] = dict()
+                self.scores_dict[channel][values[1]] = [int(values[2]),
                                                           int(values[3])]
         if not self.scores_dict:
             self.scores_dict = dict()
