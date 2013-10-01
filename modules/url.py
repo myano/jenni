@@ -37,7 +37,7 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'unbitly', 'untiny',]
+BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'title', 'unbitly', 'untiny',]
 simple_channels = list()
 
 try:
@@ -91,7 +91,7 @@ def find_title(url):
     if not re.search('^((https?)|(ftp))://', uri):
         uri = 'http://' + uri
 
-    if 'twitter.com' in uri or 'google.com' in uri:
+    if '/#!' in uri:
         uri = uri.replace('/#!', '/?_escaped_fragment_=')
 
     if 'i.imgur' in uri:
