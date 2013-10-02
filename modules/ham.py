@@ -136,7 +136,7 @@ def cs(jenni, input):
             extra[each[0].strip()] = re_tag.sub('', each[1].strip()).strip()
         response = '(%s) ' % (web.quote(cs))
         response += 'Name: %s, Address: %s. '  # More information is available at: %s'
-        response = response % (name, address)
+        response = response % (uc.decode(name), uc.decode(address))
         for each in more_info:
             temp = re_tag.sub('', each[1].strip())
             if not temp:
