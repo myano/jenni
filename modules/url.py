@@ -37,7 +37,7 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'title', 'unbitly', 'untiny',]
+BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'title', 'tw', 'unbitly', 'untiny',]
 simple_channels = list()
 
 try:
@@ -105,7 +105,7 @@ def find_title(url):
 
     ## proxy the lookup of the headers through .py
     def remote_call():
-        pyurl = u'http://tumbolia.appspot.com/py/'
+        pyurl = u'https://tumbolia.appspot.com/py/'
         code = 'import simplejson;'
         code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
         code += "req.add_header('User-Agent', 'Mozilla/5.0');"
@@ -266,7 +266,7 @@ def short(text):
             ## make sure that it is not already a bitly shortened link
             if '/j.mp' not in b and '/bit.ly' not in b and '/bitly.com' not in b:
                 longer = urllib2.quote(b)
-                url = 'http://api.j.mp/v3/shorten?login=%s' % (bitly_user)
+                url = 'https://api-ssl.bitly.com/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
                                                              longer)
                 shorter = web.get(url)
