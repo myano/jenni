@@ -151,13 +151,14 @@ cs.commands = ['cs']
 cs.example = '.cs W8LT'
 
 def cw(jenni, input):
-    re_cw = re.compile("[\.\- ]+")
-    re_noncw = re.compile("[^\.\- ]+")
+    re_cw = re.compile("[/\.\- ]+")
+    re_noncw = re.compile("[^/\.\- ]+")
     text = input.group(2).lower().rstrip().lstrip()
     temp = text.split(" ")
     output = str()
     if re_cw.findall(text) and not re_noncw.findall(text):
         ## MORSE
+        output = output.replace(' / ', '  ')
         for code in temp:
             if " " in code:
                 output += " "
@@ -173,12 +174,6 @@ def cw(jenni, input):
             except KeyError:
                 output = "Non morse code character used."
                 break
-            '''
-            if char != " ":
-                output += " "
-            elif char == " ":
-                output += " "
-            '''
             output += " "
     jenni.reply(output)
 cw.commands = ['cw']
