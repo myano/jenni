@@ -17,8 +17,7 @@ import urllib
 import urllib2
 import web
 
-
-def translate(text, input='auto', output='en'):
+def translate(text, input='auto', output='en', use_proxy=False):
     raw = False
     if output.endswith('-raw'):
         output = output[:-4]
@@ -26,8 +25,8 @@ def translate(text, input='auto', output='en'):
 
     opener = urllib2.build_opener()
     opener.addheaders = [(
-        'User-Agent', 'Mozilla/5.0 ' +
-        '(X11; U; Linux i686) ' +
+        'User-Agent', 'Mozilla/5.0' +
+        '(X11; U; Linux i686)' +
         'Gecko/20071127 Firefox/2.0.0.11'
     )]
 
@@ -36,26 +35,31 @@ def translate(text, input='auto', output='en'):
 
     uri = 'https://translate.google.com/translate_a/t?'
     params = {
-        'sl': input,
-        'tl': output,
-        'js': 'n',
-        'prev': '_t',
-        'hl': output,
-        'ie': 'UTF-8',
-        'text': text,
-        'client': 't',
-        'multires': '1',
-        'sc': '1',
-        'uptl': output,
-        'tsel': '0',
-        'ssel': '0',
-        'otf': '1',
+            'sl': input,
+            'tl': output,
+            'js': 'n',
+            'prev': '_t',
+            'hl': 'en',
+            'ie': 'UTF-8',
+            'text': text,
+            'client': 't',
+            'multires': '1',
+            'sc': '1',
+            'uptl': 'en',
+            'tsel': '0',
+            'ssel': '0',
+            'otf': '1',
     }
 
     for x in params:
         uri += '&%s=%s' % (x, params[x])
 
-    result = opener.open(uri).read()
+    if use_proxy:
+        print 'USING PROXY'
+        result = proxy.get(uri)
+    else:
+        print 'NOT USING PROXY'
+        result = opener.open(uri).read()
 
     ## this is hackish
     ## this makes the returned data parsable by the json module
