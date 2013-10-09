@@ -23,13 +23,13 @@ def head(jenni, input):
         uri, header = uri.rsplit(' ', 1)
     else: uri, header = uri, None
 
+    if not uri and hasattr(jenni, 'last_seen_uri'):
+        try: uri = jenni.bot.last_seen_uri[input.sender]
+        except KeyError: return jenni.say('?')
+
     if not uri.startswith('htt'):
         uri = 'http://' + uri
     # uri = uri.replace('#!', '?_escaped_fragment_=')
-
-    if not uri and hasattr(jenni.bot, 'last_seen_uri'):
-        try: uri = jenni.bot.last_seen_uri[input.sender]
-        except KeyError: return jenni.say('?')
 
     try: info = web.head(uri)
     except IOError: return jenni.say("Can't connect to %s" % uri)
