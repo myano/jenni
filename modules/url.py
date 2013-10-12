@@ -496,7 +496,7 @@ def unbitly(jenni, input):
             return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
-    pyurl = u'http://tumbolia.appspot.com/py/'
+    pyurl = u'https://tumbolia.appspot.com/py/'
     code = "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
     code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
     code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
