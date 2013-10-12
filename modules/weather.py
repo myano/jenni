@@ -443,8 +443,9 @@ def fucking_weather(jenni, input):
             new_text += latex.HTML_ENCODINGS[x]
         else:
             new_text += x
+    url = 'http://thefuckingweather.com/?where=%s' % (web.quote(new_text))
     try:
-        page = web.get('http://thefuckingweather.com/?where=%s' % (web.quote(new_text)))
+        page = web.get(url)
     except:
         return jenni.say("I COULDN'T ACCESS THE FUCKING SITE.")
     re_mark = re.compile('<p class="remark">(.*?)</p>')
