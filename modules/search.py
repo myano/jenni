@@ -252,6 +252,8 @@ def duck_zero_click_api(query):
         output.append(header + results['AbstractText'].strip())
     if 'Answer' in results and min_size('Answer', results):
         output.append(header + results['Answer'].strip())
+    if 'Definition' in results and min_size('Definition', results):
+        output.append(header + results['Definition'].strip())
     if not output:
         ## if we can't find anything in the API for Zero-Click
         ## give up
