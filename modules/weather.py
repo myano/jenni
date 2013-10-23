@@ -301,6 +301,8 @@ def f_weather(self, origin, match, args):
         else: temp = temp.split('.')[0]
         if temp.startswith('M'):
             temp = '-' + temp[1:]
+        if dew.startswith('M'):
+            dew = '-' + dew[1:]
         try:
             temp = int(temp)
             dew = int(dew)
