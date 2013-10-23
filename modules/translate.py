@@ -54,12 +54,7 @@ def translate(text, input='auto', output='en', use_proxy=False):
     for x in params:
         uri += '&%s=%s' % (x, params[x])
 
-    if use_proxy:
-        print 'USING PROXY'
-        result = proxy.get(uri)
-    else:
-        print 'NOT USING PROXY'
-        result = opener.open(uri).read()
+    result = opener.open(uri).read()
 
     ## this is hackish
     ## this makes the returned data parsable by the json module

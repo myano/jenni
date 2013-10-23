@@ -79,7 +79,7 @@ def delquote(jenni, input):
     newlines = lines[:number-1] + lines[number:]
     fn = open('quotes.txt', 'w')
     for line in newlines:
-        txt = uc.encode(line)
+        txt = uc.decode(line)
         if txt:
             fn.write(txt)
             if txt[-1] != '\n':
