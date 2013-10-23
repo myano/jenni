@@ -17,8 +17,7 @@ import web
 
 exchange_rates = dict()
 last_check = dt.datetime.now()
-exchanges = ['mtgox', 'btc24', 'bitfloor', 'vcx', 'btce', 'rock', 'bitme',
-             'ripple', 'lybit']
+exchanges = ['mtgox', 'btce', 'rock', 'ripple', 'bitstamp']
 
 
 def btc_page():
