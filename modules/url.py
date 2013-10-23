@@ -245,6 +245,13 @@ def find_title(url):
     else:
         return False, 'No Title'
 
+def is_bitly(txt):
+    bitly_domains = ['//j.mp', '//bit.ly', '//bitly.com']
+    for each in bitly_domains:
+        if each in txt:
+            return True
+    return False
+
 
 def short(text):
     """
@@ -264,7 +271,7 @@ def short(text):
         while i < k:
             b = uc.decode(a[i][0])
             ## make sure that it is not already a bitly shortened link
-            if '/j.mp' not in b and '/bit.ly' not in b and '/bitly.com' not in b:
+            if not is_bitly(b):
                 longer = urllib2.quote(b)
                 url = 'https://api-ssl.bitly.com/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
@@ -281,10 +288,14 @@ def short(text):
 
 
 def generateBitLy(jenni, input):
-    if not bitly_loaded:
-        return
-    bitly = short(input)
-    idx = 7
+    url = input.group(2)
+    if not url:
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
+            url = jenni.bot.last_seen_uri[input.sender]
+        else:
+            return jenni.say('No URL provided')
+
+    bitly = short(url)
     for b in bitly:
         displayBitLy(jenni, b[0], b[1])
 generateBitLy.commands = ['bitly']
@@ -295,6 +306,7 @@ def displayBitLy(jenni, url, shorten):
     if url is None or shorten is None:
         return
     u = getTLD(url)
+    shorten = shorten.replace('http:', 'https:')
     jenni.say('%s  -  %s' % (u, shorten))
 
 
