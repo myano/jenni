@@ -107,6 +107,11 @@ def find_title(url):
     def remote_call():
         pyurl = u'https://tumbolia.appspot.com/py/'
         code = 'import simplejson;'
+        code += 'opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(),'
+        code += 'urllib2.BaseHandler(), urllib2.HTTPHandler(),'
+        code += 'urllib2.HTTPRedirectHandler(), urllib2.HTTPErrorProcessor(),'
+        code += 'urllib2.UnknownHandler());'
+        code += 'urllib2.install_opener(opener);'
         code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
         code += "req.add_header('User-Agent', 'Mozilla/5.0');"
         code += "u=urllib2.urlopen(req);"
