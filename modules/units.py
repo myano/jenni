@@ -22,7 +22,7 @@ exchanges = ['mtgox', 'btce', 'rock', 'ripple', 'bitstamp']
 
 def btc_page():
     try:
-        page = web.get('http://bitcoincharts.com/t/markets.json')
+        page = web.get('https://bitcoincharts.com/t/markets.json')
     except Exception, e:
         print time.time(), btc, e
         return False, 'Failed to reach bitcoincharts.com'
