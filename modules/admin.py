@@ -58,6 +58,8 @@ def msg(jenni, input):
     if input.sender.startswith('#'): return
     a, b = input.group(2), input.group(3)
     if (not a) or (not b): return
+    if (a.startswith('+') or a.startswith('@')) and not input.owner:
+        return
     al = a.lower()
     parts = al.split(',')
     if not input.owner:

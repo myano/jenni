@@ -271,7 +271,7 @@ def f_time(self, origin, match, args):
                 tz = int(tz)
             msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (sign, str(tz)), timenow)
             self.msg(origin.sender, msg)
-f_time.commands = ['t']
+f_time.commands = ['t', 'time']
 f_time.name = 't'
 f_time.example = '.t UTC'
 
