@@ -65,7 +65,7 @@ def py(jenni, input):
     uri = 'https://tumbolia.appspot.com/py/'
     try:
         answer = web.get(uri + web.urllib.quote(query))
-        if answer:
+        if answer is not None and answer != "\n":
             jenni.say(answer)
         else:
             jenni.reply('Sorry, no result.')
