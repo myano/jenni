@@ -12,46 +12,129 @@ More info:
 """
 
 import HTMLParser
+import json
 import re
-from socket import timeout
 import string
-from modules import unicode as uc
+import urllib
 import web
+
+from modules import search
+from modules import unicode as uc
+from socket import timeout
+
+
+c_pattern = r'(?ims)<(?:h2 class="r"|div id="aoba")[^>]*>(.*?)</(?:h2|div)>'
+c_answer = re.compile(c_pattern)
+r_tag = re.compile(r'<(?!!)[^>]+>')
 
 
 def c(jenni, input):
-    """.c -- Google calculator."""
+    '''.c -- Google calculator.'''
+
+    ## let's not bother if someone doesn't give us input
     if not input.group(2):
         return jenni.reply('Nothing to calculate.')
+
+    ## handle some unicode conversions
     q = input.group(2).encode('utf-8')
     q = q.replace('\xcf\x95', 'phi')  # utf-8 U+03D5
     q = q.replace('\xcf\x80', 'pi')  # utf-8 U+03C0
-    uri = 'https://www.google.com/ig/calculator?q='
-    bytes = web.get(uri + web.urllib.quote(q))
-    parts = bytes.split('",')
-    equation = [p for p in parts if p.startswith('{lhs: "')][0][7:]
-    answer = [p for p in parts if p.startswith('rhs: "')][0][6:]
-    if answer and equation:
+
+    ## Attempt #1 (Google)
+    uri = 'https://www.google.com/search?gbv=1&q='
+    uri += web.urllib.quote(q)
+
+    ## To the webs!
+    try:
+        page = web.get(uri)
+    except:
+        ## if we can't access Google for calculating
+        ## let us move on to Attempt #2
+        page = None
+        answer = None
+
+    if page:
+        ## if we get a response from Google
+        ## let us parse out an equation from Google Search results
+        answer = c_answer.findall(page)
+
+    if answer:
+        ## if the regex finding found a match we want the first result
+        answer = answer[0]
+        #answer = answer.replace(u'\xc2\xa0', ',')
         answer = answer.decode('unicode-escape')
         answer = ''.join(chr(ord(c)) for c in answer)
         answer = uc.decode(answer)
-        answer = answer.replace(u'\xc2\xa0', ',')
         answer = answer.replace('<sup>', '^(')
         answer = answer.replace('</sup>', ')')
         answer = web.decode(answer)
         answer = answer.strip()
-        equation = uc.decode(equation)
-        equation = equation.strip()
-        max_len = 450 - len(answer) - 6
-        new_eq = equation
-        if len(new_eq) > max_len:
-            end = max_len - 10
-            new_eq = new_eq[:end]
-            new_eq += '[..]'
-        output = '\x02' + answer + '\x02' + ' == ' + new_eq
-        jenni.say(output)
+        jenni.say(answer)
     else:
-        jenni.say('Sorry, no result.')
+        #### Attempt #2 (DuckDuckGo's API)
+        ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
+        ddg_uri += urllib.quote(q)
+
+        ## Try to grab page (results)
+        ## If page can't be accessed, we shall fail!
+        try:
+            page = web.get(ddg_uri)
+        except:
+            page = None
+
+        ## Try to take page source and json-ify it!
+        try:
+            json_response = json.loads(page)
+        except:
+            ## if it can't be json-ified, then we shall fail!
+            json_response = None
+
+        ## Check for 'AnswerType' (stolen from search.py)
+        ## Also 'fail' to None so we can move on to Attempt #3
+        if (not json_response) or (hasattr(json_response, 'AnswerType') and json_response['AnswerType'] != 'calc'):
+            answer = None
+        else:
+            ## If the json contains an Answer that is the result of 'calc'
+            ## then continue
+            answer = re.sub(r'\<.*?\>', '', json_response['Answer']).strip()
+
+        if answer:
+            ## If we have found answer with Attempt #2
+            ## go ahead and display it
+            jenni.say(answer)
+        else:
+            #### Attempt #3 (DuckDuckGo's HTML)
+            ## This relies on BeautifulSoup; if it can't be found, don't even bother
+            try:
+                from BeautifulSoup import BeautifulSoup
+            except:
+                return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
+
+            ddg_html_page = web.get('https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q)))
+            soup = BeautifulSoup(ddg_html_page)
+
+            ## use BeautifulSoup to parse HTML for an answer
+            zero_click = str()
+            if soup('div', {'class': 'zero-click-result'}):
+                zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+
+            ## remove some excess text
+            output = r_tag.sub('', zero_click).strip()
+            output = output.replace('\n', '').replace('\t', '')
+
+            ## test to see if the search module has 'remove_spaces'
+            ## otherwise, let us fail
+            try:
+                output = search.remove_spaces(output)
+            except:
+                output = str()
+
+            if output:
+                ## If Attempt #3 worked, display the answer
+                jenni.say(output)
+            else:
+                ## If we made it this far, we have tried all available resources
+                jenni.say('Absolutely no results!')
 c.commands = ['c', 'calc']
 c.example = '.c 5 + 3'
 
@@ -85,7 +168,7 @@ def wa(jenni, input):
     try:
         answer = web.get(uri + web.urllib.quote(query.replace('+', '%2B')))
     except timeout as e:
-        return jenni.reply("Request timd out")
+        return jenni.say("Request timd out")
     if answer:
         answer = answer.decode("string_escape")
         answer = HTMLParser.HTMLParser().unescape(answer)
@@ -101,12 +184,12 @@ def wa(jenni, input):
             newOutput.append(temp)
         waOutputArray = newOutput
         if (len(waOutputArray) < 2):
-            jenni.reply(answer)
+            jenni.say(answer)
         else:
-            jenni.reply(waOutputArray[0] + " = " + waOutputArray[1])
+            jenni.say(waOutputArray[0] + " = " + waOutputArray[1])
         waOutputArray = list()
     else:
-        jenni.reply('Sorry, no result from WolframAlpha.')
+        jenni.say('Sorry, no result from WolframAlpha.')
 wa.commands = ['wa', 'wolfram']
 wa.example = '.wa land area of the European Union'
 
