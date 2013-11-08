@@ -87,6 +87,9 @@ def create_default_config(fn):
         '*': ['!'] # default whitelist, allow all
     }
 
+    # insult database available: "spanish" and "english"
+    insult_lang = "english"
+
     # EOF
     """
     print >> f, trim(output)
