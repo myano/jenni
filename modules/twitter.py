@@ -87,7 +87,8 @@ def id_tweet(tid):
     message, status = tuple(data)
     if status == 301:
         url = message.get("Location")
-        if not url: return "Sorry, couldn't get a tweet from %s" % link
+        if not url:
+            return "Sorry, couldn't get a tweet from %s" % link
         username = url.split('/')[3]
         tweet = read_tweet(url)
         return format(tweet, username)
@@ -96,22 +97,28 @@ def id_tweet(tid):
 def twitter(jenni, input):
     arg = input.group(2)
     if not arg:
-        return jenni.reply("Give me a link, a username, or a tweet id")
+        return jenni.reply('Give me a link, a username, or a tweet id')
 
     arg = arg.strip()
     if isinstance(arg, unicode):
         arg = arg.encode('utf-8')
 
+    output = str()
+    if arg.startswith('@'):
+        arg = arg[1:]
+
     if arg.isdigit():
-        jenni.say(id_tweet(arg))
+        output = id_tweet(arg)
     elif r_username.match(arg):
-        jenni.say(user_tweet(arg))
+        output = user_tweet(arg)
     elif r_link.match(arg):
         username = arg.split('/')[3]
         tweet = read_tweet(arg)
-        jenni.say(format(tweet, username))
-    else: jenni.reply("Give me a link, a username, or a tweet id")
+        output = format(tweet,username)
+    else:
+        output = 'Give me a link, a username, or a tweet id.'
 
+    jenni.say(output)
 twitter.commands = ['tw', 'twitter']
 twitter.thread = True
 
