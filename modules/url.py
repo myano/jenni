@@ -35,9 +35,11 @@ BITLY_TRIGGER_LEN_NOTITLE = 70
 EXCLUSION_CHAR = '!'
 IGNORE = list()
 
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0'
+
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'title', 'tw', 'unbitly', 'untiny',]
+BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'tell', 'title', 'tw', 'unbitly', 'untiny',]
 simple_channels = list()
 
 try:
@@ -113,7 +115,7 @@ def find_title(url):
         code += 'urllib2.UnknownHandler());'
         code += 'urllib2.install_opener(opener);'
         code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
-        code += "req.add_header('User-Agent', 'Mozilla/5.0');"
+        code += "req.add_header('User-Agent', %s);"
         code += "u=urllib2.urlopen(req);"
         code += "rtn=dict();"
         code += "rtn['headers'] = u.headers.dict;"
@@ -125,7 +127,7 @@ def find_title(url):
         code += "rtn['url'] = u.url;"
         code += "rtn['geturl'] = u.geturl();"
         code += "print simplejson.dumps(rtn)"
-        query = code % repr(uri)
+        query = code % (repr(uri), repr(USER_AGENT))
         temp = web.quote(query)
         u = web.get(pyurl + temp)
 
