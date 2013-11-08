@@ -79,6 +79,8 @@ def g(jenni, input):
     query = query.encode('utf-8')
     uri = google_search(query)
     if uri:
+        if 'wikipedia.org/' in uri:
+            uri = uri.replace('http:', 'https:')
         jenni.reply(uri)
         if not hasattr(jenni, 'last_seen_uri'):
             jenni.bot.last_seen_uri = {}
