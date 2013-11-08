@@ -27,7 +27,6 @@ def addquote(jenni, input):
 addquote.commands = ['addquote']
 addquote.priority = 'low'
 addquote.example = '.addquote'
-addquote.rate = 30
 
 
 def retrievequote(jenni, input):
@@ -56,7 +55,6 @@ def retrievequote(jenni, input):
 retrievequote.commands = ['quote']
 retrievequote.priority = 'low'
 retrievequote.example = '.quote'
-retrievequote.rate = 30
 
 
 def delquote(jenni, input):
@@ -89,7 +87,6 @@ def delquote(jenni, input):
 delquote.commands = ['rmquote', 'delquote']
 delquote.priority = 'low'
 delquote.example = '.rmquote'
-delquote.rate = 30
 
 
 if __name__ == '__main__':
