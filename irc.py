@@ -83,23 +83,39 @@ class Bot(asynchat.async_chat):
     # def push(self, *args, **kargs):
     #     asynchat.async_chat.push(self, *args, **kargs)
 
+    def handle_error(self):
+        '''Handle any uncaptured error in the core. Overrides asyncore's handle_error
+        This prevents the bot from disconnecting when it use to say something twice
+        and then disconnect.'''
+        trace = traceback.format_exc()
+        try:
+            print trace
+        except Exception, e:
+            print 'Uncaptured error!!!', e
+
+
     def __write(self, args, text=None, raw=False):
         # print '%r %r %r' % (self, args, text)
         try:
             if raw:
                 temp = ' '.join(args)[:510] + " :" + text + '\r\n'
-                self.push(temp)
             elif not raw:
                 if text:
                     # 510 because CR and LF count too, as nyuszika7h points out
                     temp = (' '.join(args) + ' :' + text)[:510] + '\r\n'
                 else:
                     temp = ' '.join(args)[:510] + '\r\n'
-                self.push(temp)
+            self.push(temp)
             if self.logging:
                 log_raw(temp)
-        except IndexError:
-            print "INDEXERROR", text
+        except Exception, e:
+            print time.time()
+            print '[__WRITE FAILED]', e
+            print 'raw:', str(raw)
+            print 'temp:', str(temp)
+            print 'args:', str(args)
+            print 'text:', str(text)
+            print '-' * 3
             #pass
 
     def write(self, args, text=None, raw=False):
@@ -111,7 +127,12 @@ class Bot(asynchat.async_chat):
                 self.__write(args, text, raw)
             else:
                 self.__write(args, text)
-        except Exception, e: pass
+        except Exception, e:
+            print '[WRITE FAILED]', e
+            print 'raw:', str(raw)
+            print 'temp:', str(temp)
+            print 'args:', str(args)
+            print 'text:', str(text)
 
     def safe(self, input, u=False):
         if input:
@@ -134,9 +155,6 @@ class Bot(asynchat.async_chat):
         except KeyboardInterrupt:
             sys.exit()
         except Exception, e:
-            f = open('UNKNOWN.txt', 'w')
-            f.write('%s\t%s' % (str(time.time()), str(e)))
-            f.close()
             print '[asyncore]', e
 
     def handle_connect(self):
