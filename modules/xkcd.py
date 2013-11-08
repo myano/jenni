@@ -9,7 +9,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
-from lxml import etree
+import json
 import random
 import web
 
@@ -20,12 +20,18 @@ random.seed()
 def xkcd(jenni, input):
     '''.xkcd - Generates a url for a random XKCD clip.'''
 
-    page = web.get('https://xkcd.com/rss.xml')
-    body = page.split('\n')[1]
-    parsed = etree.fromstring(body)
-    newest = etree.tostring(parsed.findall('channel/item/link')[0])
-    max_int = int(newest.split('/')[-3])
-    website = 'https://xkcd.com/%d/' % random.randint(0, max_int + 1)
+    try:
+        page = web.get('https://xkcd.com/info.0.json')
+    except:
+        return jenni.say('Failed to access xkcd.com')
+
+    try:
+        body = json.loads(page)
+    except:
+        return jenni.say('Failed to make use of data loaded by xkcd.com')
+
+    max_int = body['num']
+    website = 'https://xkcd.com/%d/' % random.randint(0, max_int)
     jenni.say(website)
 xkcd.commands = ['xkcd']
 xkcd.priority = 'low'
