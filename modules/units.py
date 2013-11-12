@@ -9,6 +9,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
+from modules import unicode as uc
 import datetime as dt
 import json
 import re
@@ -22,7 +23,7 @@ exchanges = ['mtgox', 'btce', 'rock', 'ripple', 'bitstamp']
 
 def btc_page():
     try:
-        page = web.get('https://bitcoincharts.com/t/markets.json')
+        page = web.get('https://api.bitcoincharts.com/v1/markets.json')
     except Exception, e:
         print time.time(), btc, e
         return False, 'Failed to reach bitcoincharts.com'
@@ -59,9 +60,9 @@ def btc(jenni, input):
     for each in symbols:
         if each.replace('USD', '') in exchanges:
             response += '%s: %s | ' % (each, exchange_rates['USD'][each])
-    response += 'lolcat (mtgox) index: %s | ' % (ppnum(float(
+    response += 'lolcat (mtgox) index: $%s | ' % (ppnum(float(
         exchange_rates['USD']['mtgox']) * 160))
-    response += 'last updated at: ' + str(last_check)
+    response += 'last updated at: %s UTC' % (str(last_check))
     jenni.reply(response)
 btc.commands = ['btc']
 btc.example = '.btc'
@@ -69,11 +70,17 @@ btc.rate = 5
 
 
 def fbtc(jenni, input):
-    page = web.get('http://thefuckingbitcoin.com/')
+    try:
+        page = web.get('http://thefuckingbitcoin.com/')
+    except:
+        return jenni.say('Could not access thefuckingbitcoin.com')
     price = re.search('<p id="lastPrice">(\S+)</p>', page)
     remarks = re.search('<p id="remark">(.*?)</p><p id="remarkL2">(.*?)</p>',
                         page)
-    remarks = remarks.groups()
+    try:
+        remarks = remarks.groups()
+    except:
+        return jenni.say('Could not find relevant information.')
     resp = str()
     resp += '1 BTC == %s USD. ' % price.groups()
     if remarks:
