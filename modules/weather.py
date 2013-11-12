@@ -17,6 +17,7 @@ import urllib
 import web
 from tools import deprecated
 from modules import latex
+from modules import unicode as uc
 
 r_from = re.compile(r'(?i)([+-]\d+):00 from')
 
@@ -445,6 +446,8 @@ def fucking_weather(jenni, input):
             new_text += latex.HTML_ENCODINGS[x]
         else:
             new_text += x
+
+    new_text = uc.encode(new_text)
     url = 'http://thefuckingweather.com/?where=%s' % (web.quote(new_text))
     try:
         page = web.get(url)
