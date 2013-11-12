@@ -9,8 +9,11 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+import codecs
+from modules import unicode as uc
 import pickle
 import os
+import time
 
 
 class Scores:
@@ -37,7 +40,7 @@ class Scores:
     def editpoints(self, jenni, input, nick, points):
         if not nick:
             return
-        nick = (nick).lower()
+        nick = uc.encode(nick.lower())
         if not nick:
             jenni.reply(self.STRINGS["cantadd"])
         elif (input.nick).lower() == nick:
@@ -61,26 +64,23 @@ class Scores:
 
     def save(self):
         """ Save to file in comma seperated values """
-        scores_file = open(self.scores_filename, "w")
+        os.rename(self.scores_filename, '%s-%s' % (self.scores_filename, str(time.time())))
+        scores_file = codecs.open(self.scores_filename, 'w', encoding='utf-8')
         for each_chan in self.scores_dict:
             for each_nick in self.scores_dict[each_chan]:
-                line = "{0},{1},{2},{3}\n".format(each_chan, each_nick,
-                                                  self.scores_dict[
-                                                  each_chan][each_nick][0],
-                                                  self.scores_dict[
-                                                  each_chan][each_nick][1])
-                scores_file.write(line)
+                line = '{0},{1},{2},{3}\n'.format(each_chan, each_nick, self.scores_dict[each_chan][each_nick][0], self.scores_dict[each_chan][each_nick][1])
+                scores_file.write(uc.decode(line))
         scores_file.close()
 
     def load(self):
         try:
-            sfile = open(self.scores_filename, "r")
+            sfile = open(self.scores_filename, 'r')
         except:
-            sfile = open(self.scores_filename, "w")
+            sfile = open(self.scores_filename, 'w')
             sfile.close()
             return
         for line in sfile:
-            values = line.split(",")
+            values = line.split(',')
             if len(values) == 4:
                 channel = (values[0]).lower()
                 if channel not in self.scores_dict:
@@ -112,16 +112,16 @@ class Scores:
             for key, value in scores:
                 top_scores.append(self.str_score(key, channel))
                 if len(scores) == q + 1:
-                    str_say += " %s" % (top_scores[q])
+                    str_say += ' %s' % (uc.decode(top_scores[q]))
                 else:
-                    str_say += " %s |" % (top_scores[q])
+                    str_say += ' %s |' % (uc.decode(top_scores[q]))
                 q += 1
                 if q > 9:
                     break
             return str_say
 
         def given_user(nick, channel):
-            nick = nick.lower()
+            nick = uc.encode(nick.lower())
             channel = channel.lower()
             if channel in self.scores_dict:
                 if nick in self.scores_dict[channel]:
@@ -184,8 +184,8 @@ class Scores:
         line = line[10:].split()
         if len(line) != 4:
             return
-        channel = line[0]
-        nick = line[1].lower()
+        channel = uc.encode(line[0])
+        nick = uc.encode(line[1]).lower()
         try:
             add = int(line[2])
             sub = int(line[3])
@@ -211,8 +211,8 @@ class Scores:
             jenni.reply("No input provided.")
             return
         line = line[8:].split()
-        channel = input.sender
-        nick = line[0].lower()
+        channel = uc.encode(input.sender)
+        nick = uc.encode(line[0]).lower()
 
         def check(nick, channel):
             nick = nick.lower()
