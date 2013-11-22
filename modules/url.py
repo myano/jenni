@@ -119,7 +119,7 @@ def find_title(url):
         code += "u=urllib2.urlopen(req);"
         code += "rtn=dict();"
         code += "rtn['headers'] = u.headers.dict;"
-        code += "contents = u.read();"
+        code += "contents = u.read(32768);"
         code += "con = str();"
         code += r'''exec "try: con=(contents).decode('utf-8')\n'''
         code += '''except: con=(contents).decode('iso-8859-1')";'''
