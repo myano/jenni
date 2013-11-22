@@ -377,13 +377,13 @@ def get_results(text, manual=False):
         bitly = url
 
         if not url.startswith(EXCLUSION_CHAR):
+            passs, page_title = find_title(url)
             if not manual:
                 if bitly_loaded:
                     if channel and channel not in simple_channels:
                         bitly = short(url)
                         if bitly:
                             bitly = bitly[0][1]
-            passs, page_title = find_title(url)
             display.append([page_title, url, bitly, passs])
         else:
             ## has exclusion character
@@ -516,12 +516,12 @@ def unbitly(jenni, input):
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
     pyurl = u'https://tumbolia.appspot.com/py/'
-    code = "req=urllib2.Request(%s, headers={'Accept':'text/html'});"
-    code += "req.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1 "
-    code += "rv:17.0) Gecko/20100101 Firefox/17.0'); u=urllib2.urlopen(req);"
+    code = "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
+    code += "req.add_header('User-Agent', %s);"
+    code += "u = urllib2.urlopen(req);"
     code += 'print u.geturl();'
     url = url.replace("'", r"\'")
-    query = code % repr(url.strip())
+    query = code % (repr(url.strip()), repr(USER_AGENT))
     try:
         temp = web.quote(query)
         u = web.get(pyurl + temp)
