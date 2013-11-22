@@ -96,8 +96,16 @@ def id_tweet(tid):
 
 def twitter(jenni, input):
     arg = input.group(2)
+
     if not arg:
-        return jenni.reply('Give me a link, a username, or a tweet id')
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
+            temp = jenni.bot.last_seen_uri[input.sender]
+            if '//twitter.com' in temp:
+                arg = temp
+            else:
+                return jenni.say('Last link seen in this channel is not from twitter.com.')
+        else:
+            return jenni.reply('Give me a link, a username, or a tweet id.')
 
     arg = arg.strip()
     if isinstance(arg, unicode):
