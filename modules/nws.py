@@ -123,7 +123,7 @@ conditions = {
     'Dense Fog': '\x0303Dense Fog\x03',
     'Winter': '\x02\x0311Winter\x03\x02',
     'Rain': '\x0311Rain\x03',
-    'Freezing': '\x02\x03FREEZING\x03\x02',
+    'Freezing': '\x02\x0311FREEZING\x03\x02',
     'Stagnation': '\x02Stagnation\x02',
     'Freeze': '\x02\x0311FREEZE\x03\x02',
     'Chill': '\x0311Chill\x03',
