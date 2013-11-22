@@ -22,6 +22,7 @@ def insult(jenni, input):
     if not target:
         return jenni.reply('.i <target>!')
     target.encode('utf-8')
+    target = (target).strip()
     try:
         fn = open(insultFilename, "r")
     except IOError as e:
