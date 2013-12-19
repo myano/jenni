@@ -100,6 +100,7 @@ def f_weather(self, origin, match, args):
         self.msg(origin.sender, icao_code+': no such ICAO code, or no NOAA data')
         return
 
+    #print 'metar:', bytes
     metar = bytes.splitlines().pop()
     metar = metar.split(' ')
 
@@ -202,8 +203,14 @@ def f_weather(self, origin, match, args):
         time = local(icao_code, hour, minute)
     else: time = '(time unknown)'
 
+    speed = False
+
     if wind:
-        speed = int(wind[3:5])
+        try:
+            speed = float(wind[3:5])
+        except:
+            speed = 0
+
         if speed < 1:
             description = 'Calm'
         elif speed < 4:
@@ -253,10 +260,10 @@ def f_weather(self, origin, match, args):
         if not icao_code.startswith('EN') and not icao_code.startswith('ED'):
             wind = '%s %skt (%s)' % (description, speed, degrees)
         elif icao_code.startswith('ED'):
-            kmh = int(round(speed * 1.852, 0))
+            kmh = float(round(speed * 1.852, 0))
             wind = '%s %skm/h (%skt) (%s)' % (description, kmh, speed, degrees)
         elif icao_code.startswith('EN'):
-            ms = int(round(speed * 0.514444444, 0))
+            ms = float(round(speed * 0.514444444, 0))
             wind = '%s %sm/s (%skt) (%s)' % (description, ms, speed, degrees)
     else: wind = '(wind unknown)'
 
@@ -305,8 +312,8 @@ def f_weather(self, origin, match, args):
         if dew.startswith('M'):
             dew = '-' + dew[1:]
         try:
-            temp = int(temp)
-            dew = int(dew)
+            temp = float(temp)
+            dew = float(dew)
         except ValueError:
             temp = '?'
             dew = '?'
@@ -314,11 +321,19 @@ def f_weather(self, origin, match, args):
         temp = '?'
         dew = '?'
 
+    windchill = False
+    if temp and speed and isinstance(temp, float) and isinstance(speed, float) and temp <= 10.0:
+        speed_kmh = speed * 1.852
+        windchill = 13.12 + (0.6215 * temp) - (11.37 * (speed_kmh ** (0.16))) + (0.3965 * temp * (speed_kmh ** (0.16)))
+        windchill = round(windchill)
+        f = round((windchill * 1.8) + 32, 2)
+        windchill = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, windchill)
+
     if pressure:
         if pressure.startswith('Q'):
             pressure = pressure.lstrip('Q')
             if pressure != 'NIL':
-                pressure = str(int(pressure)) + 'mb'
+                pressure = str(float(pressure)) + 'mb'
             else: pressure = '?mb'
         elif pressure.startswith('A'):
             pressure = pressure.lstrip('A')
@@ -328,17 +343,17 @@ def f_weather(self, origin, match, args):
                 pressure = '%sin (%smb)' % (inches, mb)
             else: pressure = '?mb'
 
-            if isinstance(temp, int):
+            if isinstance(temp, float):
                 f = round((temp * 1.8) + 32, 2)
                 temp = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, temp)
-            if isinstance(dew, int):
+            if isinstance(dew, float):
                 f = round((dew * 1.8) + 32, 2)
                 dew = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, dew)
     else: pressure = '?mb'
 
-    if isinstance(temp, int):
+    if isinstance(temp, float):
         temp = u'%s\u00B0C'.encode('utf-8') % temp
-    if isinstance(dew, int):
+    if isinstance(dew, float):
         dew = u'%s\u00B0C'.encode('utf-8') % dew
 
     if cond:
@@ -423,14 +438,20 @@ def f_weather(self, origin, match, args):
     #     format = u'%s at %s: %s, %s, %s, %s, %s'
     #     args = (icao, time, cover, temp, pressure, cond, wind)
 
-    if not cond:
-        format = 'Cover: %s, Temp: %s, Dew Point: %s, Pressure: %s, Wind: %s - %s %s'
-        args = (cover, temp, dew, pressure, wind, str(icao_code), time)
-    else:
-        format = 'Cover: %s, Temp: %s, Dew Point: %s, Pressure: %s, Condition: %s, Wind: %s - %s, %s'
-        args = (cover, temp, dew, pressure, cond, wind, str(icao_code), time)
+    output = str()
+    output += 'Cover: ' + cover
+    output += ', Temp: ' + str(temp)
+    output += ', Dew Point: ' + str(dew)
+    if windchill:
+        output += ', Windchill: ' + str(windchill)
+    output += ', Pressure: ' + pressure
+    if cond:
+        output += ' Condition: ' + cond
+    output += ', Wind: ' + wind
+    output += ' - %s, %s' % (str(icao_code), time)
 
-    self.msg(origin.sender, format.encode('utf-8') % args)
+
+    self.say(output)
 f_weather.rule = (['weather', 'wx'], r'(.*)')
 
 
