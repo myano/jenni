@@ -147,7 +147,7 @@ class Jenni(irc.Bot):
                         prefix = self.config.prefix
                         commands, pattern = func.rule
                         for command in commands:
-                            command = r'(%s)\b(?: +(?:%s))?' % (command, pattern)
+                            command = r'(?i)(%s)\b(?: +(?:%s))?' % (command, pattern)
                             regexp = re.compile(prefix + command)
                             bind(self, func.priority, regexp, func)
 
@@ -156,13 +156,13 @@ class Jenni(irc.Bot):
                         prefix, commands, pattern = func.rule
                         prefix = sub(prefix)
                         for command in commands:
-                            command = r'(%s) +' % command
+                            command = r'(?i)(%s) +' % command
                             regexp = re.compile(prefix + command + pattern)
                             bind(self, func.priority, regexp, func)
 
             if hasattr(func, 'commands'):
                 for command in func.commands:
-                    template = r'^%s(%s)(?: +(.*))?$'
+                    template = r'(?i)^%s(%s)(?: +(.*))?$'
                     pattern = template % (self.config.prefix, command)
                     regexp = re.compile(pattern)
                     bind(self, func.priority, regexp, func)
