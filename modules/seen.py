@@ -13,6 +13,8 @@ More info:
 import time
 from tools import deprecated
 
+## TODO: Make it save .db to disk
+
 @deprecated
 def f_seen(self, origin, match, args):
     """.seen <nick> - Reports when <nick> was last seen."""

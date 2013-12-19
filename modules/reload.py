@@ -49,6 +49,8 @@ def f_reload(jenni, input):
     jenni.bind_commands()
 
     jenni.reply('%r (version: %s)' % (module, modified))
+    if hasattr(jenni.config, 'logchan_pm'):
+        jenni.msg(jenni.config.logchan_pm, 'RELOADED: %r -- (%s, %s) - %s' % (module, input.sender, input.nick, modified))
 f_reload.name = 'reload'
 f_reload.rule = ('$nick', ['reload'], r'(\S+)?')
 f_reload.priority = 'low'
