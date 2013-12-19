@@ -693,7 +693,7 @@ leave.thread = False
 leave.rate = 0
 
 def remove_on_part(jenni, input):
-    unobot.remove_player(jenni, input.nick)
+    unobot.remove_player(jenni, (input.nick).lower())
 remove_on_part.event = 'PART'
 remove_on_part.rule = '.*'
 remove_on_part.priority = 'low'
@@ -701,7 +701,7 @@ remove_on_part.thread = False
 remove_on_part.rate = 0
 
 def remove_on_quit(jenni, input):
-    unobot.remove_player(jenni, input.nick)
+    unobot.remove_player(jenni, (input.nick).lower())
 remove_on_quit.event = 'QUIT'
 remove_on_quit.rule = '.*'
 remove_on_quit.priority = 'low'
@@ -709,7 +709,7 @@ remove_on_quit.thread = False
 remove_on_quit.rate = 0
 
 def remove_on_kick(jenni, input):
-    unobot.remove_player(jenni, input.nick)
+    unobot.remove_player(jenni, (input.nick).lower())
 remove_on_kick.event = 'KICK'
 remove_on_kick.rule = '.*'
 remove_on_kick.priority = 'low'
@@ -717,7 +717,7 @@ remove_on_kick.thread = False
 remove_on_kick.rate = 0
 
 def remove_on_nickchg(jenni, input):
-    unobot.remove_player(jenni, input.nick)
+    unobot.remove_player(jenni, (input.nick).lower())
 remove_on_nickchg.event = 'NICK'
 remove_on_nickchg.rule = '.*'
 remove_on_nickchg.priority = 'low'
