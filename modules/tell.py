@@ -56,6 +56,9 @@ def setup(self):
 def f_remind(jenni, input):
     teller = input.nick
 
+    #if not input.group(2) or input.group(3):
+    #    return jenni.say('Please tell me who and what to tell people.')
+
     # @@ Multiple comma-separated tellees? Cf. Terje, #swhack, 2006-04-15
     if input.group() and (input.group()).startswith('.tell'):
         verb = 'tell'.encode('utf-8')

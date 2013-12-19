@@ -277,7 +277,7 @@ def setpoint(jenni, input):
     if line:
         line = line.lstrip().rstrip()
     scores.setpoint(jenni, input, line)
-setpoint.commands = ['setpoint']
+setpoint.commands = ['setpoint', 'setscore']
 setpoint.priority = 'medium'
 
 
