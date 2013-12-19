@@ -508,7 +508,6 @@ collect_links.priority = 'low'
 def unbitly(jenni, input):
     url = input.group(2)
     if not url:
-        #return jenni.say('No URL provided')
         if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
             url = jenni.bot.last_seen_uri[input.sender]
         else:
