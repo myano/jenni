@@ -40,8 +40,8 @@ class Session(object):
                'asbotname', 'ttsvoice', 'typing', 'lineref', 'fno', 'sub',
                'islearning', 'cleanslate']
     headers = dict()
-    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0)'
-    headers['User-Agent'] += ' Gecko/20130101 Firefox/23.0'
+    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0)'
+    headers['User-Agent'] += ' Gecko/20130101 Firefox/26.0'
     headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;'
     headers['Accept'] += 'q=0.9,*/*;q=0.8'
     headers['Accept-Language'] = 'en-us;q=0.8,en;q=0.5'

@@ -29,7 +29,7 @@ def remove_spaces(x):
 
 class Grab(web.urllib.URLopener):
     def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0'
+        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
         web.urllib.URLopener.__init__(self, *args)
         self.addheader('Referer', 'https://github.com/myano/jenni')
         self.addheader('Accept', '*/*')

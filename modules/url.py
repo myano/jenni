@@ -35,7 +35,7 @@ BITLY_TRIGGER_LEN_NOTITLE = 80
 EXCLUSION_CHAR = '!'
 IGNORE = list()
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
@@ -415,6 +415,10 @@ def show_title_auto(jenni, input):
     status, results = get_results(input)
 
     k = 1
+
+    output_shorts = str()
+    results_len = len(results)
+
     for r in results:
         returned_title = r[0]
         orig = r[1]
@@ -447,13 +451,17 @@ def show_title_auto(jenni, input):
                     response = reg_format % (returned_title, getTLD(orig))
         elif len(orig) > BITLY_TRIGGER_LEN_NOTITLE:
             if useBitLy and bitly_link != orig:
-                response = '%s' % (bitly_link)
+                #response = '%s' % (bitly_link)
+                output_shorts += bitly_link + ' '
             else:
                 ## Fail silently, link can't be bitly'ed and no title was found
                 pass
 
         if response:
             jenni.say(response)
+
+    if output_shorts:
+        jenni.say((output_shorts).strip())
 show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 show_title_auto.priority = 'high'
 
