@@ -37,6 +37,8 @@ def woot(jenni, input):
     base2 = "\x02 {3}, \x02Quantity:\x02 {4}, \x02Woot-Off:\x02 {5} -- {6}"
     base = base1 + base2
 
+    link = link.split('?')[0]
+
     output = base.format(item, price, soldout, condition, quantity,
             woot_off, link.replace("http:", "https:"))
     jenni.reply(output)
