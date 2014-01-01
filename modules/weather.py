@@ -327,7 +327,10 @@ def f_weather(self, origin, match, args):
         windchill = 13.12 + (0.6215 * temp) - (11.37 * (speed_kmh ** (0.16))) + (0.3965 * temp * (speed_kmh ** (0.16)))
         windchill = round(windchill)
         f = round((windchill * 1.8) + 32, 2)
-        windchill = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, windchill)
+        if icao_code.startswith('K'):
+            windchill = u'%s\u00B0F (%s\u00B0C)'.encode('utf-8') % (f, windchill)
+        else:
+            windchill = u'%s\u00B0C'.encode('utf-8') % (windchill)
 
     if pressure:
         if pressure.startswith('Q'):
