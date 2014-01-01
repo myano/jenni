@@ -65,8 +65,8 @@ def chat(jenni, input):
     else:
         return
     if msgo:
-        rand_num = random.randint(0, 20)
-        time.sleep(5 + rand_num)
+        rand_num = random.randint(0, 15)
+        time.sleep(3 + rand_num)
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
         if pm:
             jenni.say(response)
