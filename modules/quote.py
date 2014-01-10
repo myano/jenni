@@ -54,16 +54,12 @@ def retrievequote(jenni, input):
         jenni.reply("I'm not sure which quote you would like to see.")
     else:
         if lines:
-            #if number > 1:
-            #    line = lines[number - 1]
             if number == 1:
                 line = lines[0]
             elif number == 0:
                 return jenni.say('There is no "0th" quote!')
             else:
                 line = lines[number - 1]
-            #elif number == 0:
-                #line = lines[0]
             jenni.reply('Quote %s of %s: ' % (number, MAX) + line)
         else:
             jenni.reply(NO_QUOTES)
