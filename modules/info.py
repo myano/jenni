@@ -44,7 +44,7 @@ def commands(jenni, input):
         return
     names = ', '.join(sorted(jenni.doc.iterkeys()))
     jenni.reply("I am sending you a private message of all my commands!")
-    jenni.reply('For more robust help please see: http://git.io/up8c4A')
+    jenni.reply('For more robust help please see: http://is.gd/CPStvK')
     jenni.msg(input.nick, 'Commands I recognise: ' + names + '.')
 commands.commands = ['commands', 'help']
 commands.priority = 'low'
