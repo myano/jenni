@@ -507,5 +507,33 @@ fucking_weather.commands = ['fucking_weather', 'fw']
 fucking_weather.priority = 'low'
 fucking_weather.rate = 5
 
+
+def windchill(jenni, input):
+    '''.windchill <temp> <wind speed> -- shows Windchill in F'''
+    text = input.split()
+    if len(text) == 1:
+        return jenni.say(u'.windchill <temp> <wind speed> -- shows Windchill in \u00B0F')
+    if len(text) >= 3:
+        try:
+            temp = float(text[1])
+            wind = float(text[2])
+        except:
+            return jenni.say('Invalid arguments! Try, .windchill without any parameters.')
+
+    if temp > 50:
+        return jenni.say(u'The windchill formula only works on temperatures below 50 \u00B0F')
+
+    if wind < 0:
+        return jenni.say("You can't have negative wind speed!")
+    elif wind >= 300:
+        jenni.reply('Are you okay?')
+
+    ## cf. https://en.wikipedia.org/wiki/Wind_chill#North_American_and_United_Kingdom_wind_chill_index
+    wc = 35.74 + (0.6215 * temp) - (35.75 * (wind ** (0.16))) + (0.4275 * temp * (wind ** (0.16)))
+
+    jenni.say(u'Windchill: %2.f \u00B0F' % (wc))
+windchill.commands = ['windchill', 'wc']
+windchill.priority = 'low'
+
 if __name__ == '__main__':
     print __doc__.strip()
