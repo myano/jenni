@@ -45,7 +45,7 @@ def gif(jenni, input):
     origterm = origterm.encode('utf-8')
     origterm = origterm.strip()
 
-    error = None 
+    error = None
 
     try: result = animate_me(origterm)
     except IOError:

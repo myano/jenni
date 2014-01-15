@@ -47,7 +47,7 @@ def img(jenni, input):
     origterm = origterm.encode('utf-8')
     origterm = origterm.strip()
 
-    error = None 
+    error = None
 
     try: result = image_me(origterm)
     except IOError:

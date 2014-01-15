@@ -20,7 +20,7 @@ mustache_uri = 'http://mustachify.me/?src=%s'
 
 def mustache_me(term):
     quoted_url = image_me.image_me(term)
-    
+
     global mustache_uri
 
     if quoted_url:
@@ -33,7 +33,7 @@ def mustache(jenni, input):
     origterm = origterm.encode('utf-8')
     origterm = origterm.strip()
 
-    error = None 
+    error = None
 
     try: result = mustache_me(origterm)
     except IOError:
