@@ -12,11 +12,14 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-try: import image_me
+try:
+    import image_me
 except ImportError:
-    raise ImportError("You must have the image_me module to use the mustache_me module")
+    raise ImportError("You must have the image_me module to use"
+                      "the mustache_me module")
 
 mustache_uri = 'http://mustachify.me/?src=%s'
+
 
 def mustache_me(term):
     quoted_url = image_me.image_me(term)
@@ -25,6 +28,7 @@ def mustache_me(term):
 
     if quoted_url:
         return (mustache_uri % quoted_url)
+
 
 def mustache(jenni, input):
     origterm = input.groups()[1]
@@ -35,17 +39,22 @@ def mustache(jenni, input):
 
     error = None
 
-    try: result = mustache_me(origterm)
+    try:
+        result = mustache_me(origterm)
     except IOError:
-        error = "An error occurred connecting to Google Images or the mustachifier"
+        error = "An error occurred connecting to Google Images"
+        error += "or the mustachifier"
         traceback.print_exc()
     except Exception as e:
-        error = "An unknown error occurred: "+str(e)
+        error = "An unknown error occurred: " + str(e)
         traceback.print_exc()
 
-    if error is not None: jenni.say(error)
-    elif result is not None: jenni.say(result)
-    else: jenni.say('Can\'t find anything in Google Images for "%s".' % origterm)
+    if error is not None:
+        jenni.say(error)
+    elif result is not None:
+        jenni.say(result)
+    else:
+        jenni.say('Can\'t find anything in Google Images for "%s".' % origterm)
 
 mustache.commands = ['mustache_me']
 mustache.priority = 'high'

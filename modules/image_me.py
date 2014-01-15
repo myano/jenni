@@ -12,12 +12,21 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import re, urllib, traceback, random, urlparse
-try: from BeautifulSoup import BeautifulSoup as Soup
-except ImportError:
-    raise ImportError("Could not find BeautifulSoup library, please install to use the image_me module")
+import random
+import re
+import traceback
+import urllib
+import urlparse
 
-google_images_uri = 'https://www.google.com/search?safe=off&source=lnms&tbm=isch&q=%s'
+try:
+    from BeautifulSoup import BeautifulSoup as Soup
+except ImportError:
+    raise ImportError("Could not find BeautifulSoup library,"
+                      "please install to use the image_me module")
+
+google_images_uri = 'https://www.google.com/search?safe=off'
+google_images_uri += '&source=lnms&tbm=isch&q=%s'
+
 
 def image_me(term):
     global google_images_uri
@@ -25,20 +34,21 @@ def image_me(term):
     t = urllib.quote_plus(term)
     # URL encode the term given
     if '%' in term:
-        t = urllib.quote_plus(term.replace('%',''))
+        t = urllib.quote_plus(term.replace('%', ''))
 
     content = urllib.urlopen(google_images_uri % t).read()
     soup = Soup(content)
     img_links = [a['href'] for a in soup.findAll('a', 'rg_l', href=True)]
 
     if img_links:
-        full_link = img_links[random.randint(0,len(img_links)-1)]
+        full_link = img_links[random.randint(0, len(img_links) - 1)]
         parsed_link = urlparse.urlparse(full_link)
         query = urlparse.parse_qs(parsed_link.query)
         img_url = query['imgurl']
         if type(img_url) == list:
             img_url = img_url[0]
         return urllib.unquote_plus(img_url)
+
 
 def img(jenni, input):
     origterm = input.groups()[1]
@@ -49,17 +59,21 @@ def img(jenni, input):
 
     error = None
 
-    try: result = image_me(origterm)
+    try:
+        result = image_me(origterm)
     except IOError:
         error = "An error occurred connecting to Google Images"
         traceback.print_exc()
     except Exception as e:
-        error = "An unknown error occurred: "+str(e)
+        error = "An unknown error occurred: " + str(e)
         traceback.print_exc()
 
-    if error is not None: jenni.say(error)
-    elif result is not None: jenni.say(result)
-    else: jenni.say('Can\'t find anything in Google Images for "%s".' % origterm)
+    if error is not None:
+        jenni.say(error)
+    elif result is not None:
+        jenni.say(result)
+    else:
+        jenni.say('Can\'t find anything in Google Images for "%s".' % origterm)
 
 img.commands = ['img_me', 'image_me']
 img.priority = 'high'
