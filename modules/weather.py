@@ -464,19 +464,16 @@ def fucking_weather(jenni, input):
     if not text:
         jenni.reply('INVALID FUCKING INPUT. PLEASE ENTER A FUCKING ZIP CODE, OR A FUCKING CITY-STATE PAIR.')
         return
-    new_text = str()
-    for x in text:
-        if x in latex.HTML_ENCODINGS:
-            new_text += latex.HTML_ENCODINGS[x]
-        else:
-            new_text += x
 
     new_text = uc.encode(new_text)
-    url = 'http://thefuckingweather.com/?where=%s' % (web.quote(new_text))
+    search = urllib2.quote((new_text).strip())
+    url = 'http://thefuckingweather.com/?where=%s' % (search)
+
     try:
         page = web.get(url)
     except:
         return jenni.say("I COULDN'T ACCESS THE FUCKING SITE.")
+
     re_mark = re.compile('<p class="remark">(.*?)</p>')
     re_temp = re.compile('<span class="temperature" tempf="\S+">(\S+)</span>')
     re_condition = re.compile('<p class="large specialCondition">(.*?)</p>')
