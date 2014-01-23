@@ -111,6 +111,10 @@ defend_ground.priority = 'low'
 def blocks(jenni, input):
     if not input.admin: return
 
+    if hasattr(jenni.config, 'logchan_pm'):
+        # BLOCKS USED - user in ##channel - text
+        jenni.msg(jenni.config.logchan_pm, 'BLOCKS USED - %s in %s -- %s' % (input.nick, input.sender, input))
+
     STRINGS = {
             'success_del' : 'Successfully deleted block: %s',
             'success_add' : 'Successfully added block: %s',

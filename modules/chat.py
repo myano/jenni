@@ -11,15 +11,21 @@ More info:
 
 
 import cleverbot
+from htmlentitydefs import name2codepoint
 import json
+from modules import unicode as uc
 import random
 import re
 import time
-import web
 
 mycb = cleverbot.Session()
 
 nowords = ['reload', 'help', 'tell', 'ask']
+
+r_entity = re.compile(r'&[A-Za-z0-9#]+;')
+HTML_ENTITIES = { 'apos': "'" }
+
+random.seed()
 
 
 def chat(jenni, input):
@@ -64,10 +70,12 @@ def chat(jenni, input):
             return
     else:
         return
+    print 'msgo:', list(msgo)
     if msgo:
         rand_num = random.randint(0, 15)
         time.sleep(3 + rand_num)
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
+        response = r_entity.sub(e, response)
         if pm:
             jenni.say(response)
             beginning = ':%s PRIVMSG %s :' % (jenni.config.nick, input.sender)
@@ -78,6 +86,31 @@ def chat(jenni, input):
             msg = '%s%s %s' % (input.nick, delim, response)
             jenni.say(msg)
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
+
+
+def e(m):
+    entity = m.group()
+    if entity.startswith('&#x'):
+        cp = int(entity[3:-1], 16)
+        meep = unichr(cp)
+    elif entity.startswith('&#'):
+        cp = int(entity[2:-1])
+        meep = unichr(cp)
+    else:
+        entity_stripped = entity[1:-1]
+        try:
+            char = name2codepoint[entity_stripped]
+            meep = unichr(char)
+        except:
+            if entity_stripped in HTML_ENTITIES:
+                meep = HTML_ENTITIES[entity_stripped]
+            else:
+                meep = str()
+    try:
+        return uc.decode(meep)
+    except:
+        return uc.decode(uc.encode(meep))
+
 
 if __name__ == '__main__':
     print __doc__.strip()
