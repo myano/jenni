@@ -135,7 +135,7 @@ def c(jenni, input):
             else:
                 ## If we made it this far, we have tried all available resources
                 jenni.say('Absolutely no results!')
-c.commands = ['c', 'calc']
+c.commands = ['c', 'cal', 'calc']
 c.example = '.c 5 + 3'
 
 
