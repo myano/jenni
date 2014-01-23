@@ -392,7 +392,7 @@ def f_weather(jenni, input):
         dew = '?'
 
     windchill = False
-    if isinstance(temp, float) and isinstance(speed, float) and temp <= 10.0:
+    if isinstance(temp, float) and isinstance(speed, float) and temp <= 10.0 and speed > 0:
         speed_kmh = speed * 1.852
         windchill = 13.12 + (0.6215 * temp) - (11.37 * (speed_kmh ** (0.16))) + (0.3965 * temp * (speed_kmh ** (0.16)))
         windchill = float(windchill)
@@ -558,7 +558,7 @@ def fucking_weather(jenni, input):
     if remarks:
         response += remarks[0]
     else:
-        response += "I CAN'T FIND THAT SHIT."
+        response += "I CAN'T FIND THAT SHIT ON THEIR PAGE."
     if conditions:
         response += ' ' + conditions[0]
     if flavor:
