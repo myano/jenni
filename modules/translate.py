@@ -31,7 +31,7 @@ def translate(text, input='auto', output='en', use_proxy=False):
     )]
 
     input, output = urllib.quote(input), urllib.quote(output)
-    text = urllib.quote(text)
+    text = urllib.quote((text).decode('utf-8'))
 
     uri = 'https://translate.google.com/translate_a/t?'
     params = {
@@ -54,6 +54,8 @@ def translate(text, input='auto', output='en', use_proxy=False):
     for x in params:
         uri += '&%s=%s' % (x, params[x])
 
+    #print "uri", uri
+
     result = opener.open(uri).read()
 
     ## this is hackish
@@ -73,7 +75,10 @@ def translate(text, input='auto', output='en', use_proxy=False):
         language = '?'
 
     if isinstance(language, list):
-        language = data[-2][0][0]
+        try:
+            language = data[-2][0][0]
+        except:
+            language = data[1]
 
     return ''.join(x[0] for x in data[0]), language
 
@@ -147,14 +152,14 @@ def mangle(jenni, input):
     phrase = input.group(2).encode('utf-8')
     for lang in ['fr', 'de', 'es', 'it', 'ja']:
         backup = phrase
-        phrase = translate(phrase, 'en', lang)
+        phrase, meh_lang = translate(phrase, 'en', lang)
         if not phrase:
             phrase = backup
             break
         __import__('time').sleep(0.5)
 
         backup = phrase
-        phrase = translate(phrase, lang, 'en')
+        phrase, meh_lang = translate(phrase, lang, 'en')
         if not phrase:
             phrase = backup
             break
