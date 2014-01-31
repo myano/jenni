@@ -70,7 +70,6 @@ def chat(jenni, input):
             return
     else:
         return
-    print 'msgo:', list(msgo)
     if msgo:
         rand_num = random.randint(0, 15)
         time.sleep(3 + rand_num)
