@@ -10,7 +10,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import sys, re, time, traceback
+import sys, re, time, datetime, traceback
 import socket, asyncore, asynchat
 import os, codecs
 
@@ -45,8 +45,8 @@ def check_logdir():
 
 def log_raw(line):
     check_logdir()
-    f = codecs.open(cwd + "/logs/raw.log", 'a', encoding='utf-8')
-    f.write(str(time.time()) + "\t")
+    f = codecs.open(cwd + "/logs/raw_" + datetime.datetime.now().strftime("%Y-%m-%d") + ".log", 'a', encoding='utf-8')
+    f.write(datetime.datetime.now().strftime("[%H:%M:%S]") + "\t")
     temp = line.replace('\n', '')
     try:
         temp = temp.decode('utf-8')
