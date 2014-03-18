@@ -120,7 +120,11 @@ class Jenni(irc.Bot):
 
             if not hasattr(func, 'event'):
                 func.event = 'PRIVMSG'
-            else: func.event = func.event.upper()
+            else:
+                if func.event:
+                    func.event = func.event.upper()
+                else:
+                    continue
 
             if not hasattr(func, 'rate'):
                 if hasattr(func, 'commands'):

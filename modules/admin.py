@@ -234,7 +234,7 @@ def write_raw(jenni, input):
         jenni.write([b[0].strip()], u' '.join(b[1:]), raw=True)
         status = True
     if status:
-        jenni.reply('Message sent to server.')
+        jenni.say('Message sent to server.')
 write_raw.commands = ['write']
 write_raw.priority = 'high'
 write_raw.thread = False
