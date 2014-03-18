@@ -11,11 +11,18 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+from BeautifulSoup import BeautifulSoup
 import json
+import re
 import time
 import urllib
 import urllib2
 import web
+
+r_tag = re.compile(r'<(?!!)[^>]+>')
+iso639_page = web.get('https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes')
+soup = BeautifulSoup(iso639_page)
+
 
 def translate(text, input='auto', output='en', use_proxy=False):
     raw = False
@@ -30,6 +37,33 @@ def translate(text, input='auto', output='en', use_proxy=False):
         'Gecko/20071127 Firefox/2.0.0.11'
     )]
 
+    input, output = urllib2.quote(input), urllib2.quote(output)
+
+    try:
+        if text is not text.encode("utf-8"):
+            text = text.encode("utf-8")
+    except:
+        pass
+    text = urllib2.quote(text)
+    result = opener.open('http://translate.google.com/translate_a/t?' +
+                         ('client=t&sl=%s&tl=%s' % (input, output)) +
+                         ('&q=%s' % text)).read()
+    while ',,' in result:
+        result = result.replace(',,', ',null,')
+        result = result.replace('[,', '[null,')
+    data = json.loads(result)
+
+    if raw:
+        return str(data), 'en-raw'
+
+    try:
+        language = data[2] # -2][0][0]
+    except:
+        language = '?'
+
+    return ''.join(x[0] for x in data[0]), language
+
+    """
     input, output = urllib.quote(input), urllib.quote(output)
     text = urllib.quote((text).decode('utf-8'))
 
@@ -81,6 +115,7 @@ def translate(text, input='auto', output='en', use_proxy=False):
             language = data[1]
 
     return ''.join(x[0] for x in data[0]), language
+    """
 
 def tr(jenni, context):
     """Translates a phrase, with an optional language hint."""
@@ -167,6 +202,49 @@ def mangle(jenni, input):
 
     jenni.reply(phrase or 'ERRORS SRY')
 mangle.commands = ['mangle']
+
+
+def iso639(jenni, input):
+    inc_text = input.group(2)
+    if not inc_text:
+        return jenni.say('No input provided.')
+    text = (inc_text).encode('utf-8')
+    col_match = soup.find('td', text=inc_text)
+    if not col_match:
+        return jenni.say('No matches found.')
+
+    row = col_match.parent.parent
+
+    if str(row).startswith('<td>'):
+        row = row.parent
+
+    row_cols = row.findAll('td')
+
+    family = (str(row_cols[1])).decode('utf-8')
+    language_name = (str(row_cols[2])).decode('utf-8')
+    native_name = (str(row_cols[3])).decode('utf-8')
+    iso_6391 = (str(row_cols[4])).decode('utf-8')
+    iso_6392T = (str(row_cols[5])).decode('utf-8')
+    iso_6392B = (str(row_cols[6])).decode('utf-8')
+    iso_6393 = (str(row_cols[7])).decode('utf-8')
+    iso_6396 = (str(row_cols[8])).decode('utf-8')
+    notes = str(row_cols[9]).decode('utf-8')
+
+    family = r_tag.sub('', family)
+    language_name = r_tag.sub('', language_name)
+    native_name = r_tag.sub('', native_name)
+    iso_6391 = r_tag.sub('', iso_6391)
+    iso_6392T = r_tag.sub('', iso_6392T)
+    iso_6392B = r_tag.sub('', iso_6392B)
+    iso_6393 = r_tag.sub('', iso_6393)
+    iso_6396 = r_tag.sub('', iso_6396)
+    notes = r_tag.sub('', notes)
+    if not notes or len(notes) <= 1:
+        notes = 'N/A'
+
+    jenni.say(u'\x02Language Name:\x02 %s, Native name: %s, Language family: %s (639-1: %s, 639-2/T: %s, 639-2/B: %s, 639-3: %s, 639-6: %s, notes: %s)' % (language_name, native_name, family, iso_6391, iso_6392T, iso_6392B, iso_6393, iso_6396, notes))
+
+iso639.commands = ['lang', '639']
 
 if __name__ == '__main__':
     print __doc__.strip()
