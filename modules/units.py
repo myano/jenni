@@ -18,7 +18,7 @@ import web
 
 exchange_rates = dict()
 last_check = dt.datetime.now()
-exchanges = ['mtgox', 'btce', 'rock', 'ripple', 'bitstamp', 'coinbase']
+exchanges = ['btce', 'rock', 'ripple', 'bitstamp', 'coinbase']
 
 
 def btc_page():
@@ -82,10 +82,10 @@ def btc(jenni, input):
     for each in symbols:
         if each.replace('USD', '') in exchanges:
             response += '%s: %s | ' % (each, exchange_rates['USD'][each])
-    response += 'lolcat (mtgox) index: $%s | ' % (ppnum(float(
-        exchange_rates['USD']['mtgox']) * 160))
-    response += 'Howells (mtgox) index: $%s | ' % (ppnum(float(
-        exchange_rates['USD']['mtgox']) * 7500))
+    response += 'lolcat (coinbase) index: $%s | ' % (ppnum(float(
+        exchange_rates['USD']['coinbase']) * 160))
+    response += 'Howells (coinbase) index: $%s | ' % (ppnum(float(
+        exchange_rates['USD']['coinbase']) * 7500))
     response += 'last updated at: %s UTC' % (str(last_check))
     jenni.say(response)
 btc.commands = ['btc']
