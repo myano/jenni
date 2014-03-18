@@ -51,6 +51,7 @@ def chat(jenni, input):
         ## in a channel and prepended with jenni's name
         pm = False
         try:
+            time.sleep(5 + random.randint(3, 30))
             msgo = mycb.Ask(msgi)
         except:
             return
@@ -65,14 +66,16 @@ def chat(jenni, input):
                 if spt.startswith(x):
                     return
         try:
+            time.sleep(5 + random.randint(1, 10))
             msgo = mycb.Ask(msgi)
         except:
             return
     else:
         return
+    #print 'msgo', msgo
     if msgo:
-        rand_num = random.randint(0, 15)
-        time.sleep(3 + rand_num)
+        rand_num = random.randint(0, 5)
+        time.sleep(1 + rand_num)
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
         response = r_entity.sub(e, response)
         if pm:

@@ -60,10 +60,11 @@ def f_remind(jenni, input):
         jenni.msg(jenni.config.logchan_pm, 'TELL used by %s in %s: %s' % (str(input.nick), str(input.sender), input))
 
     #if not input.group(2) or input.group(3):
-    #    return jenni.say('Please tell me who and what to tell people.')
+    if not input.group(2):
+        return jenni.say('Please tell me who and what to tell people.')
 
     # @@ Multiple comma-separated tellees? Cf. Terje, #swhack, 2006-04-15
-    if input.group() and (input.group()).startswith('.tell'):
+    if input.group() and (input.group()).lower().startswith('.tell'):
         verb = 'tell'.encode('utf-8')
         line = input.groups()
         line_txt = line[1].split()
