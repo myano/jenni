@@ -27,6 +27,11 @@ c_pattern = r'(?ims)<(?:h2 class="r"|div id="aoba")[^>]*>(.*?)</(?:h2|div)>'
 c_answer = re.compile(c_pattern)
 r_tag = re.compile(r'<(?!!)[^>]+>')
 
+try:
+    import proxy
+except:
+    pass
+
 
 def c(jenni, input):
     '''.c -- Google calculator.'''
@@ -46,13 +51,13 @@ def c(jenni, input):
 
     ## To the webs!
     try:
-        page = web.get(uri)
+        page = proxy.get(uri)
     except:
         ## if we can't access Google for calculating
         ## let us move on to Attempt #2
-        page = None
-        answer = None
+        page = web.get(uri)
 
+    answer = False
     if page:
         ## if we get a response from Google
         ## let us parse out an equation from Google Search results
@@ -62,6 +67,7 @@ def c(jenni, input):
         ## if the regex finding found a match we want the first result
         answer = answer[0]
         #answer = answer.replace(u'\xc2\xa0', ',')
+        answer = answer.encode('unicode-escape')
         answer = answer.decode('unicode-escape')
         answer = ''.join(chr(ord(c)) for c in answer)
         answer = uc.decode(answer)
@@ -69,6 +75,7 @@ def c(jenni, input):
         answer = answer.replace('</sup>', ')')
         answer = web.decode(answer)
         answer = answer.strip()
+        answer += ' [GC]'
         jenni.say(answer)
     else:
         #### Attempt #2 (DuckDuckGo's API)
@@ -78,9 +85,9 @@ def c(jenni, input):
         ## Try to grab page (results)
         ## If page can't be accessed, we shall fail!
         try:
-            page = web.get(ddg_uri)
+            page = proxy.get(ddg_uri)
         except:
-            page = None
+            page = web.get(ddg_uri)
 
         ## Try to take page source and json-ify it!
         try:
@@ -101,40 +108,53 @@ def c(jenni, input):
         if answer:
             ## If we have found answer with Attempt #2
             ## go ahead and display it
+            answer += ' [DDG API]'
             jenni.say(answer)
+
         else:
-            #### Attempt #3 (DuckDuckGo's HTML)
-            ## This relies on BeautifulSoup; if it can't be found, don't even bother
-            try:
-                from BeautifulSoup import BeautifulSoup
-            except:
-                return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
+            #### Attempt #3 (Wolfram Alpha)
+            status, answer = get_wa(q)
 
-            ddg_html_page = web.get('https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q)))
-            soup = BeautifulSoup(ddg_html_page)
+            if status:
+                jenni.say(answer + ' [WA]')
 
-            ## use BeautifulSoup to parse HTML for an answer
-            zero_click = str()
-            if soup('div', {'class': 'zero-click-result'}):
-                zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
-
-            ## remove some excess text
-            output = r_tag.sub('', zero_click).strip()
-            output = output.replace('\n', '').replace('\t', '')
-
-            ## test to see if the search module has 'remove_spaces'
-            ## otherwise, let us fail
-            try:
-                output = search.remove_spaces(output)
-            except:
-                output = str()
-
-            if output:
-                ## If Attempt #3 worked, display the answer
-                jenni.say(output)
             else:
-                ## If we made it this far, we have tried all available resources
-                jenni.say('Absolutely no results!')
+                #### Attempt #4 (DuckDuckGo's HTML)
+                ## This relies on BeautifulSoup; if it can't be found, don't even bother
+                try:
+                    from BeautifulSoup import BeautifulSoup
+                except:
+                    return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
+
+                new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
+                try:
+                    ddg_html_page = proxy.get(new_url)
+                except:
+                    ddg_html_page = web.get(new_url)
+                soup = BeautifulSoup(ddg_html_page)
+
+                ## use BeautifulSoup to parse HTML for an answer
+                zero_click = str()
+                if soup('div', {'class': 'zero-click-result'}):
+                    zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+
+                ## remove some excess text
+                output = r_tag.sub('', zero_click).strip()
+                output = output.replace('\n', '').replace('\t', '')
+
+                ## test to see if the search module has 'remove_spaces'
+                ## otherwise, let us fail
+                try:
+                    output = search.remove_spaces(output)
+                except:
+                    output = str()
+
+                if output:
+                    ## If Attempt #4 worked, display the answer
+                    jenni.say(output + ' [DDG HTML]')
+                else:
+                    ## If we made it this far, we have tried all available resources
+                    jenni.say('Absolutely no results!')
 c.commands = ['c', 'cal', 'calc']
 c.example = '.c 5 + 3'
 
@@ -159,17 +179,13 @@ py.commands = ['py', 'python']
 py.example = '.py print "Hello world, %s!" % ("James")'
 
 
-def wa(jenni, input):
-    """.wa <input> -- queries WolframAlpha with the given input."""
-    if not input.group(2):
-        return jenni.reply("No search term.")
-    query = input.group(2).encode('utf-8')
+def get_wa(search):
+    query = search.encode('utf-8')
     uri = 'https://tumbolia.appspot.com/wa/'
-    try:
-        answer = web.get(uri + web.urllib.quote(query.replace('+', '%2B')))
-    except timeout as e:
-        return jenni.say("Request timd out")
+    uri += urllib.quote(query.replace('+', '%2B'))
+    answer = web.get(uri)
     if answer:
+        print "answer:", answer
         answer = answer.decode("string_escape")
         answer = HTMLParser.HTMLParser().unescape(answer)
         match = re.search('\\\:([0-9A-Fa-f]{4})', answer)
@@ -183,11 +199,23 @@ def wa(jenni, input):
             temp = each.replace('\/', '/')
             newOutput.append(temp)
         waOutputArray = newOutput
+        print 'length:', len(waOutputArray)
         if (len(waOutputArray) < 2):
-            jenni.say(answer)
+            return True, answer
         else:
-            jenni.say(waOutputArray[0] + " = " + waOutputArray[1])
+            return True, waOutputArray[0] + ' | ' + " | ".join(waOutputArray[1:])
         waOutputArray = list()
+    else:
+        return False, str()
+
+
+def wa(jenni, input):
+    """.wa <input> -- queries WolframAlpha with the given input."""
+    if not input.group(2):
+        return jenni.reply("No search term.")
+    status, answer = get_wa(input.group(2))
+    if status:
+        jenni.say(answer)
     else:
         jenni.say('Sorry, no result from WolframAlpha.')
 wa.commands = ['wa', 'wolfram']
