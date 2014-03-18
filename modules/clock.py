@@ -265,7 +265,8 @@ def f_time(self, origin, match, args):
                 sign = '+'
             elif t < 0:
                 sign = '-'
-            tz = tz[1:]
+            if tz.startswith('+') or tz.startswith('-'):
+                tz = tz[1:]
             if int(tz) % 1 == 0.0:
                 ## if tz is a whole number
                 tz = int(tz)
