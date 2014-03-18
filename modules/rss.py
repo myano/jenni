@@ -19,7 +19,7 @@ from modules import url as url_module
 
 DEBUG = False
 socket.setdefaulttimeout(30)
-INTERVAL = 60  # seconds between checking for new updates
+INTERVAL = 60 * 5  # seconds between checking for new updates
 STOP = False
 
 
@@ -237,6 +237,7 @@ def startrss(jenni, input):
             jenni.say("Okay, I'll re-start rss...")
 
     if not STOP:
+        jenni.say('Starting rss...')
         while True:
             if STOP:
                 jenni.reply("STOPPED")
