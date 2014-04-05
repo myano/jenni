@@ -13,12 +13,11 @@ def toggleUpdates(jenni, input):
 			timerTask = threading.Timer(30.0, checkUpdates)
 			timerTask.start()
 			bot = jenni
-			jenni.say("NSWiki Update Logging Enabled")
-			checkUpdates()
+			jenni.say("NSWiki Edit Logging Enabled")
 		else:
 			timerTask.cancel()
 			timerTask = None
-			jenni.say("NSWiki Update Logging Disabled")
+			jenni.say("NSWiki Edit Logging Disabled")
 	else:
 		jenni.say("You lack permission.")
 
@@ -41,7 +40,7 @@ def checkUpdates():
 			lastUpdate = utime
 			bot.say(formatWikiChange(timestamp, change))
 			if len(change["comment"]) > 0:
-				bot.say("   Comment: " + '\x03' + '04' + change["comment"]);
+				bot.say("     Comment: " + '\x03' + '04' + change["comment"]);
 
 def formatWikiChange(time, change):
 	str = time.strftime("%b %d, %Y at [%H:%M:%S] ")
@@ -51,11 +50,13 @@ def formatWikiChange(time, change):
 		str += change["user"] + " created http://nswiki.org/" + change["title"].replace(" ", "_")
 	elif change["type"] == "log":
 		if change["logtype"] == "delete":
-			str += change["user"] + " deleted http://nswiki.org/" + change["title"].replace(" ", "_")
+			str += change["user"] + " deleted http://nswiki.org/index.php?title=" + change["title"].replace(" ", "_")
 		elif change["logtype"] == "newusers":
 			str += change["title"].split(":")[1] + " user account created"
 		elif change["logtype"] == "upload":
-			str += change["user"] + " uploaded http://nswiki.org/" + change["title"].replace(" ", "_")
+			str += change["user"] + " uploaded http://nswiki.org/index.php?title=" + change["title"].replace(" ", "_")
+		elif change["logtype"] == "block":
+			str += change["user"] + " banned " + change["title"] + " for " + change["block"]["duration"]
 		else:
 			str += change["user"] + " " + change["logtype"] + " "
 	else:
