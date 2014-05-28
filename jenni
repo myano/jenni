@@ -35,6 +35,7 @@ def create_default_config(fn):
     nick = 'jenni'
     host = 'irc.example.net'
     port = 6667
+    ssl  = False
     channels = ['#example', '#test']
 
     # Channel jenni will report all private messages sent to her to.
@@ -178,6 +179,9 @@ def main(argv=None):
 
         if not hasattr(module, 'password'):
             module.password = None
+
+        if not hasattr(module, 'ssl'):
+            module.ssl = False
 
         if module.host == 'irc.example.net':
             error = ('Error: you must edit the config file first!\n' +

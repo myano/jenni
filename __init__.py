@@ -37,7 +37,7 @@ def run_jenni(config):
 
     def connect(config):
         p = bot.Jenni(config)
-        p.run(config.host, config.port)
+        p.run(config.host, config.port, config.ssl)
 
     try: Watcher()
     except Exception, e:
