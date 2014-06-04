@@ -161,6 +161,8 @@ class Bot(asynchat.async_chat):
                 self.close()
                 continue
             break
+        else:
+            raise Exception("No connectivity")
 
         try: asyncore.loop()
         except KeyboardInterrupt:
