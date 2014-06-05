@@ -14,7 +14,7 @@ import sys, re, time, traceback
 import socket, asyncore, asynchat
 import os, codecs
 
-IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
+IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '332', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
 cwd = os.getcwd()
 
 class Origin(object):
@@ -79,6 +79,12 @@ class Bot(asynchat.async_chat):
 
         import threading
         self.sending = threading.RLock()
+
+
+    def initiate_send(self):
+        self.sending.acquire()
+        asynchat.async_chat.initiate_send(self)
+        self.sending.release()
 
     # def push(self, *args, **kargs):
     #     asynchat.async_chat.push(self, *args, **kargs)
