@@ -60,7 +60,7 @@ def retrievequote(jenni, input):
                 return jenni.say('There is no "0th" quote!')
             else:
                 line = lines[number - 1]
-            jenni.reply('Quote %s of %s: ' % (number, MAX) + line)
+            jenni.say('Quote %s of %s: ' % (number, MAX) + line)
         else:
             jenni.reply(NO_QUOTES)
 retrievequote.commands = ['quote']
