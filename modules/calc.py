@@ -66,9 +66,8 @@ def c(jenni, input):
     if answer:
         ## if the regex finding found a match we want the first result
         answer = answer[0]
-        #answer = answer.replace(u'\xc2\xa0', ',')
-        answer = answer.encode('unicode-escape')
-        answer = answer.decode('unicode-escape')
+        answer = answer.encode('utf-8')
+        answer = answer.decode('utf-8')
         answer = ''.join(chr(ord(c)) for c in answer)
         answer = uc.decode(answer)
         answer = answer.replace('<sup>', '^(')
@@ -180,7 +179,10 @@ py.example = '.py print "Hello world, %s!" % ("James")'
 
 
 def get_wa(search):
-    query = search.encode('utf-8')
+    txt = search
+    txt = txt.decode('utf-8')
+    txt = txt.encode('utf-8')
+    query = txt
     uri = 'https://tumbolia.appspot.com/wa/'
     uri += urllib.quote(query.replace('+', '%2B'))
     answer = web.get(uri)
@@ -199,11 +201,10 @@ def get_wa(search):
             temp = each.replace('\/', '/')
             newOutput.append(temp)
         waOutputArray = newOutput
-        print 'length:', len(waOutputArray)
         if (len(waOutputArray) < 2):
             return True, answer
         else:
-            return True, waOutputArray[0] + ' | ' + " | ".join(waOutputArray[1:])
+            return True, waOutputArray[0] + ' | ' + ' | '.join(waOutputArray[1:4])
         waOutputArray = list()
     else:
         return False, str()
