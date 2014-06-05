@@ -33,7 +33,7 @@ def load_db():
         a = line.replace(r'\n', '')
         new = a.split(r',')
         if len(new) < 3: continue
-        channel = new[0]
+        channel = uc.encode(new[0])
         nick = new[1]
         if len(new) < 2: continue
         if channel not in search_dict:
@@ -58,6 +58,7 @@ def save_db(search_dict):
         if channel is not "":
             for nick in search_dict[channel]:
                 for line in search_dict[channel][nick]:
+                    channel = uc.decode(channel)
                     channel_utf = uc.encode(channel)
                     search_file.write(channel_utf)
                     search_file.write(",")
@@ -75,7 +76,9 @@ def save_db(search_dict):
 def collectlines(jenni, input):
     """Creates a temporary storage of most recent lines for s///"""
     # don't log things in PM
-    channel = (input.sender).encode("utf-8")
+    #channel = (input.sender).encode("utf-8")
+    channel = uc.decode(input.sender)
+    channel = uc.encode(channel)
     nick = (input.nick).encode("utf-8")
     if not channel.startswith('#'): return
     search_dict = load_db()
@@ -151,7 +154,7 @@ def findandreplace(jenni, input):
     save_db(search_dict)
 
     # output
-    phrase = nick + (input.group(1) and ' thinks ' + rnick or '') + (me and ' ' or " \x02meant\x02 to say: ") + new_phrase
+    phrase = nick + (input.group(1) and ' thinks ' + rnick or '') + (me and ' ' or " \x02probably meant\x02 to say: ") + new_phrase
     if me and not input.group(1): phrase = '\x02' + phrase + '\x02'
     jenni.say(phrase)
 
