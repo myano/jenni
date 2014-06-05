@@ -619,7 +619,6 @@ def join(jenni, input):
     if input.sender == CHANNEL:
         unobot.join(jenni, input)
 join.commands = ['ujoin']
-join.rule = '^ujoin$'
 join.priority = 'low'
 join.thread = False
 join.rate = 0
