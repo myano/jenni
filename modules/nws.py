@@ -14,6 +14,7 @@ watches, warnings, and advisories that are present.
 import copy
 import datetime
 import feedparser
+from modules import weather
 import re
 import sqlite3
 import string
@@ -93,7 +94,7 @@ months = {
 conditions = {
     'Heat': '\x02\x0304Heat\x03\x02',
     'Flood': '\x02\x0303Flood\x03\x02',
-    'Statement': '\x02\x0313__Statement__\x03\x02',
+    'Statement': '\x02\x0313\x1FStatement\x1F\x03\x02',
     'Surf': '\x02\x0311Surf\x03\x02',
     'Thunderstorm': '\x02\x0307Thunderstorm\x03\x02',
     'Red Flag': '\x02\x0304Red Flag\x03\x02',
@@ -101,10 +102,10 @@ conditions = {
     'Effect': '\x02\x0311Effect\x03\x02',
     'Air': '\x02\x0305Air\x03\x02',
     'Tornado': '\x02\x0304!!!TORNADO!!!\x03\x02',
-    'Watch': '\x02\x0308*_WATCH_*\x03\x02',
+    'Watch': '\x02\x0308\x1F*WATCH*\x1F\x03\x02',
     'Warning': '\x02\x0304!WARNING!\x03\x02',
     'Severe': '\x02\x0305Severe\x03\x02',
-    'Special': '\x02\x0306__Special__\x03\x02',
+    'Special': '\x02\x0306\x1FSpecial\x1F\x03\x02',
     'Fire': '\x02\x0304Fire\x03\x02',
     'Seas': '\x02\x0311Seas\x03\x02',
     'Danger': '\x02\x0304DANGER\x03\x02',
@@ -162,9 +163,10 @@ def nws_lookup(jenni, input):
     master_url = False
     if len(bits) == 2:
         ## county given
+        name, county, state, countryName, lat, lng = weather.location(text)
         url_part1 = 'http://alerts.weather.gov'
-        state = bits[1].lstrip().rstrip().lower()
-        county = bits[0].lstrip().rstrip().lower()
+        state = (state).strip().lower()
+        county = (county).strip().lower()
         reverse_lookup = list()
         if len(state) == 2:
             reverse_lookup = [k for k, v in states.iteritems() if v == state]
@@ -358,8 +360,8 @@ def weather_feed(jenni):
                     #    if condition in title:
                     #        title = title.replace(condition, conditions[condition])
                     title = colourize(title)
-
                     state = capitalize_all(state)
+
                     line1 = '\x02[\x0302{1}\x03] Part {2} of {3}: {0}\x02'
                     line2 = '{0}. \x02Certainty\x02: {1}\x02, Severity\x02: {2}, \x02Status\x02: {3}, \x02Urgency\x02: {4}'
                     areas = textwrap.wrap(area, 450)
@@ -368,15 +370,18 @@ def weather_feed(jenni):
                     for each in areas:
                         jenni.msg(ch_state, line1.format(each, state, str(counter_areas).zfill(2), str(len_areas).zfill(2)))
                         counter_areas += 1
+
                     jenni.msg(ch_state, line2.format(title, cert, severity, status, urgency))
+
                     summaries = textwrap.wrap(summary, 450)
                     len_summaries = len(summaries)
                     counter_summaries = 1
                     for each in summaries:
                         jenni.msg(ch_state, 'Part %s of %s: %s' % (str(counter_summaries).zfill(2), str(len_summaries).zfill(2), each))
                         counter_summaries += 1
-                conn.commit()
-                c.close()
+
+            conn.commit()
+            c.close()
 
 if __name__ == '__main__':
     print __doc__.strip()
