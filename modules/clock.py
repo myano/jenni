@@ -242,6 +242,8 @@ def f_time(self, origin, match, args):
         timenow = time.gmtime(time.time() + (float(tz_final) * 3600))
         if tz_final % 1 == 0.0:
             tz_final = int(tz_final)
+        if tz_final >= 100 or tz_final <= -100:
+            return self.reply('Time requested is too far away.')
         msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (str(sign), str(abs(tz_final))), timenow)
         self.msg(origin.sender, msg)
     else:
@@ -257,6 +259,8 @@ def f_time(self, origin, match, args):
                 error = "Sorry, I don't know about the '%s' timezone." % tz
                 self.msg(origin.sender, origin.nick + ': ' + error)
         else:
+            if t >= 100 or t <= -100:
+                return self.reply('Time requested is too far away.')
             try:
                 timenow = time.gmtime(time.time() + (t * 3600))
             except:
@@ -267,7 +271,8 @@ def f_time(self, origin, match, args):
                 sign = '-'
             if tz.startswith('+') or tz.startswith('-'):
                 tz = tz[1:]
-            if int(tz) % 1 == 0.0:
+            #if int(tz) % 1 == 0.0:
+            if type(float()) == tz:
                 ## if tz is a whole number
                 tz = int(tz)
             msg = time.strftime("%a, %d %b %Y %H:%M:%S UTC" + "%s%s" % (sign, str(tz)), timenow)
