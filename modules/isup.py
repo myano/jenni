@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 isup.py - Simple website status check with isup.me
-Copyright 2013, Michael Yanovich (yanovich.net)
-Copyright 2012, 2013 Edward Powell (embolalaia.net)
+Copyright 2013-2014, Michael Yanovich (yanovich.net)
+Copyright 2012-2013 Edward Powell (embolalaia.net)
 Licensed under the Eiffel Forum License 2.
 
 This allows users to check if a website is up through isup.me.
@@ -17,19 +17,19 @@ import re
 import web
 
 def isup(jenni, input):
-    """isup.me website status checker"""
+    '''isup.me website status checker'''
     site = input.group(2)
     if not site:
-        return jenni.reply("What site do you want to check?")
+        return jenni.reply('What site do you want to check?')
     if ' ' in site:
         idx = site.find(' ')
         site = site[:idx+1]
     site = (site).strip()
 
-    if site[:6] != 'http://' and site[:7] != 'https://':
+    if site[:7] != 'http://' and site[:8] != 'https://':
         if '://' in site:
             protocol = site.split('://')[0] + '://'
-            return jenni.reply("Try it again without the %s" % protocol)
+            return jenni.reply('Try it again without the %s' % protocol)
         else:
             site = 'http://' + site
     try:
@@ -43,7 +43,7 @@ def isup(jenni, input):
     else:
         jenni.say(site + ' is down from here.')
 isup.commands = ['isup']
-isup.example = ".isup google.com"
+isup.example = '.isup google.com'
 
 if __name__ == '__main__':
     print __doc__.strip()
