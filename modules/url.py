@@ -17,7 +17,7 @@ import json
 import re
 from htmlentitydefs import name2codepoint
 from modules import unicode as uc
-import proxy
+from modules import proxy
 import time
 import urllib2
 import web
@@ -40,7 +40,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'tell', 'title', 'tw', 'unbitly', 'untiny',]
+BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly', 'untiny',]
 simple_channels = list()
 
 try:
@@ -81,6 +81,24 @@ noteuri.rule = r'(?u).*(http[s]?://[^<> "\x01]+)[,.]?'
 noteuri.priority = 'low'
 
 
+def get_page_backup(url):
+    req = urllib2.Request(url, headers={'Accept':'*/*'})
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0')
+    u = urllib2.urlopen(req)
+    contents = u.read()
+    out = dict()
+    try:
+        con = (contents).decode('utf-8')
+    except:
+        con = (contents).decode('iso-8859-1')
+    out['code'] = u.code
+    out['read'] = con
+    out['geturl'] = u.geturl()
+    out['headers'] = u.headers.dict
+    out['url'] = u.url
+    return out['code'], out
+
+
 def find_title(url):
     """
     This finds the title when provided with a string of a URL.
@@ -106,70 +124,32 @@ def find_title(url):
 
     uri = uc.decode(uri)
 
-    ## proxy the lookup of the headers through .py
-    def remote_call():
-        pyurl = u'https://tumbolia.appspot.com/py/'
-        code = 'import simplejson;'
-        code += 'opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(),'
-        code += 'urllib2.BaseHandler(), urllib2.HTTPHandler(),'
-        code += 'urllib2.HTTPRedirectHandler(), urllib2.HTTPErrorProcessor(),'
-        code += 'urllib2.UnknownHandler());'
-        code += 'urllib2.install_opener(opener);'
-        code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
-        code += "req.add_header('User-Agent', %s);"
-        code += "u=urllib2.urlopen(req);"
-        code += "rtn=dict();"
-        code += "rtn['headers'] = u.headers.dict;"
-        code += "contents = u.read(131072);"
-        code += "con = str();"
-        code += r'''exec "try: con=(contents).decode('utf-8')\n'''
-        code += '''except: con=(contents).decode('iso-8859-1')";'''
-        code += "rtn['read'] = con;"
-        code += "rtn['url'] = u.url;"
-        code += "rtn['geturl'] = u.geturl();"
-        code += "print simplejson.dumps(rtn)"
-        query = code % (repr(uri), repr(USER_AGENT))
-        #query = url
-        temp = web.quote(query)
-        u = web.get(pyurl + temp)
-        #u = proxy.get(url)
+    msg = str()
+    k = 0
+    status = False
+
+    while not status:
+        k += 1
+        if k > 3:
+            break
+
+        msg = dict()
 
         try:
-            useful = json.loads(u)
-            return True, useful
-        except Exception, e:
-            #print "%s -- Failed to parse json from web resource. -- %s" % (time.time(), str(e))
-            return False, str(u)
-
-    status = False
-    k = 0
-    error_num = re.compile('HTTPError: HTTP Error (\S+):')
-    error_codes = ['301', '302', '403', '404', '410']
-    msg = str()
-    while not status:
-        #status, msg = remote_call()
-        status, msg = remote_call()
-
-        if status:
-            break
-
-        txt = error_num.findall(msg)
-        if txt:
-            txt = txt[0]
+            status, msg = proxy.get_more(url)
+        except:
             try:
-                txt = int(txt)
+                status, msg = get_page_backup(url)
             except:
-                break
-            if 500 <= txt <= 599:
-                break
-            if txt in error_codes:
-                break
+                continue
 
-        k += 1
+        if type(msg) == type(dict()) and 'code' in msg:
+            status = msg['code']
+        else:
+            continue
 
-        if k >= 3:
-            break
         time.sleep(0.5)
+
 
     if not status:
         return False, msg
@@ -544,15 +524,18 @@ def unbitly(jenni, input):
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
 
-    useful = proxy.get_more(url)
-    new_url = re_meta.findall(useful['read'])
+    status, useful = proxy.get_more(url)
+    try:
+        new_url = re_meta.findall(useful['read'])
+    except:
+        return jenni.say(str(useful))
 
     if new_url:
         new_url = new_url[0]
     else:
         url = url.replace("'", r"\'")
         try:
-            results = proxy.get_more(url)
+            status, results = proxy.get_more(url)
             new_url = results['geturl']
         except:
             return jenni.say('Failed to grab URL: %s' % (url))
@@ -561,8 +544,7 @@ def unbitly(jenni, input):
         jenni.say(new_url)
     else:
         jenni.say('Failed to obtain final destination.')
-    jenni.say(new_url)
-unbitly.commands = ['unbitly', 'untiny', 'longurl']
+unbitly.commands = ['unbitly', 'untiny', 'longurl', 'st', 'short']
 unbitly.priority = 'low'
 unbitly.example = '.unbitly http://git.io/6fY4OQ'
 

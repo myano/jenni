@@ -24,21 +24,21 @@ urllib._urlopener = Grab()
 
 
 def remote_call(uri):
-    import json
     pyurl = u'https://tumbolia.appspot.com/py/'
     code = 'import simplejson;'
-    code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
-    code += "req.add_header('User-Agent', 'Mozilla/5.0');"
+    code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
+    code += "req.add_header('User-Agent','Mozilla/5.0');"
     code += "u=urllib2.urlopen(req);"
     code += "rtn=dict();"
-    code += "rtn['headers'] = u.headers.dict;"
-    code += "contents = u.read();"
-    code += "con = str();"
+    code += "rtn['headers']=u.headers.dict;"
+    code += "contents=u.read();"
+    code += "con=str();"
     code += r'''exec "try: con=(contents).decode('utf-8')\n'''
     code += '''except: con=(contents).decode('iso-8859-1')";'''
-    code += "rtn['read'] = con;"
-    code += "rtn['url'] = u.url;"
-    code += "rtn['geturl'] = u.geturl();"
+    code += "rtn['read']=con;"
+    code += "rtn['url']=u.url;"
+    code += "rtn['geturl']=u.geturl();"
+    code += "rtn['code']=u.code;"
     code += "print simplejson.dumps(rtn)"
     query = code % repr(uri)
     temp = urllib.quote(query)
@@ -66,13 +66,9 @@ def get(uri):
 
 def get_more(uri):
     if not uri.startswith('http'):
-        return
-    status, u = remote_call(uri)
-    if status:
-        output = u
-    else:
-        output = str()
-    return output
+        uri = 'http://' + uri
+    status, response = remote_call(uri)
+    return status, response
 
 
 if __name__ == "__main__":
