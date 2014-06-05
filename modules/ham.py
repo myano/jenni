@@ -130,7 +130,9 @@ def cs(jenni, input):
         info = info[0]
         name = info[0]
         name = re_tag.sub(' ', info[0]).strip()
-        address = re_tag.sub(' ', info[1]).strip()
+        address = info[1].split('<br>')
+        address = ', '.join(address[1:])
+        address = address.strip()
         extra = dict()
         for each in more_info:
             extra[each[0].strip()] = re_tag.sub('', each[1].strip()).strip()
@@ -142,7 +144,6 @@ def cs(jenni, input):
             if not temp:
                 temp = 'N/A'
             response += '%s: %s. ' % (each[0].strip(), temp)
-        #response = response % (name, address, link)
         response += 'More information is available at: %s' % (link)
     else:
         response = 'No matches found.'
