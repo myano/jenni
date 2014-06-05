@@ -18,6 +18,7 @@ BS = BeautifulSoup.BeautifulSoup
 
 uri = 'https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains'
 r_tag = re.compile(r'<(?!!)[^>]+>')
+r_quote = re.compile(r'\[.*?\]')
 page = web.get(uri)
 soup = BS(page)
 
@@ -44,28 +45,34 @@ def gettld(jenni, input):
                 out['entity'] = str(tld_tds[1]('a')[0].text)
             else:
                 out['entity'] = str(tld_tds[1].text)
-            out['expl'] = str(tld_tds[2])
-            out['notes'] = 'N/A'
+            none_avail = 'N/A'
+            out['expl'] = str(tld_tds[2]) if tld_tds[2] else none_avail
+            out['notes'] = none_avail
+            out['idn'] = none_avail
+            out['dnssec'] = none_avail
+            out['sld'] = none_avail
+            out['ipv6'] = none_avail
 
-            if len(tld_tds) == 7:
+            if len(tld_tds) >= 7:
                 out['notes'] = str(tld_tds[3])
-                out['idn'] = str(tld_tds[-3].text)
-                out['dnssec'] = str(tld_tds[-2].text)
-                out['sld'] = str(tld_tds[-1].text)
+                out['idn'] = str(tld_tds[4].text)
+                out['dnssec'] = str(tld_tds[5].text)
+                out['sld'] = str(tld_tds[6].text)
+                if len(tld_tds) == 8:
+                    out['ipv6'] = str(tld_tds[7].text)
             elif len(tld_tds) == 5:
-                out['idn'] = str(tld_tds[-2].text)
-                out['dnssec'] = str(tld_tds[-1].text)
-                out['sld'] = 'N/A'
+                out['idn'] = str(tld_tds[3].text)
+                out['dnssec'] = str(tld_tds[4].text)
 
             new_out = dict()
             for x in out:
                 chomped = r_tag.sub('', out[x].strip())
-                print "chomped:", chomped
+                chomped = r_quote.sub('', chomped)
                 if chomped == '&#160;':
-                    chomped = 'N/A'
+                    chomped = none_avail
                 new_out[x] = chomped
 
-            return jenni.say('Entity: %s (Explanation: %s, Notes: %s). IDN: %s, DNSSEC: %s, SLD: %s' % (new_out['entity'], new_out['expl'], new_out['notes'], new_out['idn'], new_out['dnssec'], new_out['sld']))
+            return jenni.say('Entity: %s (Explanation: %s, Notes: %s). IDN: %s, DNSSEC: %s, SLD: %s, IPv6: %s' % (new_out['entity'], new_out['expl'], new_out['notes'], new_out['idn'], new_out['dnssec'], new_out['sld'], new_out['ipv6']))
 
     return jenni.say('No matches found for TLD: %s' % (text))
 
