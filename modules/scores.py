@@ -136,10 +136,17 @@ class Scores:
         current_channel = input.sender
         current_channel = current_channel.lower()
 
+
         if len(line) == 0 or (len(line) == 1 and line[0] == 'top'):
             ## .scores
             t10 = ten(current_channel, 't')
             jenni.say(t10)
+
+
+        elif len(line) == 2 and (not line[0].startswith("#")) and line[1].startswith("#") and line[0] == "bottom":
+            ## .scores bottom <channel>
+            b10 = ten(line[1], 'b')
+            jenni.say(b10)
 
         elif len(line) == 1 and not line[0].startswith("#"):
             ## .scores <nick>
@@ -153,11 +160,6 @@ class Scores:
         elif len(line) == 2 and line[0].startswith("#") and line[1] != "all":
             ## .scores <channel> <nick>
             jenni.say(given_user(line[1], line[0]))
-
-        elif len(line) == 2 and not line[0].startswith("#") and line[1].startswith("#") and line[0] == "botom":
-            ## .scores bottom <channel>
-            b10 = ten(line[1], 'b')
-            jenni.say(b10)
 
         elif len(line) == 2:
             ## .scores <nick> all
