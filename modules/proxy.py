@@ -64,5 +64,16 @@ def get(uri):
     return page
 
 
+def get_more(uri):
+    if not uri.startswith('http'):
+        return
+    status, u = remote_call(uri)
+    if status:
+        output = u
+    else:
+        output = str()
+    return output
+
+
 if __name__ == "__main__":
     print __doctype__.strip()

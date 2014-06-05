@@ -19,7 +19,7 @@ from modules import unicode as uc
 
 r_username = re.compile(r'^[a-zA-Z0-9_]{1,15}$')
 r_link = re.compile(r'^https?://twitter.com/\S+$')
-r_p = re.compile(r'(?ims)(<p class="js-tweet-text.*?</p>)')
+r_p = re.compile(r'(?ims)(<p class="js-tweet-text.*?</p>|<p class="ProfileTweet-text.*?</p>)')
 r_tag = re.compile(r'(?ims)<[^>]+>')
 r_anchor = re.compile(r'(?ims)(<a.*?</a>)')
 r_expanded = re.compile(r'(?ims)data-expanded-url=["\'](.*?)["\']')
@@ -78,7 +78,7 @@ def format(tweet, username):
     return '%s (@%s)' % (tweet, username)
 
 def user_tweet(username):
-    tweet = read_tweet('https://twitter.com/' + username + "?" + str(time.time()))
+    tweet = read_tweet('https://twitter.com/' + username + '/with_replies?' + str(time.time()))
     return format(tweet, username)
 
 def id_tweet(tid):
@@ -122,10 +122,11 @@ def twitter(jenni, input):
     elif r_link.match(arg):
         username = arg.split('/')[3]
         tweet = read_tweet(arg)
-        output = format(tweet,username)
+        output = format(tweet, username)
     else:
         output = 'Give me a link, a username, or a tweet id.'
 
+    output = output.replace('pic.twitter.com', 'https://pic.twitter.com')
     jenni.say(output)
 twitter.commands = ['tw', 'twitter']
 twitter.thread = True

@@ -17,8 +17,9 @@ import json
 import re
 from htmlentitydefs import name2codepoint
 from modules import unicode as uc
-import urllib2
+import proxy
 import time
+import urllib2
 import web
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
@@ -64,7 +65,7 @@ except:
     print 'WARNING: No simple_channels.txt found'
 
 
-url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.\S+/?\S+?))' %
+url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
@@ -119,7 +120,7 @@ def find_title(url):
         code += "u=urllib2.urlopen(req);"
         code += "rtn=dict();"
         code += "rtn['headers'] = u.headers.dict;"
-        code += "contents = u.read(32768);"
+        code += "contents = u.read(131072);"
         code += "con = str();"
         code += r'''exec "try: con=(contents).decode('utf-8')\n'''
         code += '''except: con=(contents).decode('iso-8859-1')";'''
@@ -128,8 +129,10 @@ def find_title(url):
         code += "rtn['geturl'] = u.geturl();"
         code += "print simplejson.dumps(rtn)"
         query = code % (repr(uri), repr(USER_AGENT))
+        #query = url
         temp = web.quote(query)
         u = web.get(pyurl + temp)
+        #u = proxy.get(url)
 
         try:
             useful = json.loads(u)
@@ -144,6 +147,7 @@ def find_title(url):
     error_codes = ['301', '302', '403', '404', '410']
     msg = str()
     while not status:
+        #status, msg = remote_call()
         status, msg = remote_call()
 
         if status:
@@ -283,15 +287,17 @@ def short(text):
                 url = 'https://api-ssl.bitly.com/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
                                                              longer)
+                #shorter = proxy.get(url)
                 shorter = web.get(url)
                 shorter.strip()
                 bitlys.append([b, shorter])
             else:
                 bitlys.append([b, str()])
             i += 1
-        return bitlys
+            return bitlys
     except:
         return
+    return bitlys
 
 
 def generateBitLy(jenni, input):
@@ -354,7 +360,7 @@ def doUseBitLy(title, url):
 
 def get_results(text, manual=False):
     if not text:
-        return list()
+        return False, list()
     a = re.findall(url_finder, text)
     k = len(a)
     i = 0
@@ -420,21 +426,32 @@ def show_title_auto(jenni, input):
     results_len = len(results)
 
     for r in results:
+        ## loop through link, shorten pairs, and titles
         returned_title = r[0]
         orig = r[1]
         bitly_link = r[2]
         link_pass = r[3]
 
         if orig and bitly_link and bitly_link != orig and ('bit.ly' in bitly_link or 'j.mp' in bitly_link):
+            ## if we get back useful data
+            ## and we have a bitly link (bitly worked!)
+            ## and the shortened link is 'valid'
+            ## let's make it 'https' instead of 'http'
             bitly_link = bitly_link.replace('http:', 'https:')
 
         if returned_title == 'imgur: the simple image sharer':
+            ## because of the i.imgur hack above this is done
+            ## to prevent from showing useless titles on image
+            ## files
             return
 
         if k > 3:
+            ## more than 3 titles to show from one line of text?
+            ## let's just show only the first 3.
             break
         k += 1
 
+        ## deteremine if we should display the bitly link
         useBitLy = doUseBitLy(returned_title, orig)
 
         reg_format = '[ %s ] - %s'
@@ -491,6 +508,7 @@ def show_title_demand(jenni, input):
         link_pass = r[3]
 
         if returned_title is None:
+            jenni.say('No title returned.')
             continue
 
         if status and link_pass:
@@ -512,8 +530,11 @@ def collect_links(jenni, input):
 collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 collect_links.priority = 'low'
 
+re_meta = re.compile('(?i)content="\S+;\s*?url=(\S+)"\s*?>')
+
 
 def unbitly(jenni, input):
+    '''.longurl <link> -- obtain the final destination URL from a short URL'''
     url = input.group(2)
     if not url:
         if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
@@ -522,25 +543,55 @@ def unbitly(jenni, input):
             return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):
         url = 'http://' + url
-    pyurl = u'https://tumbolia.appspot.com/py/'
-    code = "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
-    code += "req.add_header('User-Agent', %s);"
-    code += "u = urllib2.urlopen(req);"
-    code += 'print u.geturl();'
-    url = url.replace("'", r"\'")
-    query = code % (repr(url.strip()), repr(USER_AGENT))
-    try:
-        temp = web.quote(query)
-        u = web.get(pyurl + temp)
-    except:
-        return jenni.say('Failed to grab URL: %s' % (url))
-    if u.startswith(('http://', 'https://')):
-        jenni.say(u)
+
+    useful = proxy.get_more(url)
+    new_url = re_meta.findall(useful['read'])
+
+    if new_url:
+        new_url = new_url[0]
+    else:
+        url = url.replace("'", r"\'")
+        try:
+            results = proxy.get_more(url)
+            new_url = results['geturl']
+        except:
+            return jenni.say('Failed to grab URL: %s' % (url))
+
+    if new_url.startswith(('http://', 'https://')):
+        jenni.say(new_url)
     else:
         jenni.say('Failed to obtain final destination.')
+    jenni.say(new_url)
 unbitly.commands = ['unbitly', 'untiny', 'longurl']
 unbitly.priority = 'low'
 unbitly.example = '.unbitly http://git.io/6fY4OQ'
+
+
+def puny(jenni, input):
+    '''.puny -- convert to xn-- code for URLs'''
+    text = input.group(2)
+    if not text:
+        return jenni.say('No input provided.')
+
+    if text.startswith('xn--'):
+        text = text[4:]
+        text_ascii = (text).encode('utf-8')
+        try:
+            text_unpuny = (text_ascii).decode('punycode')
+        except:
+            return jenni.say('Stop being a twat.')
+        output = (text_unpuny).encode('utf-8')
+        output = (output).decode('utf-8')
+    else:
+        text = (text).encode('utf-8')
+        text_utf = (text).decode('utf-8')
+
+        text_puny = (text_utf).encode('punycode')
+
+        output = 'xn--' + text_puny
+
+    return jenni.say(output)
+puny.commands = ['puny', 'idn', 'idna']
 
 
 if __name__ == '__main__':

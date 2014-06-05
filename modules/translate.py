@@ -11,7 +11,6 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-from BeautifulSoup import BeautifulSoup
 import json
 import re
 import time
@@ -20,8 +19,13 @@ import urllib2
 import web
 
 r_tag = re.compile(r'<(?!!)[^>]+>')
-iso639_page = web.get('https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes')
-soup = BeautifulSoup(iso639_page)
+
+try:
+    from BeautifulSoup import BeautifulSoup
+    iso639_page = web.get('https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes')
+    soup = BeautifulSoup(iso639_page)
+except:
+    soup = None
 
 
 def translate(text, input='auto', output='en', use_proxy=False):
@@ -209,6 +213,8 @@ def iso639(jenni, input):
     if not inc_text:
         return jenni.say('No input provided.')
     text = (inc_text).encode('utf-8')
+    if not soup:
+        return jenni.say('No BeautifulSoup installed.')
     col_match = soup.find('td', text=inc_text)
     if not col_match:
         return jenni.say('No matches found.')
