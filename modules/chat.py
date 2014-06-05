@@ -20,7 +20,7 @@ import time
 
 mycb = cleverbot.Session()
 
-nowords = ['reload', 'help', 'tell', 'ask']
+nowords = ['reload', 'help', 'tell', 'ask', 'ping']
 
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 HTML_ENTITIES = { 'apos': "'" }
@@ -29,7 +29,14 @@ random.seed()
 
 
 def chat(jenni, input):
-    txt = input.groups()
+    txt = str()
+    if input.groups():
+        txt = input.groups()
+    else:
+        txt = input.bytes
+
+    text = None
+
     if len(txt) > 0:
         text = txt[1]
         if txt[1].startswith('\x03') or txt[1].startswith('\x01'):
@@ -42,9 +49,11 @@ def chat(jenni, input):
     if not text:
         return
     channel = input.sender
+
     for x in nowords:
         if text.startswith(x):
             return
+
     msgi = text.strip()
     msgo = str()
     if channel.startswith('#') and txt[0]:
@@ -72,7 +81,6 @@ def chat(jenni, input):
             return
     else:
         return
-    #print 'msgo', msgo
     if msgo:
         rand_num = random.randint(0, 5)
         time.sleep(1 + rand_num)
@@ -85,9 +93,23 @@ def chat(jenni, input):
                 jenni.msg(jenni.config.logchan_pm, beginning + response)
         else:
             delim = random.choice((',', ':'))
-            msg = '%s%s %s' % (input.nick, delim, response)
+            msg = '%s' % (response)
+            if random.random() <= 0.4:
+                msg = input.nick + delim + ' ' + msg
             jenni.say(msg)
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
+
+
+def random_chat(jenni, input):
+    bad_chans =  fchannels()
+    if (input.sender).lower() in bad_chans:
+        return
+
+    temp = random.random()
+    if temp <= 0.0004:
+        old_input = input
+        chat(jenni, old_input)
+random_chat.rule = r'.*'
 
 
 def e(m):
@@ -112,6 +134,14 @@ def e(m):
         return uc.decode(meep)
     except:
         return uc.decode(uc.encode(meep))
+
+
+def fchannels():
+    f = open("nochannels.txt", "r")
+    lines = f.readlines()[0]
+    f.close()
+    lines = lines.replace('\n', '')
+    return lines.split(',')
 
 
 if __name__ == '__main__':
