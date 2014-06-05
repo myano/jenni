@@ -184,7 +184,7 @@ def read_feeds(jenni):
                 short_url = short_url.replace('http:', 'https:')
 
             response = site_name_effect + " %s \x02%s\x02" % (entry.title, short_url)
-            if entry.updated:
+            if hasattr(entry, 'updated') and entry.updated:
                 response += " - %s" % (entry.updated)
 
             jenni.msg(feed_channel, response)
