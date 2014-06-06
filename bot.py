@@ -29,7 +29,9 @@ class Jenni(irc.Bot):
         else: lc_pm = None
         if hasattr(config, "logging"): logging = config.logging
         else: logging = False
-        args = (config.nick, config.name, config.channels, config.password, lc_pm, logging)
+        if hasattr(config, 'ca_certs'): inc_ca_certs = config.ca_certs
+        else: inc_ca_certs = None
+        args = (config.nick, config.name, config.channels, config.password, lc_pm, logging, inc_ca_certs)
         ## next, try putting a try/except around the following line
         irc.Bot.__init__(self, *args)
         self.config = config

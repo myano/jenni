@@ -36,6 +36,8 @@ def create_default_config(fn):
     host = 'irc.example.net'
     port = 6667
     ssl  = False
+    ssl_verify = False
+    ca_certs = None
     sasl = False
     channels = ['#example', '#test']
 
@@ -195,9 +197,11 @@ def main(argv=None):
     # Step Four: Load jenni
 
     try: from __init__ import run
-    except ImportError:
+    except ImportError, e:
+        print 'e:', e
         try: from jenni import run
-        except ImportError:
+        except ImportError, e:
+            print >> sys.stderr, e
             print >> sys.stderr, "Error: Couldn't find jenni to import"
             sys.exit(1)
 

@@ -10,9 +10,18 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import sys, re, time, traceback
-import socket, asyncore, asynchat, ssl, select
-import os, codecs
+import sys
+import re
+import time
+import traceback
+import socket
+import asyncore
+import asynchat
+import os
+import codecs
+
+import select
+import ssl
 import errno
 
 IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
@@ -61,7 +70,16 @@ def log_raw(line):
     f.close()
 
 class Bot(asynchat.async_chat):
-    def __init__(self, nick, name, channels, password=None, logchan_pm=None, logging=False):
+    def __init__(self, nick, name, channels, password=None, logchan_pm=None, logging=False, inc_ca_certs=None):
+        ca_certs = '/etc/pki/tls/cert.pem'
+        if inc_ca_certs is not None:
+            ca_certs = inc_ca_certs
+        elif not os.path.isfile(ca_certs):
+            ca_certs = '/etc/ssl/certs/ca-certificates.crt'
+        if not os.path.isfile(ca_certs):
+            print 'Could not open CA certificates file. SSL will not work properly.'
+        self.ca_certs = ca_certs
+
         asynchat.async_chat.__init__(self)
         self.set_terminator('\n')
         self.buffer = ''
@@ -72,6 +90,7 @@ class Bot(asynchat.async_chat):
         self.password = password
 
         self.use_ssl = False
+        self.verify_sasl = False
         self.use_sasl = False
         self.is_connected = False
         self.is_authenticated = False
@@ -174,7 +193,11 @@ class Bot(asynchat.async_chat):
 
     def handle_connect(self):
         if self.use_ssl:
-            self.ssl = ssl.wrap_socket(self.socket, do_handshake_on_connect=False)
+            if not self.verify_ssl:
+                self.ssl = ssl.wrap_socket(self.socket, do_handshake_on_connect=False, suppress_ragged_eofs=True)
+            else:
+                self.ssl = ssl.wrap_socket(self.socket, do_handshake_on_connect=False, suppress_ragged_eofs=True, cert_reqs=ssl.CERT_REQUIRED,ca_certs=self.ca_certs)
+
             while True:
                 try:
                     self.ssl.do_handshake()
