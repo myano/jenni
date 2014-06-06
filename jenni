@@ -36,6 +36,7 @@ def create_default_config(fn):
     host = 'irc.example.net'
     port = 6667
     ssl  = False
+    sasl = False
     channels = ['#example', '#test']
 
     # Channel jenni will report all private messages sent to her to.

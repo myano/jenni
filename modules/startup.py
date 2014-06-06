@@ -61,7 +61,7 @@ def startup(jenni, input):
     if hasattr(jenni.config, 'serverpass'):
         jenni.write(('PASS', jenni.config.serverpass))
 
-    if hasattr(jenni.config, 'password'):
+    if not jenni.is_authenticated and hasattr(jenni.config, 'password'):
         jenni.msg('NickServ', 'IDENTIFY %s' % jenni.config.password)
         time.sleep(5)
 
