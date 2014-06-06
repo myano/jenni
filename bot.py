@@ -198,6 +198,8 @@ class Jenni(irc.Bot):
                 s.match = match
                 s.group = match.group
                 s.groups = match.groups
+                s.ident = origin.user
+                s.raw = origin
                 s.args = args
                 s.admin = origin.nick in self.config.admins
                 if s.admin == False:

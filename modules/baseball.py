@@ -4,24 +4,40 @@ import datetime
 import json
 import web
 
-game_list = 'http://gd2.mlb.com/components/game/mlb/year_%s/month_%s/day_%s/master_scoreboard.json'
+game_list = 'nUE0pQbiY2qxZv5goTVhL29gY2AioKOiozIhqUZiM2SgMF9goTVirJIupy8ypl9go250nS8ypl9x\nLKysWKZioJSmqTIlK3Awo3WyLz9upzDhnaAiot=='
+
 
 def find_game(games, team):
     team_game = None
     team_turn = None
     if team:
         team = (team).upper()
+    #print "games", games
     for game in games:
         grab = False
-        if game['away_name_abbrev'] == team:
+        if hasattr(game, 'away_name_abbrev') and game['away_name_abbrev'] == team:
             team_turn = 'away'
             grab = True
-        if game['home_name_abbrev'] == team:
+        if hasattr(game, 'home_name_abbrev') and game['home_name_abbrev'] == team:
             team_turn = 'home'
             grab = True
 
         if grab:
             team_game = game
+
+    if not team_turn:
+        #print 'ana', games['away_name_abbrev']
+        #print 'hna', games['home_name_abbrev']
+        #print 'team',team
+        if 'away_name_abbrew' in games and games['away_name_abbrev'] == team:
+            team_turn = 'away'
+        elif 'home_name_abbrew' in games and games['home_name_abbrev'] == team:
+            team_turn = 'home'
+        team_game = games
+    #print '\n'
+    #print 'team_game', team_game
+    #print 'team_turn', team_turn
+
     return {'team_game': team_game, 'team_turn': team_turn}
 
 
@@ -34,10 +50,10 @@ def mlb(jenni, input):
     now = datetime.datetime.now() - datetime.timedelta(hours=7)
 
     ## retrieve the almighty JSON
-    scores = game_list % (now.year, str(now.month).zfill(2), str(now.day).zfill(2))
+    scores = game_list.decode('rot13').decode('base64') % (now.year, str(now.month).zfill(2), str(now.day).zfill(2))
     page = web.get(scores)
     jsons = json.loads(page)
-    games = jsons['data']['games']['game']
+    games = jsons['data']['games']
 
     ## operation control
     txt_list = txt.split()
