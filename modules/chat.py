@@ -102,7 +102,7 @@ chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 
 def random_chat(jenni, input):
     bad_chans =  fchannels()
-    if (input.sender).lower() in bad_chans:
+    if bad_chans and (input.sender).lower() in bad_chans:
         return
 
     temp = random.random()
@@ -137,7 +137,10 @@ def e(m):
 
 
 def fchannels():
-    f = open("nochannels.txt", "r")
+    try:
+        f = open('nochannels.txt', 'r')
+    except:
+        return False
     lines = f.readlines()[0]
     f.close()
     lines = lines.replace('\n', '')
