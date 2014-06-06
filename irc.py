@@ -90,7 +90,7 @@ class Bot(asynchat.async_chat):
         self.password = password
 
         self.use_ssl = False
-        self.verify_sasl = False
+        self.verify_ssl = False
         self.use_sasl = False
         self.is_connected = False
         self.is_authenticated = False
