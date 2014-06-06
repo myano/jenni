@@ -37,6 +37,8 @@ def run_jenni(config):
 
     def connect(config):
         p = bot.Jenni(config)
+        p.use_ssl = config.ssl
+        p.use_sasl = config.sasl
         p.run(config.host, config.port)
 
     try: Watcher()

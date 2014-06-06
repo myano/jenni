@@ -11,10 +11,11 @@ More info:
 """
 
 import sys, re, time, traceback
-import socket, asyncore, asynchat
+import socket, asyncore, asynchat, ssl, select
 import os, codecs
+import errno
 
-IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '332', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
+IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
 cwd = os.getcwd()
 
 class Origin(object):
@@ -70,6 +71,11 @@ class Bot(asynchat.async_chat):
         self.name = name
         self.password = password
 
+        self.use_ssl = False
+        self.use_sasl = False
+        self.is_connected = False
+        self.is_authenticated = False
+
         self.verbose = True
         self.channels = channels or list()
         self.stack = list()
@@ -79,12 +85,6 @@ class Bot(asynchat.async_chat):
 
         import threading
         self.sending = threading.RLock()
-
-
-    def initiate_send(self):
-        self.sending.acquire()
-        asynchat.async_chat.initiate_send(self)
-        self.sending.release()
 
     # def push(self, *args, **kargs):
     #     asynchat.async_chat.push(self, *args, **kargs)
@@ -155,6 +155,11 @@ class Bot(asynchat.async_chat):
         if self.verbose:
             message = 'Connecting to %s:%s...' % (host, port)
             print >> sys.stderr, message,
+
+        if self.use_ssl:
+            self.send = self._ssl_send
+            self.recv = self._ssl_recv
+
         for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
@@ -177,9 +182,27 @@ class Bot(asynchat.async_chat):
             print '[asyncore]', e
 
     def handle_connect(self):
+        if self.use_ssl:
+            self.ssl = ssl.wrap_socket(self.socket, do_handshake_on_connect=False)
+            while True:
+                try:
+                    self.ssl.do_handshake()
+                    break
+                except ssl.SSLError, err:
+                    if err.args[0] == ssl.SSL_ERROR_WANT_READ:
+                        select.select([self.ssl], [], [])
+                    elif err.args[0] == ssl.SSL_ERROR_WANT_WRITE:
+                        select.select([], [self.ssl], [])
+                    else:
+                        raise
+            self.set_socket(self.ssl)
+
         if self.verbose:
             print >> sys.stderr, 'connected!'
-        if self.password:
+
+        self.write(('CAP', 'LS'))
+
+        if not self.use_sasl and self.password:
             self.write(('PASS', self.password))
         self.write(('NICK', self.nick))
         self.write(('USER', self.user, '+iw', self.nick), self.name)
@@ -187,6 +210,41 @@ class Bot(asynchat.async_chat):
     def handle_close(self):
         self.close()
         print >> sys.stderr, 'Closed!'
+
+    def _ssl_send(self, data):
+        """ Replacement for self.send() during SSL connections. """
+        """ Thank you - http://www.evanfosmark.com/2010/09/ssl-support-in-asynchatasync_chat/ """
+        try:
+            print '<-- %s' % data
+            result = self.socket.send(data)
+            return result
+        except ssl.SSLError, why:
+            if why[0] in (asyncore.EWOULDBLOCK, errno.ESRCH):
+                return 0
+            else:
+                raise ssl.SSLError, why
+            return 0
+
+    def _ssl_recv(self, buffer_size):
+        """ Replacement for self.recv() during SSL connections. """
+        """ Thank you - http://www.evanfosmark.com/2010/09/ssl-support-in-asynchatasync_chat/ """
+        try:
+            data = self.read(buffer_size)
+            if not data:
+                self.handle_close()
+                return ''
+            print '--> %s' % data
+            return data
+        except ssl.SSLError, why:
+            if why[0] in (asyncore.ECONNRESET, asyncore.ENOTCONN,
+                          asyncore.ESHUTDOWN):
+                self.handle_close()
+                return ''
+            elif why[0] == errno.ENOENT:
+                # Required in order to keep it non-blocking
+                return ''
+            else:
+                raise
 
     def collect_incoming_data(self, data):
         self.buffer += data
