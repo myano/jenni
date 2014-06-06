@@ -12,7 +12,10 @@ More info:
 
 
 def fchannels():
-    f = open("nochannels.txt", "r")
+    try:
+        f = open("nochannels.txt", "r")
+    except:
+        return False
     lines = f.readlines()[0]
     f.close()
     lines = lines.replace('\n', '')
@@ -68,7 +71,7 @@ def stats(jenni, input):
     commands = dict()
     users = dict()
     channels = dict()
-    bchannels = fchannels()
+
 
     ignore = set(['f_note', 'startup', 'message', 'noteuri',
                   'say_it', 'collectlines', 'oh_baby', 'chat',
@@ -118,8 +121,9 @@ def stats(jenni, input):
 
     # most heavy channels
     chreply = 'power channels: '
+    bchannels = fchannels()
     for count, channel in charank[:3]:
-        if channel in bchannels:
+        if bchannels and channel in bchannels:
             continue
         chreply += '%s (%s), ' % (channel, count)
     jenni.say(chreply.rstrip(', '))
