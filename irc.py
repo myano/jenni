@@ -275,7 +275,7 @@ class Bot(asynchat.async_chat):
     def dispatch(self, origin, args):
         pass
 
-    def msg(self, recipient, text, log=False, x=False):
+    def msg(self, recipient, text, log=False, x=False, wait_time=3):
         self.sending.acquire()
 
         # Cf. http://swhack.com/logs/2006-03-01#T19-43-25
@@ -291,12 +291,14 @@ class Bot(asynchat.async_chat):
         if not x:
             text = text.replace('\x01', '')
 
+        if wait_time < 1: wait_time = 1
+
         # No messages within the last 3 seconds? Go ahead!
         # Otherwise, wait so it's been at least 0.8 seconds + penalty
         def wait(sk, txt):
             if sk:
                 elapsed = time.time() - sk[-1][0]
-                if elapsed < 3:
+                if elapsed < wait_time:
                     penalty = float(max(0, len(txt) - 50)) / 70
                     wait = 0.8 + penalty
                     if elapsed < wait:
