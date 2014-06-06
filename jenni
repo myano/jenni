@@ -49,6 +49,12 @@ def create_default_config(fn):
     # password = 'example'
     # serverpass = 'serverpass'
 
+    # forecastio_apikey is for an API key from https://forecast.io/
+    # This is useful if you want extended weather information.
+    # Required if you want .weather to work.
+    # If not, you can use .weather-noaa or .wx-noaa
+    # forecastio_apikey = ''
+
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
