@@ -155,8 +155,21 @@ class Bot(asynchat.async_chat):
         if self.verbose:
             message = 'Connecting to %s:%s...' % (host, port)
             print >> sys.stderr, message,
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect((host, port))
+        for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            try:
+                self.create_socket(af,socktype)
+            except socket.error as msg:
+                continue
+            try:
+                self.connect(sa)
+            except socket.error as msg:
+                self.close()
+                continue
+            break
+        else:
+            raise Exception("No connectivity")
+
         try: asyncore.loop()
         except KeyboardInterrupt:
             sys.exit()
