@@ -57,8 +57,8 @@ def ip_lookup(jenni, input):
             response += '%s State: %s' % (spacing, results['region_name'])
         if 'country_name' in results:
             response += '%s Country: %s' % (spacing, results['country_name'])
-        if 'zip' in results:
-            response += '%s ZIP: %s' % (spacing, results['zip'])
+        if 'zipcode' in results:
+            response += '%s ZIP: %s' % (spacing, results['zipcode'])
         response += '%s Latitude: %s' % (spacing, results['latitude'])
         response += '%s Longitude: %s' % (spacing, results['longitude'])
     jenni.reply(response)
