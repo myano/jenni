@@ -117,11 +117,6 @@ class Bot(asynchat.async_chat):
         except Exception, e:
             print time.time()
             print '[__WRITE FAILED]', e
-            print 'raw:', str(raw)
-            print 'temp:', str(temp)
-            print 'args:', str(args)
-            print 'text:', str(text)
-            print '-' * 3
             #pass
 
     def write(self, args, text=None, raw=False):
@@ -135,10 +130,6 @@ class Bot(asynchat.async_chat):
                 self.__write(args, text)
         except Exception, e:
             print '[WRITE FAILED]', e
-            print 'raw:', str(raw)
-            print 'temp:', str(temp)
-            print 'args:', str(args)
-            print 'text:', str(text)
 
     def safe(self, input, u=False):
         if input:
@@ -215,7 +206,6 @@ class Bot(asynchat.async_chat):
         """ Replacement for self.send() during SSL connections. """
         """ Thank you - http://www.evanfosmark.com/2010/09/ssl-support-in-asynchatasync_chat/ """
         try:
-            print '<-- %s' % data
             result = self.socket.send(data)
             return result
         except ssl.SSLError, why:
@@ -233,7 +223,6 @@ class Bot(asynchat.async_chat):
             if not data:
                 self.handle_close()
                 return ''
-            print '--> %s' % data
             return data
         except ssl.SSLError, why:
             if why[0] in (asyncore.ECONNRESET, asyncore.ENOTCONN,
