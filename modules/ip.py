@@ -31,7 +31,10 @@ def ip_lookup(jenni, input):
     txt = uc.encode(txt)
     query = uc.decode(txt)
     response = "[IP/Host Lookup] "
-    page = web.get(base + txt)
+    try:
+        page = web.get(base + txt)
+    except IOError, err:
+        return jenni.say('Could not access given address. (Detailed error: %s)' % (err))
     try:
         results = json.loads(page)
     except:
