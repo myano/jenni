@@ -19,73 +19,125 @@ import re
 auth_list = []
 admins = []
 
-def op(jenni, input):
-    """
-    Command to op users in a room. If no nick is given,
-    jenni will op the nick who sent the command
-    """
-    if not input.admin or not input.sender.startswith('#'):
-        return
-    nick = input.group(2)
-    verify = auth_check(jenni, input.nick, nick)
-    if verify:
-        channel = input.sender
-        if not nick:
-            nick = input.nick
-        jenni.write(['MODE', channel, "+o", nick])
-op.rule = (['op'], r'(\S+)?')
-op.priority = 'low'
-
-def deop(jenni, input):
-    """
-    Command to deop users in a room. If no nick is given,
-    jenni will deop the nick who sent the command
-    """
-    if not input.admin or not input.sender.startswith('#'):
-        return
-    nick = input.group(2)
-    verify = auth_check(jenni, input.nick, nick)
-    if verify:
-        channel = input.sender
-        if not nick:
-            nick = input.nick
-        jenni.write(['MODE', channel, "-o", nick])
-deop.rule = (['deop'], r'(\S+)?')
-deop.priority = 'low'
-
 def voice(jenni, input):
     """
     Command to voice users in a room. If no nick is given,
     jenni will voice the nick who sent the command
     """
-    if not input.admin or not input.sender.startswith('#'):
-        return
-    nick = input.group(2)
-    verify = auth_check(jenni, input.nick, nick)
-    if verify:
-        channel = input.sender
-        if not nick:
-            nick = input.nick
-        jenni.write(['MODE', channel, "+v", nick])
-voice.rule = (['voice'], r'(\S+)?')
+    if not input.admin:
+        return jenni.say('You must be an admin to perform this operation')
+    inputs = None
+    try:
+        inputs = input.group(2).split(' ')
+    except:
+        return jenni.say('Invalid input: .voice ##example or .voice ##example nick')
+    channel = None
+    try:
+        channel = inputs[0]
+        if not channel.startswith('#'): raise Exception
+    except:
+        return jenni.say('You must provide a valid channel')
+    nick = None
+    try:
+        nick = inputs[1]
+    except:
+        pass
+    if not nick:
+        nick = input.nick
+    jenni.write(['MODE', channel, "+v", nick])
+voice.commands = ['voice']
 voice.priority = 'low'
+voice.example = '.voice ##example or .voice ##example nick'
 
 def devoice(jenni, input):
     """
     Command to devoice users in a room. If no nick is given,
     jenni will devoice the nick who sent the command
     """
-    if not input.admin or not input.sender.startswith('#'):
-        return
-    nick = input.group(2)
-    verify = auth_check(jenni, input.nick, nick)
-    if verify:
-        channel = input.sender
-        if not nick:
-            nick = input.nick
-        jenni.write(['MODE', channel, "-v", nick])
-devoice.rule = (['devoice'], r'(\S+)?')
+    if not input.admin:
+        return jenni.say('You must be an admin to perform this operation')
+    inputs = None
+    try:
+        inputs = input.group(2).split(' ')
+    except:
+        return jenni.say('Invalid input: .devoice ##example or .devoice ##example nick')
+    channel = None
+    try:
+        channel = inputs[0]
+        if not channel.startswith('#'): raise Exception
+    except:
+        return jenni.say('You must provide a valid channel')
+    nick = None
+    try:
+        nick = inputs[1]
+    except:
+        pass
+    if not nick:
+        nick = input.nick
+    jenni.write(['MODE', channel, "-v", nick])
+devoice.commands = ['devoice']
 devoice.priority = 'low'
+devoice.example = '.devoice ##example or .devoice ##example nick'
+
+def op(jenni, input):
+    """
+    Command to op users in a room. If no nick is given,
+    jenni will op the nick who sent the command
+    """
+    if not input.admin:
+        return jenni.say('You must be an admin to perform this operation')
+    inputs = None
+    try:
+        inputs = input.group(2).split(' ')
+    except:
+        return jenni.say('Invalid input: .op ##example or .op ##example nick')
+    channel = None
+    try:
+        channel = inputs[0]
+        if not channel.startswith('#'): raise Exception
+    except:
+        return jenni.say('You must provide a valid channel')
+    nick = None
+    try:
+        nick = inputs[1]
+    except:
+        pass
+    if not nick:
+        nick = input.nick
+    jenni.write(['MODE', channel, "+o", nick])
+op.commands = ['op']
+op.priority = 'low'
+op.example = '.op ##example or .op ##example nick'
+
+def deop(jenni, input):
+    """
+    Command to deop users in a room. If no nick is given,
+    jenni will deop the nick who sent the command
+    """
+    if not input.admin:
+        return jenni.say('You must be an admin to perform this operation')
+    inputs = None
+    try:
+        inputs = input.group(2).split(' ')
+    except:
+        return jenni.say('Invalid input: .deop ##example or .deop ##example nick')
+    channel = None
+    try:
+        channel = inputs[0]
+        if not channel.startswith('#'): raise Exception
+    except:
+        return jenni.say('You must provide a valid channel')
+    nick = None
+    try:
+        nick = inputs[1]
+    except:
+        pass
+    if not nick:
+        nick = input.nick
+    jenni.write(['MODE', channel, "-o", nick])
+deop.commands = ['deop']
+deop.priority = 'low'
+deop.example = '.deop ##example or .deop ##example nick'
 
 def auth_request(jenni, input):
     """
