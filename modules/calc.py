@@ -102,7 +102,10 @@ def c(jenni, input):
         else:
             ## If the json contains an Answer that is the result of 'calc'
             ## then continue
-            answer = re.sub(r'\<.*?\>', '', json_response['Answer']).strip()
+            answer = json_response['Answer']
+            parts = answer.split('</style>')
+            answer = ''.join(parts[1:])
+            answer = re.sub(r'<.*?>', '', answer).strip()
 
         if answer:
             ## If we have found answer with Attempt #2
