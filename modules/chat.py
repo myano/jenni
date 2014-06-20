@@ -67,7 +67,7 @@ def chat(jenni, input):
     elif not channel.startswith('#'):
         ## in a PM and not prepended with jenni's name
         pm = True
-        if text.startswith('.'):
+        if text.startswith('.') or (hasattr(jenni.config, 'prefix') and text.startswith(jenni.config.prefix)):
             return
         elif text.startswith(jenni.config.nick + ':'):
             spt = text.split(':')[1].strip()
@@ -94,8 +94,10 @@ def chat(jenni, input):
         else:
             delim = random.choice((',', ':'))
             msg = '%s' % (response)
-            if random.random() <= 0.4:
+            if random.random() <= 0.25:
                 msg = input.nick + delim + ' ' + msg
+            if random.random() <= 0.01:
+                chat(jenni, input)
             jenni.say(msg)
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 

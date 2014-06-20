@@ -157,18 +157,27 @@ import calendar
 from modules import clock
 
 def at(jenni, input):
+    '''.at YYYY-MM-DD HH:MM TZ -- remind at a specific time.'''
+    ## input can be just a HH:MM TZ if you want the same day
+
+    help_txt = 'Accepted date inputs are: "YYYY-MM-DD HH:MM TZ" and "HH:MM TZ"'
+
+    txt = input.groups(2)
+    if not txt:
+        return jenni.say(help_txt)
+
     bytes = input[4:]
 
     m = r_time.findall(bytes)
     if not m:
-        return jenni.reply("Sorry, didn't understand the time spec.2")
+        return jenni.reply("Sorry, I couldn't find the time. " + help_txt)
     #t = m.group(1).replace('.', ':')
     t = m[0].replace('.', ':')
     #bytes = bytes[len(t):]
 
     m = r_zone.findall(bytes)
     if not m:
-        return jenni.reply("Sorry, didn't understand the zone spec.3")
+        return jenni.reply("Sorry, I couldn't figure out what date you wanted. " + help_txt)
     z = m[0][0]
     #bytes = bytes[len(m.group(1)):].strip().encode("utf-8")
     tz = None
@@ -178,31 +187,71 @@ def at(jenni, input):
     if not tz:
         if clock.TimeZones.has_key(z):
             tz = clock.TimeZones[z]
-        else: return jenni.reply("Sorry, didn't understand the time zone.4")
+        else:
+            ## default to UTC
+            tz = 0
+            z = 'UTC'
 
     try_date = r_date.findall(bytes)
+
     if try_date:
         td = try_date[0]
         dt = datetime(int(td[0]), int(td[1]), int(td[2]), int(t[0:2]), int(t[3:]))
         time_delta = dt - datetime.now() + timedelta(hours=tz)
-        duration = time_delta.seconds
-        duration = int(duration / 60.0)
+        duration = time_delta.total_seconds()
         unix_stamp_event = int(time.mktime(dt.timetuple()))
     else:
-        d = time.strftime("%Y-%m-%d", time.gmtime())
-        d = time.strptime(("%s %s" % (d, t)).encode("utf-8"), "%Y-%m-%d %H:%M")
+        d = time.strftime('%Y-%m-%d', time.gmtime())
+        d = time.strptime(('%s %s' % (d, t)).encode('utf-8'), '%Y-%m-%d %H:%M')
 
-        d = int(calendar.timegm(d) - (3600 * tz))
-        duration = int((d - time.time()) / 60)
+        d = int(calendar.timegm(d) - (3600.0 * tz))
+        #duration = int((d - time.time()) / 60.0)
+        duration = int(d - time.time())
+        if duration < 1:
+            d = time.strftime('%Y-%m-%d', time.gmtime())
+            d = time.strptime(('%s %s' % (d, t)).encode('utf-8'), '%Y-%m-%d %H:%M')
+            d = int((calendar.timegm(d) + 86400.0) - (3600.0 * tz))
+            duration = int(d - time.time())
         unix_stamp_event = d
 
-    if duration < 1:
-        return jenni.reply("Sorry, that date is this minute or in the past. And only times in the same day are supported!")
+    t_duration = 0
+    duration = float(duration)
+    if duration >= (86400.0 * 365 * 2):  # 2 years
+        t_years = duration / (86400 * 365)
+        t_duration = '%.2f' % (t_years)
+    elif duration >= (86400.0 * 60):  # 2 months
+        t_months = duration / (86400.0 * 30)
+        t_duration = '%.2f' % (t_months)
+        phrase = 'months'
+    elif duration >= (86400.0 * 14):  # 2 weeks
+        t_weeks = duration / (86400.0 * 7)
+        t_duration = '%.2f' % (t_weeks)
+        phrase = 'weeks'
+    elif duration >= (86400.0 * 2):  # 2 days
+        t_days = duration / 86400.0
+        t_duration = '%.2f' % (t_days)
+        phrase = 'days'
+    elif duration >= (3600.0 * 2):  # 2 hours
+        t_hours = duration / 3600.0
+        t_duration = '%.2f' % (t_hours)
+        phrase = 'hours'
+    elif duration >= 60.0:
+        t_minutes = duration / 60.0
+        t_duration = '%.2f' % (t_minutes)
+        phrase = 'minutes'
+    elif duration >= 0:
+        t_duration = '%.2f' % (duration)
+        phrase = 'seconds'
+    else:
+        #t_duration = '?'
+        #phrase = '?'
+        return jenni.reply('Sorry, but that occurs in the past! Please select a time in the future.')
 
     # jenni.say("%s %s %s" % (t, tz, d))
 
     reminder = (input.sender, input.nick, bytes)
     # jenni.say(str((d, reminder)))
+
     try: jenni.rdb[unix_stamp_event].append(reminder)
     except KeyError: jenni.rdb[unix_stamp_event] = [reminder]
 
@@ -210,7 +259,7 @@ def at(jenni, input):
     dump_database(jenni.rfn, jenni.rdb)
     jenni.sending.release()
 
-    jenni.reply("Reminding at %s %s - in %s minute(s)" % (t, z, duration))
+    jenni.reply('Reminding at %s %s - in %s %s' % (t, z, t_duration, phrase))
 at.commands = ['at']
 
 if __name__ == '__main__':
