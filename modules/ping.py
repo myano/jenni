@@ -14,8 +14,7 @@ import random
 
 def interjection(jenni, input):
     """response to interjections"""
-    nick = input.nick
-    jenni.say(nick + '!')
+    jenni.say(input.nick + '!')
 interjection.rule = r'($nickname!)'
 interjection.priority = 'high'
 interjection.example = '$nickname!'
@@ -23,7 +22,7 @@ interjection.example = '$nickname!'
 
 def f_ping(jenni, input):
     """ping jenni in a channel or pm"""
-    jenni.reply("ping!")
+    jenni.reply('pong!')
 f_ping.rule = r'(?i)$nickname[:,]?\sping'
 f_ping.priority = 'high'
 f_ping.example = '$nickname: ping!'
