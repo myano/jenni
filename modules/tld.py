@@ -41,12 +41,15 @@ def gettld(jenni, input):
         if not text.startswith('.'):
             text = '.' + text
         if len(tld_tds[0]('a')) > 0 and str(tld_tds[0]('a')[0].text) == text:
-            if tld_tds[1]('a'):
+            print 'one:', str(tld_tds[1])
+            if tld_tds[1]('a') and tld_tds[1]('img'):
                 out['entity'] = str(tld_tds[1]('a')[0].text)
             else:
                 out['entity'] = str(tld_tds[1].text)
             none_avail = 'N/A'
-            out['expl'] = str(tld_tds[2]) if tld_tds[2] else none_avail
+            out['expl'] = none_avail
+            if tld_tds[2].text:
+                out['expl'] = tld_tds[2].text
             out['notes'] = none_avail
             out['idn'] = none_avail
             out['dnssec'] = none_avail
