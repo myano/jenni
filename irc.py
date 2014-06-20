@@ -237,6 +237,7 @@ class Bot(asynchat.async_chat):
 
     def collect_incoming_data(self, data):
         self.buffer += data
+        '''
         if data:
             if self.logchan_pm:
                 dlist = data.split()
@@ -245,11 +246,22 @@ class Bot(asynchat.async_chat):
                         self.msg(self.logchan_pm, data, True)
             if self.logging:
                 log_raw(data)
+        '''
 
     def found_terminator(self):
         line = self.buffer
         if line.endswith('\r'):
             line = line[:-1]
+
+        if line:
+            if self.logchan_pm:
+                dlist = line.split()
+                if len(dlist) >= 3:
+                    if "#" not in dlist[2] and dlist[1].strip() not in IRC_CODES:
+                        self.msg(self.logchan_pm, line, True)
+            if self.logging:
+                log_raw(line)
+
         self.buffer = ''
 
         # print line
@@ -271,6 +283,7 @@ class Bot(asynchat.async_chat):
 
         if args[0] == 'PING':
             self.write(('PONG', text))
+
 
     def dispatch(self, origin, args):
         pass
@@ -308,6 +321,7 @@ class Bot(asynchat.async_chat):
         else:
             wait(self.stack, text)
 
+        '''
         # Loop detection
         if not log:
             messages = [m[1] for m in self.stack[-8:]]
@@ -316,6 +330,7 @@ class Bot(asynchat.async_chat):
                 if messages.count('...') >= 3:
                     self.sending.release()
                     return
+        '''
 
         self.__write(('PRIVMSG', self.safe(recipient)), self.safe(text))
         if log:

@@ -35,9 +35,12 @@ re_city = re.compile('<a href="/maps/\S+">(.+?)&nbsp;.+?</a>')
 re_city_usa = re.compile('</td><td>(.*?)</td><td>')
 
 
-def clean(txt):
+def clean(txt, delim=''):
     '''Remove HTML entities from a given text'''
-    return r_tag.sub('', txt)
+    if delim:
+        return r_tag.sub(delim, txt)
+    else:
+        return r_tag.sub('', txt)
 
 
 def location(name):
@@ -97,11 +100,19 @@ def location(name):
             lat = clean(gps[0]).replace('&nbsp;', '')
             lng = clean(gps[1]).replace('&nbsp;', '')
         if name == '?':
-            name = columns[0]
+            name = clean(columns[0])
         if countryName == '?':
-            countryName = columns[2]
+            countryName = clean(columns[2])
         if region == '?':
-            region = columns[3]
+            region = clean(columns[3])
+
+    #print 'name', name
+    #print 'county', county
+    #print 'region', region
+    #print 'countryName', countryName
+    #print 'lat', lat
+    #print 'lng', lng
+    #print ''
 
     return name, county, region, countryName, lat, lng
 
@@ -468,6 +479,13 @@ def f_weather(jenni, input):
             ## else, anywhere else in the worldd
             windchill = u'%.1f\u00B0C'.encode('utf-8') % (windchill)
 
+    heatindex = False
+    if isinstance(temp, float) and isinstance(dew, float):
+        rh = make_rh_C(temp, dew)
+        temp_f = (temp * 1.8) + 32.0
+        heatindex = gen_heat_index(temp_f, rh)
+        heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
+
     if pressure:
         if pressure.startswith('Q'):
             pressure = pressure.lstrip('Q')
@@ -577,6 +595,8 @@ def f_weather(jenni, input):
     output += ', Dew Point: ' + str(dew)
     if windchill:
         output += ', Windchill: ' + str(windchill)
+    if heatindex:
+        output += ', Heat Index: ' + str(heatindex)
     output += ', Pressure: ' + pressure
     if cond:
         output += ' Condition: ' + cond
@@ -884,7 +904,7 @@ def forecastio_current_weather(jenni, input):
 
     humidity = str(int(float(humidity) * 100)) + '%'
 
-    pressure = '%smb' % (pressure)
+    pressure = '%.2fin (%.2fmb)' % (pressure * 0.0295301, pressure)
     cond = cond.replace('-', ' ')
     cond = cond.title()
 
@@ -902,15 +922,15 @@ def forecastio_current_weather(jenni, input):
     ## build output string.
     ## a bit messy, but better than other alternatives
     output = str()
-    output += '\x1D\x1FCover\x1F\x1D: ' + cover_word
-    output += ', \x1D\x1FTemp\x1F\x1D: ' + str(temp)
-    output += ', \x1D\x1FDew Point\x1F\x1D: ' + str(dew)
-    output += ', \x1D\x1FHumidity\x1F\x1D: ' + str(humidity)
-    output += ', \x1D\x1FApparent Temp\x1F\x1D: ' + str(APtemp)
-    output += ', \x1D\x1FPressure\x1F\x1D: ' + pressure
+    output += '\x1FCover\x1F: ' + cover_word
+    output += ', \x1FTemp\x1F: ' + str(temp)
+    output += ', \x1FDew Point\x1F: ' + str(dew)
+    output += ', \x1FHumidity\x1F: ' + str(humidity)
+    output += ', \x1FApparent Temp\x1F: ' + str(APtemp)
+    output += ', \x1FPressure\x1F: ' + pressure
     if cond:
-        output += ', \x1D\x1FCondition\x1F\x1D: ' + (cond).encode('utf-8')
-    output += ', \x1D\x1FWind\x1F\x1D: ' + wind
+        output += ', \x1FCondition\x1F: ' + (cond).encode('utf-8')
+    output += ', \x1FWind\x1F: ' + wind
     output += ' - '
     if name != '?' and countryName != '?':
         output += '%s, %s, %s' % (name, region, countryName)
@@ -922,6 +942,30 @@ def forecastio_current_weather(jenni, input):
     output += ' (Powered by Forecast, forecast.io)'
     jenni.say(output)
 forecastio_current_weather.commands = ['wxi', 'wx', 'weather']
+
+
+def make_rh_C(temp, dewpoint):
+    return 100.0 - (5.0 * (temp - dewpoint))
+
+
+def make_rh_F(temp, dewpoint):
+    return 100.0 - ((25.0 / 9.0) * (temp - dewpoint))
+
+
+def gen_heat_index(temp, rh):
+    ## based on https://en.wikipedia.org/wiki/Heat_index#Formula
+    c1 = -42.379
+    c2 = 2.04901523
+    c3 = 10.14333127
+    c4 = -0.22475541
+    c5 = -6.83783 * (10 ** (-3))
+    c6 = -5.481717 * (10 ** (-2))
+    c7 = 1.22874 * (10 ** (-3))
+    c8 = 8.5282 * (10 ** (-4))
+    c9 = -1.99 * (10 ** (-6))
+
+    heat_index = c1 + c2*temp + c3*rh + c4*temp*rh + c5*temp*temp + c6*rh*rh + c7*temp*temp*rh + c8*temp*rh*rh + c9*temp*temp*rh*rh
+    return heat_index
 
 
 if __name__ == '__main__':

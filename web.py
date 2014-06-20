@@ -16,6 +16,9 @@ import re
 import urllib
 import urllib2
 from htmlentitydefs import name2codepoint
+from modules import unicode as uc
+
+r_entity = re.compile(r'&([^;\s]+);')
 
 
 class Grab(urllib.URLopener):
@@ -55,7 +58,6 @@ def post(uri, query):
     u.close()
     return bytes
 
-r_entity = re.compile(r'&([^;\s]+);')
 
 
 def entity(match):
@@ -72,14 +74,44 @@ def entity(match):
 def decode(html):
     return r_entity.sub(entity, html)
 
+def entity_replace(txt):
+    return r_entity.sub(ep, txt)
 
-#For internal use in web.py, (modules can use this if they need a urllib object they can execute read() on)
-#Both handles redirects and makes sure input URI is UTF-8
+def ep(m):
+    entity = m.group()
+    if entity.startswith('&#x'):
+        cp = int(entity[3:-1], 16)
+        meep = unichr(cp)
+    elif entity.startswith('&#'):
+        cp = int(entity[2:-1])
+        meep = unichr(cp)
+    else:
+        entity_stripped = entity[1:-1]
+        try:
+            char = name2codepoint[entity_stripped]
+            meep = unichr(char)
+        except:
+            if entity_stripped in HTML_ENTITIES:
+                meep = HTML_ENTITIES[entity_stripped]
+            else:
+                meep = str()
+    try:
+        return uc.decode(meep)
+    except:
+        return uc.decode(uc.encode(meep))
+
+
+def remove_xml_tags(txt):
+    r_tag = re.compile(r'<(?!!)[^>]+>')
+    return re.sub(r_tag, '', txt)
+
+
 def get_urllib_object(uri, timeout):
-    """
-Return a urllib2 object for `uri` and `timeout`. This is better than using urrlib2 directly, for it handles redirects, makes sure URI is utf8, and is shorter and easier to use.
-Modules may use this if they need a urllib2 object to execute .read() on. For more information, refer to the urllib2 documentation.
-"""
+    '''Return a urllib2 object for `uri` and `timeout`. This is better than
+    using urrlib2 directly, for it handles redirects, makes sure URI is utf8,
+    and is shorter and easier to use.
+    Modules may use this if they need a urllib2 object to execute .read() on.
+    For more information, refer to the urllib2 documentation.'''
     redirects = 0
     try:
         uri = uri.encode("utf-8")
@@ -109,19 +141,17 @@ Modules may use this if they need a urllib2 object to execute .read() on. For mo
     return u
 
 
-#Identical to urllib2.quote
 def quote(string):
-    """
-Identical to urllib2.quote. Use this if you already importing web in your module and don't want to import urllib2 just to use the quote function.
-"""
+    '''Identical to urllib2.quote. Use this if you already importing web in
+    your module and don't want to import urllib2 just to use the quote
+    function.'''
     return urllib2.quote(string)
 
 
-#Identical to urllib.urlencode
 def urlencode(data):
-    """
-Identical to urllib.urlencode. Use this if you already importing web in your module and don't want to import urllib just to use the urlencode function.
-"""
+    '''Identical to urllib.urlencode. Use this if you already importing web
+    in your module and don't want to import urllib just to use the urlencode
+    function.'''
     return urllib.urlencode(data)
 
 
