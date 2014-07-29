@@ -22,7 +22,7 @@ import web
 
 base = 'http://freegeoip.net/json/'
 re_ip = re.compile('(?i)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-
+re_country = re.compile('(?i)(.+), (.+ of)')
 
 def ip_lookup(jenni, input):
     txt = input.group(2)
@@ -59,7 +59,11 @@ def ip_lookup(jenni, input):
         if 'region_name' in results:
             response += '%s State: %s' % (spacing, results['region_name'])
         if 'country_name' in results:
-            response += '%s Country: %s' % (spacing, results['country_name'])
+            country = results['country_name']
+            match = re_country.match(country)
+            if match:
+                country = ' '.join(reversed(match.groups()))
+            response += '%s Country: %s' % (spacing, country)
         if 'zipcode' in results:
             response += '%s ZIP: %s' % (spacing, results['zipcode'])
         response += '%s Latitude: %s' % (spacing, results['latitude'])
