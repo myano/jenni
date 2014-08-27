@@ -659,7 +659,7 @@ def fucking_weather(jenni, input):
     if remarks:
         response += remarks[0]
     else:
-        response += "THE FUCKING SITE DOESN'T CONTAIN ANY FUCKING INFORMATION ABOUT THE FUCKING WEATHER FOR THE PROVIDED FUCKING LOCATION."
+        response += "THE FUCKING SITE DOESN'T CONTAIN ANY FUCKING INFORMATION ABOUT THE FUCKING WEATHER FOR THE PROVIDED FUCKING LOCATION. FUCK!"
 
     if conditions:
         response += ' ' + conditions[0]
@@ -719,6 +719,8 @@ def forecast(jenni, input):
         return jenni.say('Please sign up for a forecast.io API key at https://forecast.io/ or try .wx-noaa or .weather-noaa')
 
     txt = input.group(2)
+    if not txt:
+        return jenni.say('Please provide a location.')
 
     name, county, region, countryName, lat, lng = location(txt)
 
@@ -842,6 +844,9 @@ def forecastio_current_weather(jenni, input):
         return jenni.say('Please sign up for a forecast.io API key at https://forecast.io/')
 
     txt = input.group(2)
+    if not txt:
+        return jenni.say('Please provide a location.')
+
     name, county, region, countryName, lat, lng = location(txt)
 
     url = 'https://api.forecast.io/forecast/%s/%s,%s'
