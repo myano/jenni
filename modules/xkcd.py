@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 '''
 xkcd.py - XKCD Module
-Copyright 2010-2013 Michael Yanovich (yanovich.net), and Morgan Goose
-
+Copyright 2010-2014 Michael Yanovich (yanovich.net), and Morgan Goose
 Partially re-written by Paul Schellin (paulschellin@gmail.com) 2014
 
 Licensed under the Eiffel Forum License 2.
@@ -22,13 +21,13 @@ from modules import unicode as uc
 Randall Munroe is nice and provides a simple JSON API for fetching comics.
 
 See this page:
-http://xkcd.com/json.html
+https://xkcd.com/json.html
 
 
 Can access:
-http://xkcd.com/info.0.json
+https://xkcd.com/info.0.json
 for the current comic, or:
-http://xkcd.com/614/info.0.json
+https://xkcd.com/614/info.0.json
 for the 614th comic.
 
 Each comic contains the following JSON keys:
@@ -75,7 +74,7 @@ def xkcd(jenni, input):
     if line:
         if line.isdigit():
             xkcd_num = line.lstrip().rstrip()
-            xkcd_url = 'http://xkcd.com/' + xkcd_num + '/info.0.json'
+            xkcd_url = 'https://xkcd.com/' + xkcd_num + '/info.0.json'
         elif any([line.lower() in ['r', 'ran', 'rand', 'random']]):
             show_random_comic = True
         else:
@@ -87,11 +86,11 @@ def xkcd(jenni, input):
     if show_random_comic:
         max_int = body['num']
         xkcd_rand_num = random.randint(0, max_int)
-        xkcd_url = 'http://xkcd.com/' + str(xkcd_rand_num) + '/info.0.json'
+        xkcd_url = 'https://xkcd.com/' + str(xkcd_rand_num) + '/info.0.json'
         body = tryToGetJSON(xkcd_url)
 
 
-    comic_date_str = body['year'] + u'-' + body['month'] + u'-' + body['day']
+    comic_date_str = body['year'] + u'-' + str(body['month']).zfill(2) + u'-' + str(body['day']).zfill(2)
     header_str = u'\x02xkcd #\x02' + str(body['num']) + u' (' + comic_date_str + u') \x02' + body['title'] + u'\x02'
     jenni.say(header_str)
 
@@ -110,7 +109,6 @@ def xkcd(jenni, input):
 xkcd.commands = ['xkcd']
 xkcd.example = '.xkcd  (for most recent), .xkcd [comic number]  (for specific comic), or .xkcd [r | ran | rand | random]  (for a random comic)'
 xkcd.priority = 'medium'
-xkcd.rate = 180
 
 if __name__ == '__main__':
     print __doc__.strip()
