@@ -65,7 +65,7 @@ except:
     print 'WARNING: No simple_channels.txt found'
 
 
-url_finder = re.compile(r'(?u)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
+url_finder = re.compile(r'(?iu)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
