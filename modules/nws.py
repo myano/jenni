@@ -116,7 +116,7 @@ conditions = {
     'Flash': '\x0311Flash\x03',
     'Rip Current': '\x02\x0311Rip Current\x03\x02',
     'Beach Hazards': '\x0308Beach Hazards\x03',
-    'Frost': '\x02Frost\x02',
+    'Frost': '\x02\x0311Frost\x03\x02',
     'Quality': '\x0313Quality\x03',
     'Hydrologic': '\x0311Hydrologic\x03',
     'Weather': '\x02Weather\x02',
