@@ -10,6 +10,9 @@ More info:
 '''
 
 import os
+import time
+
+intentional_part = False
 
 def join(jenni, input):
     '''Join the specified channel. This is an admin-only command.'''
@@ -36,8 +39,10 @@ join.example = '.join #example or .join #example key'
 def part(jenni, input):
     '''Part the specified channel. This is an admin-only command.'''
     # Can only be done in privmsg by an admin
+    global intentional_part
     if input.sender.startswith('#'): return
     if input.admin:
+        intentional_part = True
         jenni.write(['PART'], input.group(2))
 part.commands = ['part']
 part.priority = 'low'
@@ -94,6 +99,7 @@ def me(jenni, input):
 me.rule = (['me'], r'(#?\S+) (.*)')
 me.priority = 'low'
 
+
 def defend_ground(jenni, input):
     '''
     This function monitors all kicks across all channels jenni is in. If she
@@ -104,14 +110,30 @@ def defend_ground(jenni, input):
     '''
     channel = input.sender
     jenni.write(['JOIN'], channel)
+    time.sleep(10)
+    jenni.write(['JOIN'], channel)
 defend_ground.event = 'KICK'
 defend_ground.rule = '.*'
 defend_ground.priority = 'low'
 
+
+def defend_ground2(jenni, input):
+    global intentional_part
+    if not intentional_part and input.nick == jenni.config.nick:
+        intentional_part = False
+        channel = input.sender
+        jenni.write(['JOIN'], channel)
+        time.sleep(10)
+        jenni.write(['JOIN'], channel)
+defend_ground2.event = 'PART'
+defend_ground2.rule = '.*'
+defend_ground2.priority = 'low'
+
+
 def blocks(jenni, input):
     if not input.admin: return
 
-    if hasattr(jenni.config, 'logchan_pm'):
+    if hasattr(jenni.config, 'logchan_pm') and input.sender != jenni.config.logchan_pm:
         # BLOCKS USED - user in ##channel - text
         jenni.msg(jenni.config.logchan_pm, 'BLOCKS USED - %s in %s -- %s' % (input.nick, input.sender, input))
 
