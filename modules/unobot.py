@@ -54,6 +54,7 @@ STRINGS = {
     'CANT_STOP': '\x0300,01%s is the game owner, you can\'t stop it! To force stop the game, please wait %s seconds.',
     'DEALING_IN': '\x0300,01Dealing %s into the game as player #%s!',
     'JOINED': '\x0300,01Dealing %s into the game as player #%s!',
+    'ALREADY_JOINED': '\x0300,01Player, %s, is already in the game as player #%s!',
     'ENOUGH': '\x0300,01There are enough players, type .deal to start!',
     'NOT_STARTED': '\x0300,01Game not started, type .uno to start!',
     'NOT_ENOUGH': '\x0300,01Not enough players to deal yet.',
@@ -125,6 +126,7 @@ class UnoBot:
             self.players = dict()
             self.players[owner] = list()
             self.playerOrder = [owner]
+            jenni.msg(CHANNEL, STRINGS['JOINED'] % (owner, self.playerOrder.index(owner) + 1))
             if self.players_pce.get(owner, 0):
                 jenni.notice(owner, STRINGS['ENABLED_PCE'] % owner)
 
@@ -158,6 +160,8 @@ class UnoBot:
                         jenni.msg(CHANNEL, STRINGS['JOINED'] % (nickk, self.playerOrder.index(nickk) + 1))
                         if len (self.players) == 2:
                             jenni.msg(CHANNEL, STRINGS['ENOUGH'])
+                else:
+                    jenni.msg(CHANNEL, STRINGS['ALREADY_JOINED'] % (nickk, self.playerOrder.index(nickk) + 1))
             else:
                 jenni.msg(CHANNEL, STRINGS['GAME_ALREADY_DEALT'])
         else:
