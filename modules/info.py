@@ -40,15 +40,7 @@ doc.priority = 'low'
 
 
 def commands(jenni, input):
-    # This function only works in private message
-    #if input.sender.startswith('#'): return
-    if input.group(1) == "help" and input.group(2):
-        doc(jenni, input)
-        return
-    names = ', '.join(sorted(jenni.doc.iterkeys()))
-    jenni.reply("I am sending you a private message of all my commands!")
-    jenni.reply('For more robust help please see: http://is.gd/CPStvK')
-    jenni.msg(input.nick, 'Commands I recognise: ' + names + '.')
+    jenni.reply('For a list of all of my commands, please visit: https://is.gd/CPStvK')
 commands.commands = ['commands', 'help']
 commands.priority = 'low'
 
