@@ -36,7 +36,7 @@ def load_db():
         try:
             channel = uc.encode(new[0])
         except:
-            channe = uc.decode(new[0])
+            channel = uc.decode(new[0])
         nick = new[1]
         if len(new) < 2: continue
         if channel not in search_dict:
