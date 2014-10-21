@@ -56,8 +56,8 @@ def setup(self):
 def f_remind(jenni, input):
     teller = input.nick
 
-    if hasattr(jenni.config, 'logchan_pm'):
-        jenni.msg(jenni.config.logchan_pm, 'TELL used by %s in %s: %s' % (str(input.nick), str(input.sender), input))
+    #if hasattr(jenni.config, 'logchan_pm'):
+        #jenni.msg(jenni.config.logchan_pm, 'TELL used by %s in %s: %s' % (str(input.nick), str(input.sender), input))
 
     #if not input.group(2) or input.group(3):
     if not input.group(2):

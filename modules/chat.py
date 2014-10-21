@@ -24,6 +24,7 @@ nowords = ['reload', 'help', 'tell', 'ask', 'ping']
 
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 HTML_ENTITIES = { 'apos': "'" }
+noun = 'ZHVjaw=='
 
 random.seed()
 
@@ -60,7 +61,7 @@ def chat(jenni, input):
         ## in a channel and prepended with jenni's name
         pm = False
         try:
-            time.sleep(5 + random.randint(3, 30))
+            time.sleep(random.randint(5, 30))
             msgo = mycb.Ask(msgi)
         except:
             return
@@ -75,17 +76,32 @@ def chat(jenni, input):
                 if spt.startswith(x):
                     return
         try:
-            time.sleep(5 + random.randint(1, 10))
+            time.sleep(random.randint(3, 15))
             msgo = mycb.Ask(msgi)
         except:
             return
     else:
         return
+
     if msgo:
         rand_num = random.randint(0, 5)
         time.sleep(1 + rand_num)
+
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
+        response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), msgo)
+        response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), msgo)
         response = r_entity.sub(e, response)
+
+        if random.random() <= 0.5:
+            response = response[0].lower() + response[1:]
+
+        if random.random() <= 0.5:
+            response = response[:-1]
+
+        if len(response) > 10 and random.random() <= 0.3:
+            random_int_rm = random.randint(1, len(response))
+            response = response[:random_int_rm-1] + response[random_int_rm:]
+
         if pm:
             jenni.say(response)
             beginning = ':%s PRIVMSG %s :' % (jenni.config.nick, input.sender)
@@ -94,10 +110,12 @@ def chat(jenni, input):
         else:
             delim = random.choice((',', ':'))
             msg = '%s' % (response)
+
             if random.random() <= 0.25:
                 msg = input.nick + delim + ' ' + msg
-            if random.random() <= 0.01:
+            if random.random() <= 0.15:
                 chat(jenni, input)
+
             jenni.say(msg)
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 

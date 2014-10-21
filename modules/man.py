@@ -52,9 +52,24 @@ def man(jenni, input):
         if n in h:
             return jenni.say("Couldn't find the man page {0} on man.he.net".format(term))
 
+    lines = soup.pre.contents[0]
+    try:
+        desc_idx = lines.index('DESCRIPTION')
+    except:
+        return jenni.say('Could not find a "DESCRIPTION" section. :(')
+
+    try:
+        desc_end_idx = lines[desc_idx:].index('\n\n')
+    except:
+        return jenni.say('Could not find an ending to the "DESCRIPTION" section. :-(')
+
+    description = lines[desc_idx:desc_idx + desc_end_idx]
+
     jenni.say(man_uri % t)
     jenni.say("I am sending you the content of this page in a private message")
-    for c in soup.pre.contents[0].split('\n'):
+    description = description.replace('DESCRIPTION\n', 'DESCRIPTION of %s\n' % (term))
+
+    for c in description.split('\n'):
         jenni.msg(input.nick, c, False, False, 1)
 
 man.commands = ['man', 'manual']
