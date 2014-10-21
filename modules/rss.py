@@ -105,7 +105,7 @@ def manage_rss(jenni, input):
     else:
         jenni.reply("Incorrect parameters specified.")
     c.close()
-manage_rss.commands = ['rss']
+manage_rss.commands = ['rss-admin']
 manage_rss.priority = 'low'
 
 
@@ -223,9 +223,14 @@ def startrss(jenni, input):
     elif query == '-i':
         INTERVAL = input.group(3)
         jenni.reply("INTERVAL updated to: %s" % (str(INTERVAL)))
-    elif query == '--stop':
+    elif query == 'stop':
         STOP = True
         jenni.reply("Stop parameter updated.")
+    elif query == 'start':
+        STOP = False
+    else:
+        return jenni.reply("We couldn't figure out what you wanted to do.")
+
 
     if first_run:
         if DEBUG:
@@ -251,7 +256,7 @@ def startrss(jenni, input):
 
     if DEBUG:
         jenni.say("Stopped checking")
-startrss.commands = ['startrss']
+startrss.commands = ['startrss', 'rss']
 startrss.priority = 'high'
 
 if __name__ == '__main__':
