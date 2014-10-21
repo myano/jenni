@@ -462,10 +462,10 @@ def f_weather(jenni, input):
 
     windchill = False
     if isinstance(temp, float) and isinstance(speed, float) and temp <= 10.0 and speed > 0:
-        ## Convert knots to kilometers per hour, http://is.gd/3dNrbW
+        ## Convert knots to kilometers per hour, https://is.gd/3dNrbW
         speed_kmh = speed * 1.852
 
-        ## Formula for Windchill: http://is.gd/SS0u6E
+        ## Formula for Windchill: https://is.gd/SS0u6E
         windchill = 13.12 + (0.6215 * temp) - (11.37 * (speed_kmh ** (0.16))) + (0.3965 * temp * (speed_kmh ** (0.16)))
         windchill = float(windchill)
 
@@ -704,7 +704,7 @@ def windchill(jenni, input):
         ## hehe
         jenni.reply('Are you okay?')
 
-    ## cf. http://is.gd/mgLuzU
+    ## cf. https://is.gd/mgLuzU
     wc = 35.74 + (0.6215 * temp) - (35.75 * (wind ** (0.16))) + (0.4275 * temp * (wind ** (0.16)))
 
     jenni.say(u'Windchill: %2.f \u00B0F' % (wc))
@@ -779,7 +779,7 @@ def forecast(jenni, input):
         lowC = form % ((float(day['temperatureMin']) - 32) * (5.0 / 9.0))
         dewC = form % ((float(day['dewPoint'] - 32)) * (5.0 / 9.0))
 
-        ## value taken from, http://is.gd/3dNrbW
+        ## value taken from, https://is.gd/3dNrbW
         windspeedC = form % (float(day['windSpeed']) * 1.609344)
         windspeed = form % (day['windSpeed'])
         summary = day['summary']
@@ -917,7 +917,7 @@ def forecastio_current_weather(jenni, input):
 
     degrees = wind_dir(degrees)
 
-    ## value taken from, http://is.gd/3dNrbW
+    ## value taken from, https://is.gd/3dNrbW
     speedC = 1.609344 * speed
     wind = '%s %.1fmph (%.1fkmh) (%s)' % (description, speed, speedC, degrees)
 

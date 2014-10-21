@@ -21,7 +21,7 @@ def ask(jenni, input):
     if choices == None:
         jenni.reply('There is no spoon! Please try a valid question.')
     elif choices.lower() == 'what is the answer to life, the universe, and everything?':
-        ## cf. http://is.gd/2KYchV
+        ## cf. https://is.gd/2KYchV
         jenni.reply('42')
     else:
         list_choices = choices.lower().split(' or ')

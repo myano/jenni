@@ -176,7 +176,6 @@ def py(jenni, input):
             jenni.reply('Sorry, no result.')
     except Exception, e:
         jenni.reply('The server did not return an answer.')
-        print '[.py]', e
 py.commands = ['py', 'python']
 py.example = '.py print "Hello world, %s!" % ("James")'
 
@@ -190,7 +189,6 @@ def get_wa(search):
     uri += urllib.quote(query.replace('+', '%2B'))
     answer = web.get(uri)
     if answer:
-        print "answer:", answer
         answer = answer.decode("string_escape")
         answer = HTMLParser.HTMLParser().unescape(answer)
         match = re.search('\\\:([0-9A-Fa-f]{4})', answer)
