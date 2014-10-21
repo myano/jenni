@@ -61,7 +61,7 @@ def log_raw(line):
     f.close()
 
 class Bot(asynchat.async_chat):
-    def __init__(self, nick, name, channels, password=None, logchan_pm=None, logging=False):
+    def __init__(self, nick, name, channels, password=None, logchan_pm=None, logging=False, ipv6=False):
         asynchat.async_chat.__init__(self)
         self.set_terminator('\n')
         self.buffer = ''
@@ -82,6 +82,7 @@ class Bot(asynchat.async_chat):
         self.stack_log = list()
         self.logchan_pm = logchan_pm
         self.logging = logging
+        self.ipv6 = ipv6
 
         import threading
         self.sending = threading.RLock()
@@ -151,20 +152,24 @@ class Bot(asynchat.async_chat):
             self.send = self._ssl_send
             self.recv = self._ssl_recv
 
-        for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
-            af, socktype, proto, canonname, sa = res
-            try:
-                self.create_socket(af,socktype)
-            except socket.error as msg:
-                continue
-            try:
-                self.connect(sa)
-            except socket.error as msg:
-                self.close()
-                continue
-            break
+        if self.ipv6:
+            for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
+                af, socktype, proto, canonname, sa = res
+                try:
+                    self.create_socket(af,socktype)
+                except socket.error as msg:
+                    continue
+                try:
+                    self.connect(sa)
+                except socket.error as msg:
+                    self.close()
+                    continue
+                break
+            else:
+                raise Exception("No connectivity")
         else:
-            raise Exception("No connectivity")
+            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connect((host, port))
 
         try: asyncore.loop()
         except KeyboardInterrupt:
@@ -186,6 +191,8 @@ class Bot(asynchat.async_chat):
                         select.select([], [self.ssl], [])
                     else:
                         raise
+                except:
+                    continue
             self.set_socket(self.ssl)
 
         if self.verbose:
@@ -250,16 +257,21 @@ class Bot(asynchat.async_chat):
 
     def found_terminator(self):
         line = self.buffer
+
         if line.endswith('\r'):
             line = line[:-1]
 
         if line:
             if self.logchan_pm:
+                ## if logging to logging channel is enabled
+                ## send stuff in PM to logging channel
                 dlist = line.split()
                 if len(dlist) >= 3:
                     if "#" not in dlist[2] and dlist[1].strip() not in IRC_CODES:
                         self.msg(self.logchan_pm, line, True)
             if self.logging:
+                ## if logging (to log file) is enabled
+                ## send stuff to the log file
                 log_raw(line)
 
         self.buffer = ''

@@ -25,17 +25,20 @@ def decode(bytes):
 
 class Jenni(irc.Bot):
     def __init__(self, config):
+        lc_pm = None
         if hasattr(config, "logchan_pm"): lc_pm = config.logchan_pm
-        else: lc_pm = None
+        logging = False
         if hasattr(config, "logging"): logging = config.logging
-        else: logging = False
-        args = (config.nick, config.name, config.channels, config.password, lc_pm, logging)
+        ipv6 = False
+        if hasattr(config, 'ipv6'): ipv6 = config.ipv6
+        args = (config.nick, config.name, config.channels, config.password, lc_pm, logging, ipv6)
         ## next, try putting a try/except around the following line
         irc.Bot.__init__(self, *args)
         self.config = config
         self.doc = {}
         self.stats = {}
         self.times = {}
+        self.excludes = {}
         if hasattr(config, 'excludes'):
             self.excludes = config.excludes
         self.setup()
@@ -221,14 +224,20 @@ class Jenni(irc.Bot):
 
     def call(self, func, origin, jenni, input):
         nick = (input.nick).lower()
+
+        ## rate limiting
         if nick in self.times:
             if func in self.times[nick]:
                 if not input.admin:
+                    ## admins are not rate limited
                     if time.time() - self.times[nick][func] < func.rate:
                         self.times[nick][func] = time.time()
                         return
-        else: self.times[nick] = dict()
+        else:
+            self.times[nick] = dict()
+
         self.times[nick][func] = time.time()
+
         try:
             if hasattr(self, 'excludes'):
                 if input.sender in self.excludes:
