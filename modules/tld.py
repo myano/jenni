@@ -40,7 +40,7 @@ def gettld(jenni, input):
         out = dict()
         if not text.startswith('.'):
             text = '.' + text
-        if len(tld_tds[0]('a')) > 0 and str(tld_tds[0]('a')[0].text) == text:
+        if len(tld_tds[0]('a')) > 0 and tld_tds[0]('a')[0].text == text:
             print 'one:', str(tld_tds[1])
             if tld_tds[1]('a') and tld_tds[1]('img'):
                 out['entity'] = str(tld_tds[1]('a')[0].text)
