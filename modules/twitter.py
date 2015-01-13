@@ -82,14 +82,9 @@ def user_tweet(username):
     return format(tweet, username)
 
 def id_tweet(tid):
-    link = 'https://twitter.com/twitter/status/' + tid
+    link = 'https://twitter.com/-/status/' + tid
     data = web.head(link)
-
-    try:
-        message, status = tuple(data)
-    except ValueError:
-        ## this happens if the tweet id is from the account name "Twitter"
-        return read_tweet(link)
+    message, status = tuple(data)
 
     if status == 301:
         url = message.get("Location")
