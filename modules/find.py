@@ -161,8 +161,9 @@ def findandreplace(jenni, input):
     if me and not input.group(1): phrase = '\x02' + phrase + '\x02'
     jenni.say(phrase)
 
-# Matches optional whitespace + 's' + optional whitespace + separator character
-findandreplace.rule = r'(?iu)(?:([^\s:,]+)[\s:,])?\s*s\s*([^\s\w])(.*)' # May work for both this and "meant" (requires input.group(i+1))
+# Matches optional whitespace + 's' + optional whitespace + separator character.
+# The separator can be any non-alphanumeric character except for '_', '.', ':' and '-'.
+findandreplace.rule = r'(?iu)(?:([^\s:,]+)[\s:,])?\s*s\s*([^\s\w.:-])(.*)' # May work for both this and "meant" (requires input.group(i+1))
 findandreplace.priority = 'high'
 findandreplace.rate = 30
 
