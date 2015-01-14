@@ -29,7 +29,7 @@ def checkdb(cursor):
 
 
 def manage_rss(jenni, input):
-    """.rss operation channel site_name url -- 'add', 'del', or 'list' rss"""
+    """.rss-admin operation channel site_name url -- 'add', 'del', or 'list' rss"""
     if not input.admin:
         jenni.reply("Sorry, you need to be an admin to modify the RSS feeds.")
         return
@@ -40,7 +40,7 @@ def manage_rss(jenni, input):
 
     text = input.group().split()
     if len(text) < 2:
-        jenni.reply("Proper usage: '.rss add ##channel Site_Name URL', '.rss del ##channel Site_Name URL', '.rss del ##channel'")
+        jenni.reply("Proper usage: '.rss-admin add ##channel Site_Name URL', '.rss-admin del ##channel Site_Name URL', '.rss-admin del ##channel'")
     elif len(text) > 2:
         channel = text[2].lower()
 
@@ -52,10 +52,10 @@ def manage_rss(jenni, input):
             site_name = text[3]
             site_url = text[4]
             if len(text) >= 6:
-                # .rss add ##yano ScienceDaily http://sciencedaily.com/ 03
+                # .rss-admin add ##yano ScienceDaily http://sciencedaily.com/ 03
                 fg_colour = str(text[5])
             if len(text) == 7:
-                # .rss add ##yano ScienceDaily http://sciencedaily.com/ 03 00
+                # .rss-admin add ##yano ScienceDaily http://sciencedaily.com/ 03 00
                 bg_colour = str(text[6])
         elif temp[-1].split():
             site_name = temp[1]
@@ -78,13 +78,13 @@ def manage_rss(jenni, input):
         c.close()
         jenni.reply("Successfully added values to database.")
     elif len(text) == 3 and text[1] == 'del':
-        # .rss del ##channel
+        # .rss-admin del ##channel
         c.execute("DELETE FROM rss WHERE channel = ?", (channel,))
         conn.commit()
         c.close()
         jenni.reply("Successfully removed values from database.")
     elif len(text) >= 4 and text[1] == 'del':
-        # .rss del ##channel Site_Name
+        # .rss-admin del ##channel Site_Name
         site_name = ' '.join(text[3:])
         temp = input.group().split('"')
         if len(temp) != 1:
