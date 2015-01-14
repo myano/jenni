@@ -13,7 +13,7 @@ More info:
 """
 
 try:
-    import image_me
+    from modules import image_me
 except ImportError:
     raise ImportError("You must have the image_me module to use"
                       "the mustache_me module")
