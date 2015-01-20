@@ -13,8 +13,10 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+from modules import proxy
 import re
 import web
+
 
 def isup(jenni, input):
     '''isup.me website status checker'''
@@ -33,7 +35,7 @@ def isup(jenni, input):
         else:
             site = 'http://' + site
     try:
-        response = web.get(site)
+        response = proxy.get(site)
     except Exception as e:
         jenni.say(site + ' looks down from here.')
         return
