@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 url.py - jenni Bitly Module
+Copyright 2015, Sujeet Akula (sujeet@freeboson.org)
 Copyright 2010-2013, Michael Yanovich (yanovich.net)
 Copyright 2010-2013, Kenneth Sham
 Licensed under the Eiffel Forum License 2.
@@ -21,6 +22,8 @@ from modules import proxy
 import time
 import urllib2
 import web
+
+from modules import youtube.title
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
@@ -64,13 +67,13 @@ try:
 except:
     print 'WARNING: No simple_channels.txt found'
 
-
 url_finder = re.compile(r'(?iu)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 HTML_ENTITIES = { 'apos': "'" }
 
+yt_catch = re.compile('http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
@@ -478,6 +481,10 @@ def show_title_demand(jenni, input):
             uri = jenni.bot.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
+
+    yt_match =  yt_catch.match(uri)
+    if (youtube.title(jenni, yt_match)):
+        return
 
     status, results = get_results(uri, True)
 
