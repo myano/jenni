@@ -23,7 +23,7 @@ import time
 import urllib2
 import web
 
-from modules import youtube.title
+from modules import youtube
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
