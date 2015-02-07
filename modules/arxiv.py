@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 '''
-arxiv.py -- arXiv archive
-Copyright 2014 Michael Yanovich (yanovich.net)
+arXiv.py -- arXiv Module
 Copyright 2014 Sujeet Akula (sujeet@freeboson.org)
 Licensed under the Eiffel Forum License 2.
 
@@ -13,22 +12,23 @@ More info:
 
 import web, re, feedparser
 from web import urllib
-
-metamark_api = r'http://metamark.net/api/rest/simple'
+from modules.url import short
 
 # Base api query url
 base_url = 'http://export.arxiv.org/api/query?';
 
-request = 'search_query=all:{}&start=0&max_results=1'
+request = 'search_query={}&start=0&max_results=1'
 
 feedparser._FeedParserMixin.namespaces['http://a9.com/-/spec/opensearch/1.1/'] = 'opensearch'
 feedparser._FeedParserMixin.namespaces['http://arxiv.org/schemas/atom'] = 'arxiv'
 
-id_filter = re.compile(r'.*\/abs\/((?:[\d\.]{9})|(?:[\w\-\.]*\/\d{7}))(?:v\d+){,1}[/]{,1}') # id will be in \1
+id_filter = re.compile(r'.*\/abs\/((?:[\d\.]{9})|(?:[\w\-\.]*\/\d{7}))(?:v\d+){,1}[/]{,1}') # id will be in \1 
 collab_check = re.compile(r'\s(?:Collaboration)|(?:Group).*', flags=re.IGNORECASE)
 no_http = re.compile(r'.*\/\/(.*)')
+no_newlines = re.compile(r'\n')
 
 def get_arxiv(query):
+
     url = base_url + request.format(urllib.quote(query))
     xml = web.get(url)
     feed = feedparser.parse(xml)
@@ -43,8 +43,7 @@ def get_arxiv(query):
     arxivid = id_filter.sub(r'\1', abs_link)
 
     try:
-        short_url = urllib.urlopen(metamark_api,
-                         urllib.urlencode({'long_url':abs_link})).read()
+        short_url = short(abs_link)[0][1]
     except:
         short_url = ''
 
@@ -62,7 +61,7 @@ def get_arxiv(query):
         authors = ''
 
     title = entry.title
-    abstract = entry.summary
+    abstract = no_newlines.sub(' ', entry.summary)
 
     return (arxivid, authors, title, abstract, short_url)
 
@@ -73,15 +72,15 @@ def summary(jenni, input):
     try:
         (arxivid, authors, title, abstract, url) = get_arxiv(query)
     except:
-        jenni.say('[arXiv] Could not lookup ' + query + ' in the arXiv.')
+        jenni.say("[arXiv] Could not lookup " + query + " in the arXiv.")
         return
 
-    arxiv_summary = '[arXiv:' + arxivid + '] ' + authors + ', "' \
+    arxiv_summary = "[arXiv:" + arxivid + "] " + authors + ', "' \
                     + title + '" :: ' + abstract
 
-    long_summary = arxiv_summary + ' ' + url
+    long_summary = arxiv_summary + " " + url
     if len(long_summary) > 300:
-        ending = '[...] ' + url
+        ending = '[...] ' + url 
         clipped = arxiv_summary[:(300-len(ending))] + ending
     else:
         clipped = long_summary
