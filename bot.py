@@ -31,8 +31,8 @@ class Jenni(irc.Bot):
         if hasattr(config, "logging"): logging = config.logging
         ipv6 = False
         if hasattr(config, 'ipv6'): ipv6 = config.ipv6
-	serverpass = None
-	if hasattr(config, 'serverpass'): serverpass = config.serverpass
+        serverpass = None
+        if hasattr(config, 'serverpass'): serverpass = config.serverpass
         args = (config.nick, config.name, config.channels, serverpass, lc_pm, logging, ipv6)
         ## next, try putting a try/except around the following line
         irc.Bot.__init__(self, *args)
