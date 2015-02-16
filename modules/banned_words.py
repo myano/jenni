@@ -37,6 +37,9 @@ def banned_words(jenni, input):
     """
     global current_warnings
 
+    if not hasattr(jenni.config, 'bad_word_limit') or not hasattr(jenni.config, 'bad_words'):
+        return
+
     bad_word_limit = jenni.config.bad_word_limit or 0
     bad_words = jenni.config.bad_words or {}
 
