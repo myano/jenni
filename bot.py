@@ -206,6 +206,10 @@ class Jenni(irc.Bot):
                 s.ident = origin.user
                 s.raw = origin
                 s.args = args
+                s.mode = origin.mode
+                s.mode_target = origin.mode_target
+                s.names = origin.names
+                s.full_ident = origin.full_ident
                 s.admin = origin.nick in self.config.admins
                 if s.admin == False:
                     for each_admin in self.config.admins:

@@ -67,6 +67,15 @@ def create_default_config(fn):
     # This is optional and doesn't need to be added.
     # wunderground_apikey = ''
 
+    # You can add bannable words / regex per channel
+    # bad_words = {
+    #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
+    # }
+    #
+    # This controls the number of warnings a user will receive
+    # before they are banned from the channel
+    # bad_word_limit = 1
+
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
