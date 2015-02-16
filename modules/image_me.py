@@ -12,6 +12,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+import json
 import random
 import re
 import traceback
@@ -24,30 +25,32 @@ except ImportError:
     raise ImportError("Could not find BeautifulSoup library,"
                       "please install to use the image_me module")
 
-google_images_uri = 'https://www.google.com/search?safe=off'
-google_images_uri += '&source=lnms&tbm=isch&q=%s'
-
+bing_images_uri = 'https://www.bing.com/images/search?q=%s'
 
 def image_me(term):
-    global google_images_uri
+    global bing_images_uri
 
     t = urllib.quote_plus(term)
     # URL encode the term given
     if '%' in term:
         t = urllib.quote_plus(term.replace('%', ''))
 
-    content = urllib.urlopen(google_images_uri % t).read()
+    content = urllib.urlopen(bing_images_uri % t).read()
     soup = Soup(content)
-    img_links = [a['href'] for a in soup.findAll('a', 'rg_l', href=True)]
+    img_links = []
+    for div in soup.findAll('div', attrs={'class': 'dg_u'}):
+        link = div.find('a')
+        # Fix the lazy json
+        try:
+            m = link.get('m')
+            img_url = m.split("imgurl:\"")[1].split("\",")[0]
+            img_links.append(img_url)
+        except:
+            continue
 
     if img_links:
         full_link = img_links[random.randint(0, len(img_links) - 1)]
-        parsed_link = urlparse.urlparse(full_link)
-        query = urlparse.parse_qs(parsed_link.query)
-        img_url = query['imgurl']
-        if type(img_url) == list:
-            img_url = img_url[0]
-        return urllib.unquote_plus(img_url)
+        return urllib.unquote_plus(full_link)
 
 
 def img(jenni, input):
