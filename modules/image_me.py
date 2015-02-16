@@ -17,6 +17,7 @@ import re
 import traceback
 import urllib
 import urlparse
+from modules import proxy
 
 try:
     from BeautifulSoup import BeautifulSoup as Soup
@@ -36,7 +37,8 @@ def image_me(term):
     if '%' in term:
         t = urllib.quote_plus(term.replace('%', ''))
 
-    content = urllib.urlopen(google_images_uri % t).read()
+    content = proxy.get(google_images_uri % t)
+
     soup = Soup(content)
     img_links = [a['href'] for a in soup.findAll('a', 'rg_l', href=True)]
 
