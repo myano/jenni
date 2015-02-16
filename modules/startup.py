@@ -73,5 +73,59 @@ startup.rule = r'(.*)'
 startup.event = '251'
 startup.priority = 'low'
 
+# Method for populating op/hop/voice information in channels on join
+def privs_on_join(jenni, input):
+    if not input.mode_target or not input.mode_target.startswith('#'):
+        return
+
+    channel = input.mode_target
+    if input.names and len(input.names) > 0:
+        split_names = input.names.split()
+        for name in split_names:
+            nick_mode, nick = name[0], name[1:]
+            if nick_mode == '@':
+                jenni.add_op(channel, nick)
+            elif nick_mode == '%':
+                jenni.add_halfop(channel, nick)
+            elif nick_mode == '+':
+                jenni.add_voice(channel, nick)
+privs_on_join.rule = r'(.*)'
+privs_on_join.event = '353'
+privs_on_join.priority = 'high'
+
+# Method for tracking changes to ops/hops/voices in channels
+def track_priv_change(jenni, input):
+    if not input.sender or not input.sender.startswith('#'):
+        return
+
+    channel = input.sender
+
+    if input.mode:
+        add_mode = input.mode.startswith('+')
+        del_mode = input.mode.startswith('-')
+
+        # Check that this is a mode change and that it is a mode change on a user
+        if (add_mode or del_mode) and input.mode_target and len(input.mode_target) > 0:
+            mode_change = input.mode[1:]
+            mode_target = input.mode_target
+
+            if add_mode:
+                if mode_change == 'o':
+                    jenni.add_op(channel, mode_target)
+                elif mode_change == 'h':
+                    jenni.add_halfop(channel, mode_target)
+                elif mode_change == 'v':
+                    jenni.add_voice(channel, mode_target)
+            else:
+                if mode_change == 'o':
+                    jenni.del_op(channel, mode_target)
+                elif mode_change == 'h':
+                    jenni.del_halfop(channel, mode_target)
+                elif mode_change == 'v':
+                    jenni.del_voice(channel, mode_target)
+track_priv_change.rule = r'(.*)'
+track_priv_change.event = 'MODE'
+track_priv_change.priority = 'high'
+
 if __name__ == '__main__':
     print __doc__.strip()
