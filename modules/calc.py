@@ -33,6 +33,19 @@ except:
     pass
 
 
+def clean_up_answer(answer):
+    answer = answer.encode('utf-8')
+    answer = answer.decode('utf-8')
+    answer = ''.join(chr(ord(c)) for c in answer)
+    answer = uc.decode(answer)
+    answer = answer.replace('<sup>', '^(')
+    answer = answer.replace('</sup>', ')')
+    answer = web.decode(answer)
+    answer = answer.strip()
+    answer += ' [GC]'
+    return answer
+
+
 def c(jenni, input):
     '''.c -- Google calculator.'''
 
@@ -44,18 +57,21 @@ def c(jenni, input):
     q = input.group(2).encode('utf-8')
     q = q.replace('\xcf\x95', 'phi')  # utf-8 U+03D5
     q = q.replace('\xcf\x80', 'pi')  # utf-8 U+03C0
+    temp_q = q.replace(' ', '')
 
     ## Attempt #1 (Google)
-    uri = 'https://www.google.com/search?gbv=1&q='
-    uri += web.urllib.quote(q)
+    uri_base = 'http://www.google.com/search?gbv=1&q='
+    uri = uri_base + web.urllib.quote(temp_q)
 
     ## To the webs!
     try:
         page = proxy.get(uri)
+        print 'used proxy!'
     except:
         ## if we can't access Google for calculating
         ## let us move on to Attempt #2
         page = web.get(uri)
+        print 'Did not use proxy!'
 
     answer = False
     if page:
@@ -66,97 +82,112 @@ def c(jenni, input):
     if answer:
         ## if the regex finding found a match we want the first result
         answer = answer[0]
-        answer = answer.encode('utf-8')
-        answer = answer.decode('utf-8')
-        answer = ''.join(chr(ord(c)) for c in answer)
-        answer = uc.decode(answer)
-        answer = answer.replace('<sup>', '^(')
-        answer = answer.replace('</sup>', ')')
-        answer = web.decode(answer)
-        answer = answer.strip()
-        answer += ' [GC]'
+        answer = clean_up_answer(answer)
         jenni.say(answer)
     else:
-        #### Attempt #2 (DuckDuckGo's API)
-        ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
-        ddg_uri += urllib.quote(q)
-
-        ## Try to grab page (results)
-        ## If page can't be accessed, we shall fail!
+        #### Attempt #1a
+        uri = uri_base + web.urllib.quote(q)
         try:
-            page = proxy.get(ddg_uri)
+            page = proxy.get(uri)
         except:
-            page = web.get(ddg_uri)
+            page = web.get(uri)
 
-        ## Try to take page source and json-ify it!
-        try:
-            json_response = json.loads(page)
-        except:
-            ## if it can't be json-ified, then we shall fail!
-            json_response = None
+        answer = False
 
-        ## Check for 'AnswerType' (stolen from search.py)
-        ## Also 'fail' to None so we can move on to Attempt #3
-        if (not json_response) or (hasattr(json_response, 'AnswerType') and json_response['AnswerType'] != 'calc'):
-            answer = None
-        else:
-            ## If the json contains an Answer that is the result of 'calc'
-            ## then continue
-            answer = json_response['Answer']
-            parts = answer.split('</style>')
-            answer = ''.join(parts[1:])
-            answer = re.sub(r'<.*?>', '', answer).strip()
-
+        if page:
+            answer = c_answer.findall(page)
         if answer:
-            ## If we have found answer with Attempt #2
-            ## go ahead and display it
-            answer += ' [DDG API]'
+            answer = answer[0]
+            answer = clean_up_answer(answer)
             jenni.say(answer)
-
         else:
-            #### Attempt #3 (Wolfram Alpha)
-            status, answer = get_wa(q)
 
-            if status:
-                jenni.say(answer + ' [WA]')
+            #### Attempt #2
+            try:
+                from BeautifulSoup import BeautifulSoup
+            except:
+                #return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
+                pass
+
+            new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
+            try:
+                ddg_html_page = proxy.get(new_url)
+            except:
+                ddg_html_page = web.get(new_url)
+            soup = BeautifulSoup(ddg_html_page)
+
+            ## use BeautifulSoup to parse HTML for an answer
+            zero_click = str()
+            if soup('div', {'class': 'zero-click-result'}):
+                zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+
+            ## remove some excess text
+            output = r_tag.sub('', zero_click).strip()
+            output = output.replace('\n', '').replace('\t', '')
+
+            ## test to see if the search module has 'remove_spaces'
+            ## otherwise, let us fail
+            try:
+                output = search.remove_spaces(output)
+            except:
+                output = str()
+
+            #if output:
+            if False:
+                ## If Attempt #2 worked, display the answer
+                jenni.say(output + ' [DDG HTML]')
 
             else:
-                #### Attempt #4 (DuckDuckGo's HTML)
-                ## This relies on BeautifulSoup; if it can't be found, don't even bother
+                #### Attempt #3 (DuckDuckGo's API)
+                ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
+                ddg_uri += urllib.quote(q)
+
+                ## Try to grab page (results)
+                ## If page can't be accessed, we shall fail!
                 try:
-                    from BeautifulSoup import BeautifulSoup
+                    page = proxy.get(ddg_uri)
                 except:
-                    return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
+                    page = web.get(ddg_uri)
 
-                new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
+                ## Try to take page source and json-ify it!
                 try:
-                    ddg_html_page = proxy.get(new_url)
+                    json_response = json.loads(page)
                 except:
-                    ddg_html_page = web.get(new_url)
-                soup = BeautifulSoup(ddg_html_page)
+                    ## if it can't be json-ified, then we shall fail!
+                    json_response = None
 
-                ## use BeautifulSoup to parse HTML for an answer
-                zero_click = str()
-                if soup('div', {'class': 'zero-click-result'}):
-                    zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
-
-                ## remove some excess text
-                output = r_tag.sub('', zero_click).strip()
-                output = output.replace('\n', '').replace('\t', '')
-
-                ## test to see if the search module has 'remove_spaces'
-                ## otherwise, let us fail
-                try:
-                    output = search.remove_spaces(output)
-                except:
-                    output = str()
-
-                if output:
-                    ## If Attempt #4 worked, display the answer
-                    jenni.say(output + ' [DDG HTML]')
+                ## Check for 'AnswerType' (stolen from search.py)
+                ## Also 'fail' to None so we can move on to Attempt #3
+                if (not json_response) or (hasattr(json_response, 'AnswerType') and json_response['AnswerType'] != 'calc'):
+                    answer = None
                 else:
-                    ## If we made it this far, we have tried all available resources
-                    jenni.say('Absolutely no results!')
+                    ## If the json contains an Answer that is the result of 'calc'
+                    ## then continue
+                    answer = json_response['Answer']
+                    if hasattr(answer, 'result'):
+                        answer = answer['result']
+                    parts = answer.split('</style>')
+                    answer = ''.join(parts[1:])
+                    answer = re.sub(r'<.*?>', '', answer).strip()
+
+                if answer:
+                    ## If we have found answer with Attempt #2
+                    ## go ahead and display it
+                    answer += ' [DDG API]'
+                    jenni.say(answer)
+
+                else:
+                    #### Attempt #4 (DuckDuckGo's HTML)
+                    ## This relies on BeautifulSoup; if it can't be found, don't even bother
+
+                    #### Attempt #3 (Wolfram Alpha)
+                    status, answer = get_wa(q)
+
+                    if status:
+                        jenni.say(answer + ' [WA]')
+                    else:
+                        ## If we made it this far, we have tried all available resources
+                        jenni.say('Absolutely no results!')
 c.commands = ['c', 'cal', 'calc']
 c.example = '.c 5 + 3'
 
@@ -215,7 +246,11 @@ def wa(jenni, input):
     """.wa <input> -- queries WolframAlpha with the given input."""
     if not input.group(2):
         return jenni.reply("No search term.")
-    status, answer = get_wa(input.group(2))
+    txt = input.group(2)
+    txt = txt.encode('utf-8')
+    txt = txt.decode('utf-8')
+    txt = txt.encode('utf-8')
+    status, answer = get_wa(txt)
     if status:
         jenni.say(answer)
     else:
