@@ -57,6 +57,11 @@ def create_default_config(fn):
     # If not, you can use .weather-noaa or .wx-noaa
     # forecastio_apikey = ''
 
+    # wunderground_apikey is for an API key from http://www.wunderground.com/
+    # This is useful if you want more local and *live* weather information.
+    # This is optional and doesn't need to be added.
+    # wunderground_apikey = ''
+
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
