@@ -15,7 +15,7 @@ bad_format = "Please use correct format: .countdown 2012 12 21 You can also try:
 ## 2036 02 07
 
 def get_output(calculate_date, today, nye):
-    ending = "%s %s-%s-%sT%s00Z"
+    #ending = "%s %s-%s-%sT%s00Z"
     verb = str()
     if calculate_date <= today:
         diff = today - calculate_date
@@ -106,7 +106,7 @@ def three(inc):
 
 def generic_countdown(jenni, input):
     """ .countdown <year> <month> <day> - displays a countdown to a given date. """
-    ending = "%s %s-%s-%sT%s00"
+    ending = "%s %s-%s-%sT%s"
     text = input.group(2)
 
     if text and len(text.split()) >= 3:
@@ -114,6 +114,10 @@ def generic_countdown(jenni, input):
         year = text[0]
         month = text[1]
         day = text[2]
+
+        if not year.isdigit() and not month.isdigit() and not day.isdigit():
+            return jenni.reply('What are you even trying to do?')
+
         try:
             offset = text[3]
         except:
@@ -123,22 +127,30 @@ def generic_countdown(jenni, input):
             offset = text.split()[0]
         else:
             offset = 0
-        year = '2014'
+        year = '2015'
         month = '01'
         day = '01'
+
+    try:
+        float(offset)
+    except:
+        return jenni.reply(':-(')
 
 
     if text and len(text) >= 3 and year.isdigit() and month.isdigit() and day.isdigit():
         calculate_date = datetime(int(year), int(month), int(day), 0, 0, 0)
+        if abs(float(offset)) >= 14:
+            #return jenni.reply('Why, would you even try something like that? >_>')
+            return jenni.reply('Do you not love me anymore?')
         today = datetime.now() + timedelta(hours=float(offset))
         nye = False
     elif -14 <= int(offset) <= 14:
-        print 'len:', len(input)
+        #print 'len:', len(input)
         if len(input) <= 3:
             offset = 0
         else:
             offset = offset
-        calculate_date = datetime(2014, 1, 1, 0, 0, 0)
+        calculate_date = datetime(2015, 1, 1, 0, 0, 0)
         today = datetime.now() + timedelta(hours=int(offset))
         nye = True
     else:
@@ -149,7 +161,25 @@ def generic_countdown(jenni, input):
     if offset == 0:
         off = '00'
     else:
-        off = three(offset)
+        if offset[0] == '+' or offset[0] == '-':
+            offset = offset[1:]
+
+        prefix = str()
+        if float(offset) >= 0:
+            prefix = '+'
+        else:
+            prefix = '-'
+
+        if float(offset) % 1 == 0:
+            off = '%s%s00' % (prefix, two(offset))
+        else:
+            parts = str(offset).split('.')
+            wholenum = parts[0]
+            first_part = two(wholenum)
+            second_part = int(float('.%s' % parts[1]) * 60.0)
+            second_part = two(second_part)
+            off = '%s%s%s' % (prefix, first_part, second_part)
+
 
     output = ending % (output, two(year), two(month), two(day), off)
     jenni.say(output)
