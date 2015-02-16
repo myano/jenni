@@ -617,15 +617,15 @@ unostop.priority = 'low'
 unostop.thread = False
 unostop.rate = 0
 
-def join(jenni, input):
+def unojoin(jenni, input):
     if not (input.sender).startswith('#'):
         return
     if input.sender == CHANNEL:
         unobot.join(jenni, input)
-join.commands = ['ujoin']
-join.priority = 'low'
-join.thread = False
-join.rate = 0
+unojoin.commands = ['ujoin']
+unojoin.priority = 'low'
+unojoin.thread = False
+unojoin.rate = 0
 
 def deal(jenni, input):
     if not (input.sender).startswith('#'):
