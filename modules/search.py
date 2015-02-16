@@ -219,7 +219,7 @@ def duck_search(query):
         output = str()
         if m:
             for result in m:
-                if '/y.js?' not in result and '//ad.ddg.gg/' not in result:
+                if '/y.js?' not in result and '//ad.ddg.gg/' not in result and '.msn.com/' not in result:
                     ## ignore ads
                     output = result
                     break
