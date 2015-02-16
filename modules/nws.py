@@ -142,7 +142,7 @@ re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
 re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z ]+)\]</a></td></tr>')
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 re_zip = re.compile(r'^(\d{5})\-?(\d{4})?$')
-more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1} -- You may also PM the bot to get the full list.'
+more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1} -- You may also PM the bot to get more details.'
 warning_list = 'http://alerts.weather.gov/cap/us.php?x=1'
 stop = False
 CHANNEL = '##weather'
@@ -258,7 +258,7 @@ def nws_lookup(jenni, input):
         warn_list_dt = sorted(warn_keys_dt, key=warn_keys_dt.get, reverse=True)
         #print 'warn_list_dt', warn_list_dt
 
-        if input.sender.startswith('#'):
+        if input.sender.startswith('#') and not (input.group(1)).startswith('nws-more'):
             ## if queried in channel
             for key in warn_list_dt:
                 jenni.say(key)
@@ -269,7 +269,7 @@ def nws_lookup(jenni, input):
                 jenni.say(key)
                 jenni.say(warnings_dict[key])
             jenni.say(more_info.format(location, master_url))
-nws_lookup.commands = ['nws']
+nws_lookup.commands = ['nws', 'nws-more']
 nws_lookup.priority = 'high'
 nws_lookup.thread = True
 
