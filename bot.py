@@ -48,7 +48,7 @@ class Jenni(irc.Bot):
 
         filenames = []
         if not hasattr(self.config, 'enable'):
-            for fn in os.listdir(os.path.join(os.getcwd(), 'modules')):
+            for fn in os.listdir(os.path.join(home, 'modules')):
                 if fn.endswith('.py') and not fn.startswith('_'):
                     filenames.append(os.path.join(home, 'modules', fn))
         else:
