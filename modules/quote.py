@@ -122,7 +122,7 @@ def grabquote(jenni, input):
     try:
         from modules import find
     except:
-        jenni.say('Could not load "find" module.')
+        return jenni.say('Could not load "find" module.')
 
     txt = input.group(2)
     parts = txt.split()
