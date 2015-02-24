@@ -90,8 +90,8 @@ def print_summary(jenni, input=None, arxiv_id=None):
 
     return jenni.say(clipped)
 
-summary.commands = ['arxiv']
-summary.priority = 'high'
+print_summary.commands = ['arxiv']
+print_summary.priority = 'high'
 
 if __name__ == '__main__':
     print __doc__.strip()
