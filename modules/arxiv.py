@@ -12,7 +12,6 @@ More info:
 
 import web, re, feedparser
 from web import urllib
-from modules.url import short
 
 # Base api query url
 base_url = 'http://export.arxiv.org/api/query?';
@@ -28,6 +27,8 @@ no_http = re.compile(r'.*\/\/(.*)')
 no_newlines = re.compile(r'\n')
 
 def get_arxiv(query):
+
+    from modules.url import short
 
     url = base_url + request.format(urllib.quote(query))
     xml = web.get(url)
