@@ -24,6 +24,7 @@ import urllib2
 import web
 
 from modules import youtube
+from modules.arxiv import print_summary
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
@@ -75,11 +76,11 @@ HTML_ENTITIES = { 'apos': "'" }
 
 yt_catch = re.compile(r'http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 arxiv_catch = re.compile(
-    r"""http[s]*://                      # durr
-        [^/]*                            # for fr./www./&c.
-        (xxx.lanl.gov|arxiv.org)/        # xxx.lanl.gov still works
-        [a-z]+/                          # for the category
-        (\d{4}\.\d{4,5}|[A-z\-\.]/\d{7}) # arXiv id in group(2)""", re.X)
+    r"""http[s]*://                       # durr
+        [^/]*                             # for fr./www./&c.
+        (xxx.lanl.gov|arxiv.org)/         # xxx.lanl.gov still works
+        [a-z]+/                           # for the category
+        (\d{4}\.\d{4,5}|[A-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
@@ -491,6 +492,10 @@ def show_title_demand(jenni, input):
     yt_match =  yt_catch.match(uri)
     if (youtube.title(jenni, yt_match)):
         return
+    
+    arxiv_match = arxiv_catch.match(uri.lower())
+    if arxiv_match is not None:
+        return arxiv.print_summary(jenni, arxiv_match.group(2))
 
     status, results = get_results(uri, True)
 
