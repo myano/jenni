@@ -57,8 +57,8 @@ def ytget(bot, trigger, uri):
             video_entry = result['feed']['entry'][0]
         else:
             video_entry = result['entry']
-    except:
-        bot.say('Something went wrong when accessing the YouTube API.')
+    except Exception as e:
+        bot.say('Error accessing YouTube: {0}'.format(e))
         return 'err'
     vid_info = {}
     try:
