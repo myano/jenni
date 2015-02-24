@@ -28,7 +28,7 @@ def title(bot, match):
     if match is None:
         return
 
-    uri = 'http://gdata.youtube.com/feeds/api/videos/' + match.group(2) + '?v=2&alt=json'
+    uri = 'https://gdata.youtube.com/feeds/api/videos/' + match.group(2) + '?v=2&alt=json'
 
     video_info = ytget(bot, None, uri)
     if video_info is 'err':
@@ -66,7 +66,7 @@ def ytget(bot, trigger, uri):
         # So we need to split by : and take the last item
         vid_id = video_entry['id']['$t'].split(':')
         vid_id = vid_id[len(vid_id) - 1]  # last item is the actual ID
-        vid_info['link'] = 'http://youtu.be/' + vid_id
+        vid_info['link'] = 'https://youtu.be/' + vid_id
     except KeyError:
         vid_info['link'] = 'N/A'
 
@@ -148,7 +148,7 @@ def ytsearch(bot, trigger):
     #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
     if not trigger.group(2):
         return
-    uri = 'http://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
+    uri = 'https://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
     uri = uri.replace(' ', '+')
     video_info = ytget(bot, trigger, uri)
 
