@@ -65,17 +65,20 @@ def get_arxiv(query):
 
     return (arxivid, authors, title, abstract, short_url)
 
-def summary(jenni, input):
+def print_summary(jenni, input=None, arxiv_id=None):
 
-    query = input.group(2)
+    if arxiv_id is not None:
+        query = 'id:' + arxiv_id
+    else:
+        query = input.group(2)
 
     try:
-        (arxivid, authors, title, abstract, url) = get_arxiv(query)
+        (arxiv_id, authors, title, abstract, url) = get_arxiv(query)
     except:
         jenni.say("[arXiv] Could not lookup " + query + " in the arXiv.")
         return
 
-    arxiv_summary = "[arXiv:" + arxivid + "] " + authors + ', "' \
+    arxiv_summary = "[arXiv:" + arxiv_id + "] " + authors + ', "' \
                     + title + '" :: ' + abstract
 
     long_summary = arxiv_summary + " " + url
@@ -85,7 +88,7 @@ def summary(jenni, input):
     else:
         clipped = long_summary
 
-    jenni.say(clipped)
+    return jenni.say(clipped)
 
 summary.commands = ['arxiv']
 summary.priority = 'high'
