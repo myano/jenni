@@ -15,7 +15,7 @@ import io, random, os
 def smiley(jenni, input):
     '''.smiley -- print a random smiley'''
 
-    with io.open(os.getcwd() + 'modules/smileys.txt', 'r', encoding='utf-16-le') as f:
+    with io.open(os.getcwd() + '/modules/smileys.txt', 'r', encoding='utf-16-le') as f:
         smileys = f.read().splitlines()
         jenni.say(random.choice(smileys))
 
