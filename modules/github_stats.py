@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 github_stats.py - jenni Github Info Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2015, Michael Yanovich (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
@@ -53,6 +53,21 @@ def github_search(jenni, term):
     else:
         jenni.say("Couldn't find any repos matching your search term")
 
+# Search for users
+def github_user_search(jenni, term):
+    search_url = BASE_URL + "/search/users?q=%s"
+
+    content = fetch_github(search_url, term)
+    if content is None: return
+
+    if "items" in content:
+        # Take no more than 5 entries
+        list_names = min(len(content["items"]), 5)
+        logins = ", ".join([ x["login"] for x in content["items"][:5] ])
+        jenni.say("Top {0} results: {1}".format(list_names, logins))
+    else:
+        jenni.say("Couldn't find any users matching your search term")
+
 # List open PRs
 def github_prs(jenni, project):
     pr_url = BASE_URL + "/repos/%s/pulls"
@@ -68,6 +83,36 @@ def github_prs(jenni, project):
         titles = ", ".join([ x["title"] for x in content[:5] ])
         jenni.say("Latest {0} PRs: {1}".format(list_pulls, titles))
 
+# User info
+def github_user(jenni, login):
+    user_url = BASE_URL + "/users/%s"
+
+    content = fetch_github(user_url, login)
+    if content is None: return
+
+    if "login" not in content:
+      msg = "An error occurred fetching user info"
+      if "message" in content:
+        msg += ": {0}".format(content["message"])
+      jenni.say(msg)
+      return
+
+    user_info = "Login: {0}; Member since: {1}; Name: {2}; Public repos: {3}; Followers: {4}".format(content["login"], content["created_at"], content["name"], content["public_repos"], content["followers"])
+    if "company" in content and len(content["company"]) > 0:
+      user_info += "; Company: {0}".format(content["company"])
+
+    if "blog" in content and len(content["blog"]) > 0:
+      user_info += "; Blog: {0}".format(content["blog"])
+
+    if "location" in content and len(content["location"]) > 0:
+      user_info += "; Location: {0}".format(content["location"])
+
+    if "hireable" in content and content["hireable"] is not None:
+      user_info += "; Available for hire: {0}".format(content["hireable"])
+
+    jenni.say(user_info)
+
+# Contributors to a repo
 def github_contribs(jenni, project):
     contrib_url = BASE_URL + "/repos/%s/contributors"
 
@@ -100,9 +145,51 @@ def gh_search(jenni, input):
     except Exception as e:
         error = "An unknown error occurred: " + str(e)
         traceback.print_exc()
-gh_search.commands = ['gh_search', 'github_search']
+gh_search.commands = ['gh_search', 'github_search', 'gh_s']
 gh_search.priority = 'low'
 gh_search.rate = 10
+
+def gh_user_search(jenni, input):
+    origterm = input.groups()[1]
+    if not origterm:
+        return jenni.say('Perhaps you meant ".github_user_search user"?')
+    origterm = origterm.encode('utf-8')
+    origterm = origterm.strip()
+
+    error = None
+
+    try:
+        result = github_user_search(jenni, origterm)
+    except IOError:
+        error = "An error occurred connecting to Github"
+        traceback.print_exc()
+    except Exception as e:
+        error = "An unknown error occurred: " + str(e)
+        traceback.print_exc()
+gh_user_search.commands = ['gh_user_search', 'github_user_search', 'gh_usr_s']
+gh_user_search.priority = 'low'
+gh_user_search.rate = 10
+
+def gh_user_info(jenni, input):
+    origterm = input.groups()[1]
+    if not origterm:
+        return jenni.say('Perhaps you meant ".github_user_info user"?')
+    origterm = origterm.encode('utf-8')
+    origterm = origterm.strip()
+
+    error = None
+
+    try:
+        result = github_user(jenni, origterm)
+    except IOError:
+        error = "An error occurred connecting to Github"
+        traceback.print_exc()
+    except Exception as e:
+        error = "An unknown error occurred: " + str(e)
+        traceback.print_exc()
+gh_user_info.commands = ['gh_user_info', 'github_user_info', 'gh_usr', 'gh_user', 'gh_u']
+gh_user_info.priority = 'low'
+gh_user_info.rate = 10
 
 def gh_prs(jenni, input):
     origterm = input.groups()[1]
