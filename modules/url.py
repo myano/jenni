@@ -76,11 +76,11 @@ HTML_ENTITIES = { 'apos': "'" }
 
 yt_catch = re.compile(r'http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 arxiv_catch = re.compile(
-    r"""http[s]*://                       # durr
+    r"""http[s]?://                       # durr
         [^/]*                             # for fr./www./&c.
-        (xxx.lanl.gov|arxiv.org)/         # xxx.lanl.gov still works
+        (xxx\.lanl\.gov|arxiv\.org)/      # xxx.lanl.gov still works
         [a-z]+/                           # for the category
-        (\d{4}\.\d{4,5}|[A-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
+        (\d{4}\.\d{4,5}|[a-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
