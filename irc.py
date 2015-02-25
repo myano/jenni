@@ -218,7 +218,8 @@ class Bot(asynchat.async_chat):
         if self.verbose:
             print >> sys.stderr, 'connected!'
 
-        self.write(('CAP', 'LS'))
+        if self.use_sasl:
+            self.write(('CAP', 'LS'))
 
         if not self.use_sasl and self.password:
             self.write(('PASS', self.password))
