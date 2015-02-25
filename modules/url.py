@@ -489,13 +489,15 @@ def show_title_demand(jenni, input):
         else:
             return jenni.say('No recent links seen in this channel.')
 
-    yt_match =  yt_catch.match(uri)
-    if (youtube.title(jenni, yt_match)):
+    yt_match = yt_catch.match(uri) # don't lower() this ;)
+    if yt_match is not None:
+        youtube.title(jenni, yt_match)
         return
     
     arxiv_match = arxiv_catch.match(uri.lower())
     if arxiv_match is not None:
-        return arxiv.print_summary(jenni, arxiv_id=arxiv_match.group(2))
+        arxiv.print_summary(jenni, arxiv_id=arxiv_match.group(2))
+        return
 
     status, results = get_results(uri, True)
 
