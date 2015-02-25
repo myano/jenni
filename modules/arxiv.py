@@ -89,7 +89,7 @@ def print_summary(jenni, input=None, arxiv_id=None):
     else:
         clipped = long_summary
 
-    return jenni.say(clipped)
+    jenni.say(clipped)
 
 print_summary.commands = ['arxiv']
 print_summary.priority = 'high'
