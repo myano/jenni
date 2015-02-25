@@ -45,7 +45,7 @@ irc_cap.priority = 'high'
 
 def irc_authenticated (jenni, input):
     auth = False
-    if hasattr(jenni.config, 'nick') and jenni.config.nick not None and hasattr(jenni.config, 'password') and jenni.config.password not None:       
+    if hasattr(jenni.config, 'nick') and jenni.config.nick is not None and hasattr(jenni.config, 'password') and jenni.config.password is not None:
         auth = "\0".join((jenni.config.nick, jenni.config.nick, jenni.config.password))
         auth = base64.b64encode(auth)
 

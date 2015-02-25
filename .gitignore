@@ -7,4 +7,4 @@ blocks
 logs/*
 *.db
 build
-
+*~

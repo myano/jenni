@@ -72,6 +72,7 @@ def gettld(jenni, input):
                 chomped = r_quote.sub('', chomped)
                 if chomped == '&#160;':
                     chomped = none_avail
+                chomped = (chomped).decode('utf-8')
                 new_out[x] = chomped
 
             return jenni.say('Entity: %s (Explanation: %s, Notes: %s). IDN: %s, DNSSEC: %s, SLD: %s, IPv6: %s' % (new_out['entity'], new_out['expl'], new_out['notes'], new_out['idn'], new_out['dnssec'], new_out['sld'], new_out['ipv6']))

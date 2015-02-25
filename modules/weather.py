@@ -1123,7 +1123,7 @@ def forecast_wg(jenni, input):
         day_of_week = day['date']['weekday_short']
         conditions = day['conditions']
         highs = u'\x02\x0304%s\u00B0F (%s\u00B0C)\x03\x02' % (day['high']['fahrenheit'], day['high']['celsius'])
-        lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['high']['celsius'])
+        lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
         wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
 
         temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FWind\x1F: %s, \x1FConditions\x1F: %s. Then later, %s | ' % (day_of_week, highs, lows, wind, days_text[k], days_text[k + 1])
