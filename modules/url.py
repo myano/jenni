@@ -82,6 +82,14 @@ arxiv_catch = re.compile(
         [a-z]+/                           # for the category
         (\d{4}\.\d{4,5}|[a-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
 
+def setup(jenni):
+    # enable show_title_auto by default, but disable
+    # if show_title_auto=False in config
+    if (not hasattr(jenni.config, 'show_title_auto') or 
+            jenni.config.show_title_auto is True):
+        show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
+        show_title_auto.priority = 'high'
+
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
     if not hasattr(jenni, 'last_seen_uri'):
@@ -469,9 +477,6 @@ def show_title_auto(jenni, input):
 
     if output_shorts:
         jenni.say((output_shorts).strip())
-show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
-show_title_auto.priority = 'high'
-
 
 def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
