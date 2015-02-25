@@ -76,6 +76,15 @@ def create_default_config(fn):
     # before they are banned from the channel
     # bad_word_limit = 1
 
+    # Fill in Yelp API information here
+    # This is for using the .food command
+    yelp_api_credentials = {
+        'consumer_key': '',
+        'consumer_secret': '',
+        'token': '',
+        'token_secret': ''
+        }
+   
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
