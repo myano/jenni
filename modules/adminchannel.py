@@ -192,7 +192,7 @@ def auth_check(jenni, nick, target=None):
 
 def deauth(nick):
     """
-    Remove pepole from the deauth list.
+    Remove people from the deauth list.
     """
     global auth_list
     if nick in auth_list:
