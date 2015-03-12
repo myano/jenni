@@ -973,8 +973,15 @@ def gen_heat_index(temp, rh):
     return heat_index
 
 def add_degree(txt):
-    txt = re.sub('F', u'\u00B0F', txt)
-    txt = re.sub('C', u'\u00B0C', txt)
+    if ' F' in txt:
+        txt = re.sub(' F', u'\u00B0F', txt)
+    else:
+        txt = re.sub('F', u'\u00B0F', txt)
+
+    if ' C' in txt:
+        txt = re.sub(' C', u'\u00B0C', txt)
+    else:
+        txt = re.sub('C', u'\u00B0C', txt)
     return ((txt).encode('utf-8')).decode('utf-8')
 
 
@@ -1124,9 +1131,9 @@ def forecast_wg(jenni, input):
         conditions = day['conditions']
         highs = u'\x02\x0304%s\u00B0F (%s\u00B0C)\x03\x02' % (day['high']['fahrenheit'], day['high']['celsius'])
         lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
-        wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
+        #wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
 
-        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FWind\x1F: %s, \x1FConditions\x1F: %s. Then later, %s | ' % (day_of_week, highs, lows, wind, days_text[k], days_text[k + 1])
+        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FConditions\x1F: %s. Then later, %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
 
         k += 1
         if k <= 2:
