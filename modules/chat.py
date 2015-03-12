@@ -89,6 +89,7 @@ def chat(jenni, input):
 
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
         response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), msgo)
+        response = re.sub('(?i)\bbot\b', noun.decode('base64'), msgo)
         response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), msgo)
         response = r_entity.sub(e, response)
 
@@ -102,9 +103,9 @@ def chat(jenni, input):
             random_int_rm = random.randint(1, len(txt))
             return txt[:random_int_rm-1] + txt[random_int_rm:]
 
-        if random.random() <= 0.3:
+        if random.random() <= 0.25:
             l_response = len(response) // 20
-            for x in range(0, l_response):
+            for x in range(1, l_response):
                 response = chomp(response)
 
         if pm:

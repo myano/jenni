@@ -13,6 +13,7 @@ More info:
 from htmlentitydefs import name2codepoint
 import re
 import time
+import urllib
 import web
 
 from modules import unicode as uc
@@ -83,17 +84,27 @@ def user_tweet(username):
 
 def id_tweet(tid):
     link = 'https://twitter.com/-/status/' + tid
-    data = web.head(link)
-    message, status = tuple(data)
+    error = "Sorry, couldn't get a tweet from %s" % link
 
-    if status == 301:
-        url = message.get("Location")
-        if not url:
-            return "Sorry, couldn't get a tweet from %s" % link
-        username = url.split('/')[3]
-        tweet = read_tweet(url)
-        return format(tweet, username)
-    return "Sorry, couldn't get a tweet from %s" % link
+    data = web.head_info(link)
+    code = data.get('code', 0)
+    code = int(code)
+
+    url = str()
+
+    if code == 301:
+        url = data.get('info', dict()).get('Location')
+    elif code == 200:
+        url = data.get('geturl')
+    else:
+        return error
+
+    if not url:
+        return error
+
+    username = url.split('/')[3]
+    tweet = read_tweet(url)
+    return format(tweet, username)
 
 def twitter(jenni, input):
     arg = input.group(2)

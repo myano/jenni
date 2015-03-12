@@ -4,22 +4,28 @@ food.py - Jenni Food Module
 by afuhrtrumpet
 
 More info:
-* Jenni: https://github.com/myano/jenni/
-* Phenny: http://inamidst.com/phenny/
+ * jenni: https://github.com/myano/jenni/
+ * Phenny: http://inamidst.com/phenny/
 """
+
 from yelpapi import YelpAPI
 import random
 
+
 def food(jenni, input):
+    if not hasattr(jenni.config, 'yelp_api_credentials'):
+        return
     yelp_api = YelpAPI(jenni.config.yelp_api_credentials['consumer_key'], jenni.config.yelp_api_credentials['consumer_secret'], jenni.config.yelp_api_credentials['token'], jenni.config.yelp_api_credentials['token_secret'])
 
     location = input.group(2)
+
     if not location:
         jenni.say("Please enter a location.")
         return
-    print location
+
     done = False
     max_offset = 5
+
     try:
         while not done:
             offset = random.randint(0, max_offset)
@@ -33,7 +39,7 @@ def food(jenni, input):
         jenni.say("Invalid location!")
 
 food.commands = ["food"]
-food.priority='medium'
+food.priority = 'medium'
 food.example = '.food <location>'
 
 if __name__ == '__main__':
