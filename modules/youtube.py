@@ -28,7 +28,7 @@ def title(bot, match):
     if match is None:
         return
 
-    uri = 'http://gdata.youtube.com/feeds/api/videos/' + match.group(2) + '?v=2&alt=json'
+    uri = 'https://gdata.youtube.com/feeds/api/videos/' + match.group(2) + '?v=2&alt=json'
 
     video_info = ytget(bot, None, uri)
     if video_info is 'err':
@@ -66,7 +66,7 @@ def ytget(bot, trigger, uri):
         # So we need to split by : and take the last item
         vid_id = video_entry['id']['$t'].split(':')
         vid_id = vid_id[len(vid_id) - 1]  # last item is the actual ID
-        vid_info['link'] = 'http://youtu.be/' + vid_id
+        vid_info['link'] = 'https://youtu.be/' + vid_id
     except KeyError:
         vid_info['link'] = 'N/A'
 
@@ -84,9 +84,8 @@ def ytget(bot, trigger, uri):
     #get upload time in format: yyyy-MM-ddThh:mm:ss.sssZ
     try:
         upraw = video_entry['published']['$t']
-        #parse from current format to output format: DD/MM/yyyy, hh:mm
-        vid_info['uploaded'] = '%s/%s/%s, %s:%s' % (upraw[8:10], upraw[5:7],
-                                                  upraw[0:4], upraw[11:13],
+        vid_info['uploaded'] = '%s/%s/%s, %s:%s' % (upraw[0:4], upraw[5:7],
+                                                  upraw[8:10], upraw[11:13],
                                                   upraw[14:16])
     except KeyError:
         vid_info['uploaded'] = 'N/A'
@@ -148,7 +147,7 @@ def ytsearch(bot, trigger):
     #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
     if not trigger.group(2):
         return
-    uri = 'http://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
+    uri = 'https://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
     uri = uri.replace(' ', '+')
     video_info = ytget(bot, trigger, uri)
 
