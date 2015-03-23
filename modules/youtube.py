@@ -146,18 +146,17 @@ def ytsearch(bot, trigger):
     """Search YouTube"""
     #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
     if not trigger.group(2):
-        return
+        return jenni.say('Please provide me some input for YouTube.')
     uri = 'https://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
     uri = uri.replace(' ', '+')
     video_info = ytget(bot, trigger, uri)
 
     if video_info is 'err':
-        bot.reply("Sorry, I couldn't find the video you are looking for")
-        return
+        return bot.reply("Sorry, I couldn't find the video you are looking for.")
 
     if video_info['link'] == 'N/A':
-        bot.reply("Sorry, I couldn't find the video you are looking for")
-        return
+        return bot.reply("Sorry, I couldn't find the video you are looking for.")
+
     message = '[YouTube] Title: ' + video_info['title'] + \
               ' | Uploader: ' + video_info['uploader'] + \
               ' | Uploaded: ' + video_info['uploaded'] + \
@@ -175,7 +174,7 @@ ytsearch.priority = 'high'
 
 def ytlast(bot, trigger):
     if not trigger.group(2):
-        return
+        return jenni.say('Pleae provide some input for YouTube.')
     uri = 'https://gdata.youtube.com/feeds/api/users/' + trigger.group(2).encode('utf-8') + '/uploads?max-results=1&alt=json&v=2'
     video_info = ytget(bot, trigger, uri)
 
