@@ -42,6 +42,9 @@ def gettld(jenni, input):
         ## reloads cache if data becomes too old
         reload_cache()
 
+    if not soup:
+        reload_cache()
+
     tlds = soup.findAll('tr', {'valign': 'top'})
     for tld in tlds:
         tld_tds = tld('td')
