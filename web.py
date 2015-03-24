@@ -62,7 +62,7 @@ def head_info(uri):
     if hasattr(u, 'url'):
         output['url'] = u.url
     if hasattr(u, 'headers'):
-        output['headers'] = u.headers.dict
+        output['headers'] = u.headers
     if hasattr(u, 'info'):
         output['info'] = u.info()
 

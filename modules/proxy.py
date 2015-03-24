@@ -27,8 +27,8 @@ urllib._urlopener = Grab()
 
 
 def remote_call(uri, info=False):
-    pyurl = u'http://tumbolia.appspot.com/py/'
-    code = 'import simplejson;'
+    pyurl = u'https://tumbolia.appspot.com/py/'
+    code = 'import json;'
     code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
     code += "req.add_header('User-Agent','%s');" % (user_agent)
     code += "u=urllib2.urlopen(req);"
@@ -45,7 +45,7 @@ def remote_call(uri, info=False):
         code += "rtn['url']=u.url;"
         code += "rtn['geturl']=u.geturl();"
         code += "rtn['code']=u.code;"
-    code += "print simplejson.dumps(rtn)"
+    code += "print json.dumps(rtn)"
     query = code % repr(uri)
     temp = urllib.quote(query)
     u = urllib.urlopen(pyurl + temp)
