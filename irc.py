@@ -124,6 +124,8 @@ class Bot(asynchat.async_chat):
     def __write(self, args, text=None, raw=False):
         # print '%r %r %r' % (self, args, text)
         try:
+            # fix for deque index out of range
+            time.sleep(0.01)
             if raw:
                 temp = ' '.join(args)[:510] + " :" + text + '\r\n'
             elif not raw:
