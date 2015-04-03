@@ -217,8 +217,13 @@ def get_wa(search):
     txt = txt.encode('utf-8')
     query = txt
     uri = 'https://tumbolia.appspot.com/wa/'
-    uri += urllib.quote(query.replace('+', '%2B'))
-    answer = web.get(uri)
+    # tumbolia appspot WA has bug where querystrings are decoded twice,
+    # and encoded plusses are changed to spaces
+    # e.g. '5%2B5' --> '5+5' --> '5 5'
+    # until this is fixed, encode the querystring twice
+    q = urllib.quote(query.replace('+', '%2B'))
+    q = urllib.quote(q)
+    answer = web.get(uri + q)
     if answer:
         answer = answer.decode("string_escape")
         answer = HTMLParser.HTMLParser().unescape(answer)
