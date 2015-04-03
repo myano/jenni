@@ -403,6 +403,11 @@ def show_title_auto(jenni, input):
     if len(re.findall('\([\d]+\sfiles\sin\s[\d]+\sdirs\)', input)) == 1:
         ## Directory Listing of files
         return
+
+    yt_match =  yt_catch.match(input)
+    if (youtube.title(jenni, yt_match)):
+        return
+
     status, results = get_results(input)
 
     k = 1
@@ -416,6 +421,7 @@ def show_title_auto(jenni, input):
         orig = r[1]
         bitly_link = r[2]
         link_pass = r[3]
+
 
         if orig and bitly_link and bitly_link != orig and ('bit.ly' in bitly_link or 'j.mp' in bitly_link):
             ## if we get back useful data

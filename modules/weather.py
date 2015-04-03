@@ -483,8 +483,9 @@ def f_weather(jenni, input):
     if isinstance(temp, float) and isinstance(dew, float):
         rh = make_rh_C(temp, dew)
         temp_f = (temp * 1.8) + 32.0
-        heatindex = gen_heat_index(temp_f, rh)
-        heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
+        if rh >= 40.0 and temp_f >= 80.0:
+            heatindex = gen_heat_index(temp_f, rh)
+            heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
 
     if pressure:
         if pressure.startswith('Q'):
@@ -1133,7 +1134,7 @@ def forecast_wg(jenni, input):
         lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
         #wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
 
-        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FConditions\x1F: %s. Then later, %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
+        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FConditions\x1F: %s. %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
 
         k += 1
         if k <= 2:
