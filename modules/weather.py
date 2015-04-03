@@ -483,8 +483,9 @@ def f_weather(jenni, input):
     if isinstance(temp, float) and isinstance(dew, float):
         rh = make_rh_C(temp, dew)
         temp_f = (temp * 1.8) + 32.0
-        heatindex = gen_heat_index(temp_f, rh)
-        heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
+        if rh >= 40.0 and temp_f >= 80.0:
+            heatindex = gen_heat_index(temp_f, rh)
+            heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
 
     if pressure:
         if pressure.startswith('Q'):
