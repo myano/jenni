@@ -83,7 +83,7 @@ class Jenni(irc.Bot):
                 modules.append(name)
 
         if modules:
-            print >> sys.stderr, 'Registered modules:', ', '.join(modules)
+            print >> sys.stderr, 'Registered modules:', ', '.join(sorted(modules))
         else: print >> sys.stderr, "Warning: Couldn't find any modules"
 
         self.bind_commands()
