@@ -151,7 +151,8 @@ class Jenni(irc.Bot):
                         prefix, pattern = func.rule
                         prefix = sub(prefix)
                         regexp = re.compile(prefix + pattern)
-                        bound_funcs.append(bind(self, func.priority, regexp, func))
+                        bound_funcs.append(bind(self, func.priority, regexp,
+                                                func))
 
                     # 2) e.g. (['p', 'q'], '(.*)')
                     elif len(func.rule) == 2 and isinstance(func.rule[0], list):
@@ -160,7 +161,8 @@ class Jenni(irc.Bot):
                         for command in commands:
                             command = r'(?i)(%s)\b(?: +(?:%s))?' % (command, pattern)
                             regexp = re.compile(prefix + command)
-                            bound_funcs.append(bind(self, func.priority, regexp, func))
+                            bound_funcs.append(bind(self, func.priority, regexp,
+                                                    func))
 
                     # 3) e.g. ('$nick', ['p', 'q'], '(.*)')
                     elif len(func.rule) == 3:
@@ -169,7 +171,8 @@ class Jenni(irc.Bot):
                         for command in commands:
                             command = r'(?i)(%s) +' % command
                             regexp = re.compile(prefix + command + pattern)
-                            bound_funcs.append(bind(self, func.priority, regexp, func))
+                            bound_funcs.append(bind(self, func.priority, regexp,
+                                                    func))
 
             if hasattr(func, 'commands'):
                 for command in func.commands:
@@ -180,8 +183,9 @@ class Jenni(irc.Bot):
 
         max_pattern_width = max(len(f[2]) for f in bound_funcs)
         for module, name, regexp, priority in sorted(bound_funcs):
-           print '{} | {}.{}, {} priority'.format(regexp.encode('utf-8').ljust(max_pattern_width),
-                                                  module, name, priority)
+           print ('{0} | {1}.{2}, {3} priority'
+                  .format(regexp.encode('utf-8').ljust(max_pattern_width),
+                          module, name, priority))
 
     def wrapped(self, origin, text, match):
         class JenniWrapper(object):
