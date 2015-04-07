@@ -408,7 +408,11 @@ def show_title_auto(jenni, input):
     if (youtube.title(jenni, yt_match)):
         return
 
-    status, results = get_results(input)
+    try:
+        status, results = get_results(input)
+    except Exception, e:
+        print '[%s]' % e, input
+        return
 
     k = 1
 
