@@ -483,8 +483,9 @@ def f_weather(jenni, input):
     if isinstance(temp, float) and isinstance(dew, float):
         rh = make_rh_C(temp, dew)
         temp_f = (temp * 1.8) + 32.0
-        heatindex = gen_heat_index(temp_f, rh)
-        heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
+        if rh >= 40.0 and temp_f >= 80.0:
+            heatindex = gen_heat_index(temp_f, rh)
+            heatindex = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (heatindex, (heatindex - 32.0) / (1.8) )
 
     if pressure:
         if pressure.startswith('Q'):
@@ -946,7 +947,7 @@ def forecastio_current_weather(jenni, input):
     ## required according to ToS by forecast.io
     output += ' (Powered by Forecast, forecast.io)'
     jenni.say(output)
-forecastio_current_weather.commands = ['wxi', 'wx', 'weather']
+forecastio_current_weather.commands = ['wxi-ft', 'wx-ft', 'weather-ft', 'weather', 'wx']
 
 
 def make_rh_C(temp, dewpoint):
@@ -971,6 +972,184 @@ def gen_heat_index(temp, rh):
 
     heat_index = c1 + c2*temp + c3*rh + c4*temp*rh + c5*temp*temp + c6*rh*rh + c7*temp*temp*rh + c8*temp*rh*rh + c9*temp*temp*rh*rh
     return heat_index
+
+def add_degree(txt):
+    if ' F' in txt:
+        txt = re.sub(' F', u'\u00B0F', txt)
+    else:
+        txt = re.sub('F', u'\u00B0F', txt)
+
+    if ' C' in txt:
+        txt = re.sub(' C', u'\u00B0C', txt)
+    else:
+        txt = re.sub('C', u'\u00B0C', txt)
+    return ((txt).encode('utf-8')).decode('utf-8')
+
+
+def weather_wunderground(jenni, input):
+    if not hasattr(jenni.config, 'wunderground_apikey'):
+        return jenni.say('Please sign up for a wunderground.com API key at http://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
+
+    apikey = jenni.config.wunderground_apikey
+
+    url = 'https://api.wunderground.com/api/%s/conditions/geolookup/q/%s.json'
+    txt = input.group(2)
+    if not txt:
+        return jenni.say('No input provided. Please provide a locaiton.')
+
+    url_new = url % (apikey, urllib.quote(txt))
+
+    try:
+        page = web.get(url_new)
+    except:
+        return jenni.say("We could not access wunderground.com's API at the moment.")
+
+    useful = False
+
+    try:
+        useful = json.loads(page)
+    except:
+        return jenni.say('We could not obtain useful information from the wunderground.com API.')
+
+    if 'response' in useful and 'error' in useful['response'] and 'description' in useful['response']['error']:
+        return jenni.say(str(useful['response']['error']['description']))
+
+    if 'current_observation' not in useful:
+        return jenni.say('No observations currently found.')
+    current = useful['current_observation']
+
+
+    condition = current['weather']
+    temp = current['temperature_string']
+    wind_kph = current['wind_kph']
+    wind_mph = current['wind_mph']
+    wind_dir = current['wind_dir']
+    feelslike = current['feelslike_string']
+    dewpoint = current['dewpoint_string']
+    location = current['observation_location']['full']
+    time_updated = current['observation_time']
+    precip_today = current['precip_today_string']
+    #precip_1hr = current['precip_1hr_string']
+    rh = current['relative_humidity']
+    pressure_in = current['pressure_in']
+    pressure_mb = current['pressure_mb']
+    pressure_trend = current['pressure_trend']
+
+    if pressure_trend == '-':
+        #pressure_trend = re.sub('-', u'\u2193', pressure_trend)
+        pressure_trend = u'\u2193'
+    elif pressure_trend == '+':
+        #pressure_trend = re.sub('\+', u'\u2191', pressure_trend)
+        pressure_trend = u'\u2191'
+    elif pressure_trend == '0':
+        pressure_trend = u'\u2192'
+
+    time_updated = re.sub('Last Updated on ', '\x1FLast Updated\x1F: ', time_updated)
+
+    output = str()
+    output += '\x1FCover\x1F: ' + condition
+    output += ', \x1FTemp\x1F: ' + add_degree(temp)
+    output += ', \x1FDew Point\x1F: ' + add_degree(dewpoint)
+    output += ', \x1FHumdity\x1F: ' + rh
+    output += ', \x1FFeels Like\x1F: ' + add_degree(feelslike)
+    output += ', \x1FPressure\x1F: ' + '[%s] %sin (%smb)' % (pressure_trend, pressure_in, pressure_mb)
+    output += ', \x1FWind\x1F: ' + 'From the %s at %s mph (%s kmh)' % (wind_dir, wind_mph, wind_kph)
+    output += ', \x1FLocation\x1F: ' + location
+    output += ', ' + time_updated
+
+    output += ', (Powered by wunderground.com)'
+
+    jenni.say(output)
+
+weather_wunderground.commands = ['wx-wg', 'weather-wg']
+
+
+def forecast_wg(jenni, input):
+    if not hasattr(jenni.config, 'wunderground_apikey'):
+        return jenni.say('Please sign up for a wunderground.com API key at http://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
+
+    apikey = jenni.config.wunderground_apikey
+
+    url = 'https://api.wunderground.com/api/%s/forecast10day/geolookup/q/%s.json'
+
+    txt = input.group(2)
+    if not txt:
+        return jenni.say('No input provided. Please provide a locaiton.')
+
+    url_new = url % (apikey, txt)
+
+    try:
+        page = web.get(url_new)
+    except:
+        return jenni.say("We could not access wunderground.com's API at the moment.")
+
+    try:
+        useful = json.loads(page)
+    except:
+        return jenni.say('We could not obtain useful information from the wunderground.com API.')
+
+    if 'response' in useful and 'error' in useful['response'] and 'description' in useful['response']['error']:
+        return jenni.say(str(useful['response']['error']['description']))
+
+
+    days = useful['forecast']['simpleforecast']['forecastday']
+    forecast_text = useful['forecast']['txt_forecast']['forecastday']
+
+    days_text = list()
+
+    for each in forecast_text:
+        txt = each['fcttext']
+        temp = txt.split('. Low')
+        temp = temp[0]
+
+        temp = temp.split('. High')
+        temp = temp[0]
+
+        days_text.append(temp)
+
+    city = useful['location']['city']
+
+    region = str()
+    if 'state' in useful['location']:
+        region += useful['location']['state']
+
+    country = useful['location']['country_name']
+
+    def preface_location(ci, reg, cty):
+        out = str()
+        out += '[' + ci
+        if reg:
+            out += ', ' + reg
+        out += ', %s] ' % (country)
+        return out
+
+    output = preface_location(city, region, country)
+    output_second = preface_location(city, region, country)
+
+    k = 0
+    for day in days:
+        day_of_week = day['date']['weekday_short']
+        conditions = day['conditions']
+        highs = u'\x02\x0304%s\u00B0F (%s\u00B0C)\x03\x02' % (day['high']['fahrenheit'], day['high']['celsius'])
+        lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
+        #wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
+
+        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FConditions\x1F: %s. %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
+
+        k += 1
+        if k <= 2:
+            output += temp
+        elif 4 >= k > 2:
+            output_second += temp
+
+    output = output[:-3]
+    output_second = output_second[:-3]
+
+    jenni.say(output)
+    jenni.say(output_second)
+
+forecast_wg.commands = ['forecast-wg']
+
 
 
 if __name__ == '__main__':

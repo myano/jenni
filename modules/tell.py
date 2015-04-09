@@ -11,33 +11,41 @@ More info:
 """
 
 import os, re, time, random
-import web
+import threading
 
 maximum = 4
 
 
-def loadReminders(fn):
-    result = {}
-    f = open(fn)
-    for line in f:
-        line = line.strip()
-        if line:
-            try: tellee, teller, verb, timenow, msg = line.split('\t', 4)
-            except ValueError: continue  # @@ hmm
-            result.setdefault(tellee, []).append((teller, verb, timenow, msg))
-    f.close()
+def loadReminders(fn, lock):
+    lock.acquire()
+    try:
+        result = {}
+        f = open(fn)
+        for line in f:
+            line = line.strip()
+            if line:
+                try: tellee, teller, verb, timenow, msg = line.split('\t', 4)
+                except ValueError: continue  # @@ hmm
+                result.setdefault(tellee, []).append((teller, verb, timenow, msg))
+        f.close()
+    finally:
+        lock.release()
     return result
 
 
-def dumpReminders(fn, data):
-    f = open(fn, 'w')
-    for tellee in data.iterkeys():
-        for remindon in data[tellee]:
-            line = '\t'.join((tellee,) + remindon)
-            try: f.write(line + '\n')
-            except IOError: break
-    try: f.close()
-    except IOError: pass
+def dumpReminders(fn, data, lock):
+    lock.acquire()
+    try:
+        f = open(fn, 'w')
+        for tellee in data.iterkeys():
+            for remindon in data[tellee]:
+                line = '\t'.join((tellee,) + remindon)
+                try: f.write(line + '\n')
+                except IOError: break
+        try: f.close()
+        except IOError: pass
+    finally:
+        lock.release()
     return True
 
 
@@ -50,7 +58,8 @@ def setup(self):
         else:
             f.write('')
             f.close()
-    self.reminders = loadReminders(self.tell_filename)  # @@ tell
+    self.tell_lock = threading.Lock()
+    self.reminders = loadReminders(self.tell_filename, self.tell_lock)  # @@ tell
 
 
 def f_remind(jenni, input):
@@ -90,13 +99,16 @@ def f_remind(jenni, input):
             jenni.say('Nickname %s is too long.' % (tellee))
             continue
         if not tellee.lower() in (teller.lower(), jenni.nick):  # @@
-            warn = False
-            if not tellee.lower() in whogets:
-                whogets.append(tellee)
-                if tellee not in jenni.reminders:
-                    jenni.reminders[tellee] = [(teller, verb, timenow, msg)]
-                else:
-                    jenni.reminders[tellee].append((teller, verb, timenow, msg))
+            jenni.tell_lock.acquire()
+            try:
+                if not tellee.lower() in whogets:
+                    whogets.append(tellee)
+                    if tellee not in jenni.reminders:
+                        jenni.reminders[tellee] = [(teller, verb, timenow, msg)]
+                    else:
+                        jenni.reminders[tellee].append((teller, verb, timenow, msg))
+            finally:
+                jenni.tell_lock.release()
     response = str()
     if teller.lower() == tellee.lower() or tellee.lower() == 'me':
         response = 'You can %s yourself that.' % (verb)
@@ -117,7 +129,7 @@ def f_remind(jenni, input):
 
     jenni.reply(response)
 
-    dumpReminders(jenni.tell_filename, jenni.reminders) # @@ tell
+    dumpReminders(jenni.tell_filename, jenni.reminders, jenni.tell_lock) # @@ tell
 f_remind.rule = ('$nick', ['[tT]ell', '[aA]sk'], r'(\S+) (.*)')
 f_remind.commands = ['tell', 'to']
 
@@ -127,13 +139,19 @@ def getReminders(jenni, channel, key, tellee):
     template = '%s: %s <%s> %s %s %s'
     today = time.strftime('%d %b', time.gmtime())
 
-    for (teller, verb, datetime, msg) in jenni.reminders[key]:
-        if datetime.startswith(today):
-            datetime = datetime[len(today) + 1:]
-        lines.append(template % (tellee, datetime, teller, verb, tellee, msg))
+    jenni.tell_lock.acquire()
 
-    try: del jenni.reminders[key]
-    except KeyError: jenni.msg(channel, 'Er...')
+    try:
+        for (teller, verb, datetime, msg) in jenni.reminders[key]:
+            if datetime.startswith(today):
+                datetime = datetime[len(today) + 1:]
+            lines.append(template % (tellee, datetime, teller, verb, tellee, msg))
+
+        try: del jenni.reminders[key]
+        except KeyError: jenni.msg(channel, 'Er...')
+    finally:
+        jenni.tell_lock.release()
+
     return lines
 
 
@@ -165,7 +183,7 @@ def message(jenni, input):
             jenni.msg(tellee, line)
 
     if len(jenni.reminders.keys()) != remkeys:
-        dumpReminders(jenni.tell_filename, jenni.reminders)  # @@ tell
+        dumpReminders(jenni.tell_filename, jenni.reminders, jenni.tell_lock)  # @@ tell
 message.rule = r'(.*)'
 message.priority = 'low'
 

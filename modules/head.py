@@ -12,6 +12,7 @@ More info:
 
 import httplib, time
 from htmlentitydefs import name2codepoint
+from modules import proxy
 import web
 
 
@@ -33,7 +34,7 @@ def head(jenni, input):
     if '/#!' in uri:
         uri = uri.replace('/#!', '/?_escaped_fragment_=')
 
-    try: info = web.head(uri)
+    try: info = proxy.head(uri)
     except IOError: return jenni.say("Can't connect to %s" % uri)
     except httplib.InvalidURL: return jenni.say("Not a valid URI, sorry.")
 

@@ -44,7 +44,9 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'isup', 'longurl', 'py', 'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly', 'untiny',]
+BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
+                   'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly',
+                   'untiny', 'youtube', 'yt']
 simple_channels = list()
 
 try:
@@ -416,7 +418,16 @@ def show_title_auto(jenni, input):
     if len(re.findall('\([\d]+\sfiles\sin\s[\d]+\sdirs\)', input)) == 1:
         ## Directory Listing of files
         return
-    status, results = get_results(input)
+
+    yt_match =  yt_catch.match(input)
+    if (youtube.title(jenni, yt_match)):
+        return
+
+    try:
+        status, results = get_results(input)
+    except Exception, e:
+        print '[%s]' % e, input
+        return
 
     k = 1
 
@@ -429,6 +440,7 @@ def show_title_auto(jenni, input):
         orig = r[1]
         bitly_link = r[2]
         link_pass = r[3]
+
 
         if orig and bitly_link and bitly_link != orig and ('bit.ly' in bitly_link or 'j.mp' in bitly_link):
             ## if we get back useful data

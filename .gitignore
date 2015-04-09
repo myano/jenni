@@ -7,4 +7,5 @@ blocks
 logs/*
 *.db
 build
-
+*~
+nohup.out

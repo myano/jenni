@@ -14,6 +14,17 @@ import time
 
 intentional_part = False
 
+def reload_confs(jenni, input):
+    # Reload known configs. This is an owner-only command.
+    if not input.owner: return
+
+    config_modules = []
+
+    jenni.config.config_helper.load_modules(config_modules)
+    jenni.reply("Reloaded configs")
+reload_confs.commands = ['reload_configs', 'reload_config', 'reload_conf']
+reload_confs.priority = 'low'
+
 def join(jenni, input):
     '''Join the specified channel. This is an admin-only command.'''
     # Can only be done in privmsg by an admin

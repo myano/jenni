@@ -38,7 +38,7 @@ def chat(jenni, input):
 
     text = None
 
-    if len(txt) > 0:
+    if len(txt) > 1:
         text = txt[1]
         if txt[1].startswith('\x03') or txt[1].startswith('\x01'):
             ## block out /ctcp
@@ -89,6 +89,7 @@ def chat(jenni, input):
 
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
         response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), msgo)
+        response = re.sub('(?i)\bbot\b', noun.decode('base64'), msgo)
         response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), msgo)
         response = r_entity.sub(e, response)
 
@@ -98,9 +99,14 @@ def chat(jenni, input):
         if random.random() <= 0.5:
             response = response[:-1]
 
-        if len(response) > 10 and random.random() <= 0.3:
-            random_int_rm = random.randint(1, len(response))
-            response = response[:random_int_rm-1] + response[random_int_rm:]
+        def chomp(txt):
+            random_int_rm = random.randint(1, len(txt))
+            return txt[:random_int_rm-1] + txt[random_int_rm:]
+
+        if random.random() <= 0.25:
+            l_response = len(response) // 20
+            for x in range(1, l_response):
+                response = chomp(response)
 
         if pm:
             jenni.say(response)

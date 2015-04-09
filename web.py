@@ -49,6 +49,27 @@ def head(uri):
     return info
 
 
+def head_info(uri):
+    if not uri.startswith('http'):
+        return
+    output = dict()
+
+    u = urllib.urlopen(uri)
+    if hasattr(u, 'geturl'):
+        output['geturl'] = u.geturl()
+    if hasattr(u, 'code'):
+        output['code'] = u.code
+    if hasattr(u, 'url'):
+        output['url'] = u.url
+    if hasattr(u, 'headers'):
+        output['headers'] = u.headers
+    if hasattr(u, 'info'):
+        output['info'] = u.info()
+
+    u.close()
+    return output
+
+
 def post(uri, query):
     if not uri.startswith('http'):
         return

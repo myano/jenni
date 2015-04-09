@@ -15,10 +15,16 @@ Then run ./jenni again
 """
 
 import sys, os, imp, optparse
+from configs import Configs
 from textwrap import dedent as trim
 
 dotdir = os.path.expanduser('~/.jenni')
 configpath = os.path.expanduser(dotdir + '/default.py')
+
+if os.geteuid() == 0:
+    error = 'Error: Refusing to run as root.'
+    print >> sys.stderr, error
+    sys.exit(1)
 
 def check_python_version():
     if sys.version_info < (2, 4):
@@ -63,6 +69,29 @@ def create_default_config(fn):
     # Required if you want .weather to work.
     # If not, you can use .weather-noaa or .wx-noaa
     # forecastio_apikey = ''
+
+    # wunderground_apikey is for an API key from http://www.wunderground.com/
+    # This is useful if you want more local and *live* weather information.
+    # This is optional and doesn't need to be added.
+    # wunderground_apikey = ''
+
+    # You can add bannable words / regex per channel
+    # bad_words = {
+    #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
+    # }
+    #
+    # This controls the number of warnings a user will receive
+    # before they are banned from the channel
+    # bad_word_limit = 1
+
+    # Fill in Yelp API information here
+    # This is for using the .food command
+    yelp_api_credentials = {
+        'consumer_key': '',
+        'consumer_secret': '',
+        'token': '',
+        'token_secret': ''
+        }
 
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
@@ -155,49 +184,14 @@ def config_names(config):
 
     sys.exit(1)
 
-def main(argv=None):
-    # Step One: Parse The Command Line
-
-    parser = optparse.OptionParser('%prog [options]')
-    parser.add_option('-c', '--config', metavar='fn',
-        help='use this configuration file or directory')
-    opts, args = parser.parse_args(argv)
-
-    # Step Two: Check Dependencies
-
-    check_python_version() # require python2.4 or later
-    check_dotdir() # require ~/.jenni, or make it and exit
-
-    # Step Three: Load The Configurations
-
+def initialize_configs(config_paths):
     config_modules = []
-    for config_name in config_names(opts.config):
-        name = os.path.basename(config_name).split('.')[0] + '_config'
-        module = imp.load_source(name, config_name)
-        module.filename = config_name
 
-        if not hasattr(module, 'prefix'):
-            module.prefix = r'\.'
+    config_helper = Configs(config_names(config_paths))
+    config_helper.load_modules(config_modules)
 
-        if not hasattr(module, 'name'):
-            module.name = 'jenni yanosbot, http://git.io/jenni'
-
-        if not hasattr(module, 'port'):
-            module.port = 6667
-
-        if not hasattr(module, 'password'):
-            module.password = None
-
-        if not hasattr(module, 'ssl'):
-            module.ssl = False
-
-        if module.host == 'irc.example.net':
-            error = ('Error: you must edit the config file first!\n' +
-                        "You're currently using %s" % module.filename)
-            print >> sys.stderr, error
-            sys.exit(1)
-
-        config_modules.append(module)
+    # Give at least one module the config helper
+    config_modules[0].config_helper = config_helper
 
     # Step Four: Load jenni
 
@@ -213,6 +207,23 @@ def main(argv=None):
     # @@ ignore SIGHUP
     for config_module in config_modules:
         run(config_module) # @@ thread this
+
+def main(argv=None):
+    # Step One: Parse The Command Line
+
+    parser = optparse.OptionParser('%prog [options]')
+    parser.add_option('-c', '--config', metavar='fn',
+        help='use this configuration file or directory')
+    opts, args = parser.parse_args(argv)
+
+    # Step Two: Check Dependencies
+
+    check_python_version() # require python2.4 or later
+    check_dotdir() # require ~/.jenni, or make it and exit
+
+    # Step Three: Load The Configurations
+
+    initialize_configs(opts.config)
 
 if __name__ == '__main__':
     main()

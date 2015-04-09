@@ -10,6 +10,7 @@ More info:
 """
 
 import BeautifulSoup
+import datetime as dt
 import re
 import urllib2
 import web
@@ -19,12 +20,15 @@ BS = BeautifulSoup.BeautifulSoup
 uri = 'https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains'
 r_tag = re.compile(r'<(?!!)[^>]+>')
 r_quote = re.compile(r'\[.*?\]')
-page = web.get(uri)
-soup = BS(page)
+
+soup = False
+last_updated = dt.datetime.now() - dt.timedelta(days=30)
 
 
 def gettld(jenni, input):
     '''.tld .sh -- displays information about a given top level domain.'''
+    global soup
+
     text = input.group(2)
     if not text:
         jenni.reply("You didn't provide any input.")
@@ -34,6 +38,13 @@ def gettld(jenni, input):
         text = text[1:]
     text = text.encode('utf-8')
 
+    if (dt.datetime.now() - last_updated) >= dt.timedelta(days=14):
+        ## reloads cache if data becomes too old
+        reload_cache()
+
+    if not soup:
+        reload_cache()
+
     tlds = soup.findAll('tr', {'valign': 'top'})
     for tld in tlds:
         tld_tds = tld('td')
@@ -41,7 +52,6 @@ def gettld(jenni, input):
         if not text.startswith('.'):
             text = '.' + text
         if len(tld_tds[0]('a')) > 0 and tld_tds[0]('a')[0].text == text:
-            print 'one:', str(tld_tds[1])
             if tld_tds[1]('a') and tld_tds[1]('img'):
                 out['entity'] = str(tld_tds[1]('a')[0].text)
             else:
@@ -73,6 +83,11 @@ def gettld(jenni, input):
                 chomped = r_quote.sub('', chomped)
                 if chomped == '&#160;':
                     chomped = none_avail
+                try:
+                    chomped = (chomped).encode('utf-8')
+                except:
+                    pass
+                chomped = (chomped).decode('utf-8')
                 new_out[x] = chomped
 
             return jenni.say('Entity: %s (Explanation: %s, Notes: %s). IDN: %s, DNSSEC: %s, SLD: %s, IPv6: %s' % (new_out['entity'], new_out['expl'], new_out['notes'], new_out['idn'], new_out['dnssec'], new_out['sld'], new_out['ipv6']))
@@ -81,6 +96,25 @@ def gettld(jenni, input):
 
 gettld.commands = ['tld']
 gettld.example = '.tld .it'
+
+
+def reload_cache():
+    global last_updated
+    global soup
+
+    last_updated = dt.datetime.now()
+    page = web.get(uri)
+    soup = BS(page)
+
+
+def tld_cache(jenni, input):
+    jenni.say('TLD cache from Wikipedia last updated: ' + str(last_updated))
+
+    reload_cache()
+
+    jenni.say('TLD cache is now current.')
+tld_cache.commands = ['tld-cache']
+
 
 if __name__ == '__main__':
     print __doc__.strip()
