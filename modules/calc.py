@@ -64,14 +64,13 @@ def c(jenni, input):
     uri = uri_base + web.urllib.quote(temp_q)
 
     ## To the webs!
+    page = str()
     try:
         page = proxy.get(uri)
-        print 'used proxy!'
     except:
         ## if we can't access Google for calculating
         ## let us move on to Attempt #2
         page = web.get(uri)
-        print 'Did not use proxy!'
 
     answer = False
     if page:
@@ -108,7 +107,6 @@ def c(jenni, input):
                 from BeautifulSoup import BeautifulSoup
                 attempt_two = True
             except:
-                #return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
                 attempt_two = False
 
             output = str()
