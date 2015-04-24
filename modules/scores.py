@@ -43,23 +43,23 @@ class Scores:
         nick = uc.encode(nick.lower())
         if not nick:
             jenni.reply(self.STRINGS["cantadd"])
-        elif (input.nick).lower() == nick:
+        elif (not input.admin) and (input.nick).lower() == nick:
             jenni.reply(self.STRINGS["denied"])
         else:
             nick = nick.lower()
-            if input.sender not in self.scores_dict:
-                self.scores_dict[input.sender] = {}
-            if not nick in self.scores_dict[input.sender]:
-                self.scores_dict[input.sender][nick] = [0, 0]
+            chan = (input.sender).lower()
+            if chan not in self.scores_dict:
+                self.scores_dict[chan] = {}
+            if not nick in self.scores_dict[chan]:
+                self.scores_dict[chan][nick] = [0, 0]
 
             # Add a point if points is TRUE, remove if FALSE
             if points:
-                self.scores_dict[input.sender][nick][0] += 1
+                self.scores_dict[chan][nick][0] += 1
             else:
-                self.scores_dict[input.sender][nick][1] += 1
+                self.scores_dict[chan][nick][1] += 1
 
             self.save()
-            chan = input.sender
             jenni.say(self.str_score(nick, chan))
 
     def save(self):
@@ -186,7 +186,7 @@ class Scores:
         line = line[10:].split()
         if len(line) != 4:
             return
-        channel = uc.encode(line[0])
+        channel = uc.encode(line[0]).lower()
         nick = uc.encode(line[1]).lower()
         try:
             add = int(line[2])
@@ -213,7 +213,7 @@ class Scores:
             jenni.reply("No input provided.")
             return
         line = line[8:].split()
-        channel = uc.encode(input.sender)
+        channel = uc.encode((input.sender).lower())
         nick = uc.encode(line[0]).lower()
 
         def check(nick, channel):
@@ -230,7 +230,7 @@ class Scores:
 
         if len(line) == 1:
             ## .rmuser <nick>
-            result = check(nick, input.sender)
+            result = check(nick, (input.sender).lower())
             self.save()
         elif len(line) == 2:
             ## .rumser <channel> <nick>
