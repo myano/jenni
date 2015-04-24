@@ -404,6 +404,10 @@ def show_title_auto(jenni, input):
         ## Directory Listing of files
         return
 
+    yt_match = yt_catch.match(input)
+    if (youtube.title(jenni, yt_match)):
+        return
+
     try:
         status, results = get_results(input)
     except Exception, e:
