@@ -64,14 +64,13 @@ def c(jenni, input):
     uri = uri_base + web.urllib.quote(temp_q)
 
     ## To the webs!
+    page = str()
     try:
         page = proxy.get(uri)
-        print 'used proxy!'
     except:
         ## if we can't access Google for calculating
         ## let us move on to Attempt #2
         page = web.get(uri)
-        print 'Did not use proxy!'
 
     answer = False
     if page:
@@ -103,37 +102,39 @@ def c(jenni, input):
         else:
 
             #### Attempt #2
+            attempt_two = False
             try:
                 from BeautifulSoup import BeautifulSoup
+                attempt_two = True
             except:
-                #return jenni.say('No results. (Please install BeautifulSoup for additional checking.)')
-                pass
+                attempt_two = False
 
-            new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
-            try:
-                ddg_html_page = proxy.get(new_url)
-            except:
-                ddg_html_page = web.get(new_url)
-            soup = BeautifulSoup(ddg_html_page)
+            output = str()
+            if attempt_two:
+                new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
+                try:
+                    ddg_html_page = proxy.get(new_url)
+                except:
+                    ddg_html_page = web.get(new_url)
+                soup = BeautifulSoup(ddg_html_page)
 
-            ## use BeautifulSoup to parse HTML for an answer
-            zero_click = str()
-            if soup('div', {'class': 'zero-click-result'}):
-                zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+                ## use BeautifulSoup to parse HTML for an answer
+                zero_click = str()
+                if soup('div', {'class': 'zero-click-result'}):
+                    zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
 
-            ## remove some excess text
-            output = r_tag.sub('', zero_click).strip()
-            output = output.replace('\n', '').replace('\t', '')
+                ## remove some excess text
+                output = r_tag.sub('', zero_click).strip()
+                output = output.replace('\n', '').replace('\t', '')
 
-            ## test to see if the search module has 'remove_spaces'
-            ## otherwise, let us fail
-            try:
-                output = search.remove_spaces(output)
-            except:
-                output = str()
+                ## test to see if the search module has 'remove_spaces'
+                ## otherwise, let us fail
+                try:
+                    output = search.remove_spaces(output)
+                except:
+                    output = str()
 
-            #if output:
-            if False:
+            if output:
                 ## If Attempt #2 worked, display the answer
                 jenni.say(output + ' [DDG HTML]')
 

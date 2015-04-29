@@ -21,6 +21,15 @@ from HTMLParser import HTMLParser
 import re, urllib, gzip, StringIO
 import web
 
+
+def remove_spaces(x):
+    if '  ' in x:
+        x = x.replace('  ', ' ')
+        return remove_spaces(x)
+    else:
+        return x
+
+
 def title(bot, match):
     """
     Get information about the latest video uploaded by the channel provided.
@@ -35,7 +44,7 @@ def title(bot, match):
         return
 
     #combine variables and print
-    message = '[YouTube] Title: ' + video_info['title'] + \
+    message = '[YouTube] Title: ' + remove_spaces(video_info['title']) + \
               ' | Uploader: ' + video_info['uploader'] + \
               ' | Uploaded: ' + video_info['uploaded'] + \
               ' | Duration: ' + video_info['length'] + \
@@ -181,7 +190,7 @@ def ytlast(bot, trigger):
     if video_info is 'err':
         return
 
-    message = ('[Latest Video] Title: ' + video_info['title'] +
+    message = ('[Latest Video] Title: ' + remove_spaces(video_info['title']) +
               ' | Duration: ' + video_info['length'] +
               ' | Uploaded: ' + video_info['uploaded'] +
               ' | Views: ' + video_info['views'] +
