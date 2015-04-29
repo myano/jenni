@@ -127,7 +127,7 @@ def generic_countdown(jenni, input):
             offset = text.split()[0]
         else:
             offset = 0
-        year = '2015'
+        year = str(int(datetime.now().year) + 1)
         month = '01'
         day = '01'
 
@@ -140,17 +140,15 @@ def generic_countdown(jenni, input):
     if text and len(text) >= 3 and year.isdigit() and month.isdigit() and day.isdigit():
         calculate_date = datetime(int(year), int(month), int(day), 0, 0, 0)
         if abs(float(offset)) >= 14:
-            #return jenni.reply('Why, would you even try something like that? >_>')
             return jenni.reply('Do you not love me anymore?')
         today = datetime.now() + timedelta(hours=float(offset))
         nye = False
     elif -14 <= int(offset) <= 14:
-        #print 'len:', len(input)
         if len(input) <= 3:
             offset = 0
         else:
             offset = offset
-        calculate_date = datetime(2015, 1, 1, 0, 0, 0)
+        calculate_date = datetime(int(datetime.now().year) + 1, 1, 1, 0, 0, 0)
         today = datetime.now() + timedelta(hours=int(offset))
         nye = True
     else:

@@ -58,7 +58,7 @@ def setup(jenni):
 def startup(jenni, input):
     import time
 
-    if hasattr(jenni.config, 'serverpass'):
+    if hasattr(jenni.config, 'serverpass') and not jenni.auth_attempted:
         jenni.write(('PASS', jenni.config.serverpass))
 
     if not jenni.is_authenticated and hasattr(jenni.config, 'password'):

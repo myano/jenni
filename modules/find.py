@@ -165,7 +165,6 @@ def findandreplace(jenni, input):
 # The separator can be any non-alphanumeric character except for '_', '.', ':' and '-'.
 findandreplace.rule = r'(?iu)(?:([^\s:,]+)[\s:,])?\s*s\s*([^\s\w.:-])(.*)' # May work for both this and "meant" (requires input.group(i+1))
 findandreplace.priority = 'high'
-findandreplace.rate = 30
 
 
 if __name__ == '__main__':

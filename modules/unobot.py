@@ -48,8 +48,8 @@ SCOREFILE = "/home/jenni/jenni/unoscores.txt"
 INACTIVE_TIMEOUT = 3
 
 STRINGS = {
-    'ALREADY_STARTED': '\x0300,01Game already started by %s! Type ".ujoin" to join!',
-    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type ".ujoin" to join!',
+    'ALREADY_STARTED': '\x0300,01Game already started by %s! Type ".join" to join!',
+    'GAME_STARTED': '\x0300,01IRC-UNO started by %s - Type ".join" to join!',
     'GAME_STOPPED': '\x0300,01Game stopped.',
     'CANT_STOP': '\x0300,01%s is the game owner, you can\'t stop it! To force stop the game, please wait %s seconds.',
     'DEALING_IN': '\x0300,01Dealing %s into the game as player #%s!',
@@ -622,7 +622,7 @@ def unojoin(jenni, input):
         return
     if input.sender == CHANNEL:
         unobot.join(jenni, input)
-unojoin.commands = ['ujoin']
+unojoin.commands = ['ujoin', 'join']
 unojoin.priority = 'low'
 unojoin.thread = False
 unojoin.rate = 0
@@ -809,6 +809,7 @@ def uno_get_names(jenni, input):
         if x not in away_list:
             new_list.append(x)
     new_list.remove(jenni.config.nick)
+    new_list.remove('ChanServ')
     new_list.sort()
     final_string = ', '.join(new_list)
     if user_triggered:

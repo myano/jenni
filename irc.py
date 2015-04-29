@@ -94,6 +94,10 @@ class Bot(asynchat.async_chat):
         self.use_ssl = False
         self.use_sasl = False
         self.is_connected = False
+
+        # Store this separately from authenticated
+        # that way we don't try twice
+        self.auth_attempted = False
         self.is_authenticated = False
 
         self.verbose = True
@@ -223,6 +227,8 @@ class Bot(asynchat.async_chat):
 
         if not self.use_sasl and self.password:
             self.write(('PASS', self.password))
+            # Store the fact that we authed, or at least tried
+            self.authed_attempted = True
         self.write(('NICK', self.nick))
         self.write(('USER', self.user, '+iw', self.nick), self.name)
 
