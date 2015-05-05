@@ -45,7 +45,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 bitly_loaded = False
 BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
                    'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly',
-                   'untiny', 'youtube', 'yt']
+                   'untiny', 'ytitle']
 simple_channels = list()
 
 try:

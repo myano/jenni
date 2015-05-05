@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: set fileencoding=UTF-8 :
 '''
 youtube.py - Youtube Module
 
@@ -20,6 +21,7 @@ import re
 from HTMLParser import HTMLParser
 import re, urllib, gzip, StringIO
 import web
+from modules import proxy
 
 
 def remove_spaces(x):
@@ -28,6 +30,11 @@ def remove_spaces(x):
         return remove_spaces(x)
     else:
         return x
+
+def process_title(inc):
+    outgoing = remove_spaces(inc)
+    out = '\x02\x0306' + outgoing + '\x03\x02'
+    return out
 
 
 def title(bot, match):
@@ -44,7 +51,7 @@ def title(bot, match):
         return
 
     #combine variables and print
-    message = '[YouTube] Title: ' + remove_spaces(video_info['title']) + \
+    message = '[YouTube] Title: ' + process_title(video_info['title']) + \
               ' | Uploader: ' + video_info['uploader'] + \
               ' | Uploaded: ' + video_info['uploaded'] + \
               ' | Duration: ' + video_info['length'] + \
@@ -58,17 +65,19 @@ def title(bot, match):
 
     return True
 
+
 def ytget(bot, trigger, uri):
-    try:
-        bytes = web.get(uri)
-        result = json.loads(bytes)
-        if 'feed' in result:
-            video_entry = result['feed']['entry'][0]
-        else:
-            video_entry = result['entry']
-    except:
-        bot.say('Something went wrong when accessing the YouTube API.')
-        return 'err'
+    #try:
+    #bytes = web.get(uri)
+    bytes = proxy.get(uri)
+    result = json.loads(bytes)
+    if 'feed' in result:
+        video_entry = result['feed']['entry'][0]
+    else:
+        video_entry = result['entry']
+    #except:
+        #bot.say('Something went wrong when accessing the YouTube API.')
+        #return 'err'
     vid_info = {}
     try:
         # The ID format is tag:youtube.com,2008:video:RYlCVwxoL_g
@@ -151,57 +160,13 @@ def ytget(bot, trigger, uri):
     return vid_info
 
 
-def ytsearch(bot, trigger):
-    """Search YouTube"""
-    #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
-    if not trigger.group(2):
-        return jenni.say('Please provide me some input for YouTube.')
-    uri = 'https://gdata.youtube.com/feeds/api/videos?v=2&alt=json&max-results=1&q=' + trigger.group(2).encode('utf-8')
-    uri = uri.replace(' ', '+')
-    video_info = ytget(bot, trigger, uri)
+def yt_title(bot, trigger):
+    uri = trigger.group(2)
+    yt_catch = re.compile('http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
+    yt_match = yt_catch.match(trigger.group(2))
+    title(bot, yt_match)
+yt_title.commands = ['ytitle']
 
-    if video_info is 'err':
-        return bot.reply("Sorry, I couldn't find the video you are looking for.")
-
-    if video_info['link'] == 'N/A':
-        return bot.reply("Sorry, I couldn't find the video you are looking for.")
-
-    message = '[YouTube] Title: ' + video_info['title'] + \
-              ' | Uploader: ' + video_info['uploader'] + \
-              ' | Uploaded: ' + video_info['uploaded'] + \
-              ' | Duration: ' + video_info['length'] + \
-              ' | Views: ' + video_info['views'] + \
-              ' | Comments: ' + video_info['comments'] + \
-              ' | Likes: ' + video_info['likes'] + \
-              ' | Dislikes: ' + video_info['dislikes'] + \
-              ' | Link: ' + video_info['link']
-
-    bot.say(HTMLParser().unescape(message))
-
-ytsearch.commands = ['yt', 'youtube']
-ytsearch.priority = 'high'
-
-def ytlast(bot, trigger):
-    if not trigger.group(2):
-        return jenni.say('Pleae provide some input for YouTube.')
-    uri = 'https://gdata.youtube.com/feeds/api/users/' + trigger.group(2).encode('utf-8') + '/uploads?max-results=1&alt=json&v=2'
-    video_info = ytget(bot, trigger, uri)
-
-    if video_info is 'err':
-        return
-
-    message = ('[Latest Video] Title: ' + remove_spaces(video_info['title']) +
-              ' | Duration: ' + video_info['length'] +
-              ' | Uploaded: ' + video_info['uploaded'] +
-              ' | Views: ' + video_info['views'] +
-              ' | Likes: ' + video_info['likes'] +
-              ' | Dislikes: ' + video_info['dislikes'] +
-              ' | Link: ' + video_info['link'])
-
-    bot.say(HTMLParser().unescape(message))
-ytlast.commands = ['ytlast', 'ytnew', 'ytlatest']
-ytlast.priority = 'high'
 
 if __name__ == '__main__':
     print __doc__.strip()
-
