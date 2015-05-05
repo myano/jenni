@@ -21,7 +21,7 @@ from textwrap import dedent as trim
 dotdir = os.path.expanduser('~/.jenni')
 configpath = os.path.expanduser(dotdir + '/default.py')
 
-if os.geteuid() == 0:
+if getattr(os, 'geteuid', None) and os.geteuid() == 0:
     error = 'Error: Refusing to run as root.'
     print >> sys.stderr, error
     sys.exit(1)
