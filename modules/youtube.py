@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # vim: set fileencoding=UTF-8 :
 '''
-youtube.py - Youtube Module
+youtube.py - Youtube Module Improved
 
+Copyright 2015, Josh Begleiter (kanedasan@gmail.com)
 Copyright 2014, Sujeet Akula (sujeet@freeboson.org)
 Copyright 2012, Dimitri Molenaars, Tyrope.nl.
 Copyright 2012-2013, Elad Alfassa, <elad@fedoraproject.org>
@@ -14,14 +15,156 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
-
-
 import json
 import re
-from HTMLParser import HTMLParser
+import traceback
 import re, urllib, gzip, StringIO
 import web
+from HTMLParser import HTMLParser
 from modules import proxy
+
+BASE_URL = "https://gdata.youtube.com/feeds/api"
+
+def colorize(text):
+  return '\x02\x0306' + text + '\x03\x02'
+
+def ytsearch(jenni, search_term):
+    t = urllib.quote_plus(search_term)
+    uri = "{0}/videos?q={1}&start-index=1&max-results=10&v=2&alt=json".format(BASE_URL, t)
+    bytes = proxy.get(uri)
+    result = json.loads(bytes)
+
+    video_entry = result['feed']['entry']
+    num_results = result['feed']['openSearch$totalResults']['$t']
+
+    return_text = "YouTube returned {0} results: ".format(num_results)
+
+    entry_text = []
+
+    for entry in video_entry:
+        title = entry['title']['$t'].encode('utf8')
+        if len(title) > 50:
+            title = title[:50] + ' ...'
+        title = colorize(title)
+
+        link = None
+
+        for link_hash in entry['link']:
+            if link_hash['type'] == "text/html":
+                link = link_hash['href'].encode('utf8').\
+                    replace('&feature=youtube_gdata','').\
+                    replace('https://www.youtube.com', 'https://youtu.be/')
+                break
+
+        authors = []
+
+        for author_hash in entry['author']:
+            authors.append(author_hash['name']['$t'])
+
+        author = ', '.join(authors).encode('utf8')
+
+        entry_text.append("{0} by {1} ({2})".format(title, author, link))
+
+    all_entries = ""
+    if int(num_results) > 0:
+      all_entries = ', '.join(entry_text[1:])
+
+    jenni.say(return_text + all_entries)
+
+def youtube_search(jenni, input):
+    origterm = input.groups()[1]
+    if not origterm:
+        return jenni.say('Perhaps you meant ".youtube_search pugs"?')
+    origterm = origterm.encode('utf-8')
+    origterm = origterm.strip()
+
+    error = None
+
+    try:
+        ytsearch(jenni, origterm)
+    except IOError:
+        error = "An error occurred connecting to YouTube"
+        traceback.print_exc()
+    except Exception as e:
+        error = "An unknown error occurred: " + str(e)
+        traceback.print_exc()
+
+    if error is not None:
+        jenni.say(error)
+
+youtube_search.commands = ['youtube_search', 'yt_search']
+youtube_search.priority = 'high'
+youtube_search.rate = 10
+
+def ytinfo(jenni, vid_id):
+    t = urllib.quote_plus(vid_id)
+    uri = "{0}/videos/{1}?v=2&alt=json".format(BASE_URL, t)
+
+    bytes = proxy.get(uri)
+    result = json.loads(bytes)
+
+    if 'feed' in result:
+        video_entry = result['feed']['entry'][0]
+    else:
+        video_entry = result['entry']
+
+    title = video_entry['title']['$t'].encode('utf8')
+    if len(title) > 50:
+        title = title[:50] + ' ...'
+    title = colorize(title)
+
+    link = None
+
+    for link_hash in video_entry['link']:
+        if link_hash['type'] == "text/html":
+            link = link_hash['href'].encode('utf8').\
+                       replace('&feature=youtube_gdata','').\
+                       replace('https://www.youtube.com', 'https://youtu.be/')
+            break
+
+    authors = []
+
+    for author_hash in video_entry['author']:
+        authors.append(author_hash['name']['$t'])
+
+    author = ', '.join(authors).encode('utf8')
+    description = video_entry["media$group"]["media$description"]["$t"].encode('utf8')
+
+    if len(description) > 75:
+        description = description[:75] + ' ...'
+
+    duration = video_entry["media$group"]["media$content"][0]["duration"]
+    favorites = video_entry["yt$statistics"]["favoriteCount"]
+    views = video_entry["yt$statistics"]["viewCount"]
+
+    entry_text = "{0} by {1} ({2}). Description: {3}; Duration: {4} seconds; Favorites: {5}; Views: {6}".format(title, author, link, description, duration, favorites, views)
+
+    jenni.say(entry_text)
+
+def youtube_info(jenni, input):
+    origterm = input.groups()[1]
+    if not origterm:
+        return jenni.say('Perhaps you meant ".youtube_info pzPxhaYQQK8"?')
+    origterm = origterm.encode('utf-8')
+    origterm = origterm.strip()
+
+    error = None
+
+    try:
+        ytinfo(jenni, origterm)
+    except IOError:
+        error = "An error occurred connecting to YouTube"
+        traceback.print_exc()
+    except Exception as e:
+        error = "An unknown error occurred: " + str(e)
+        traceback.print_exc()
+
+    if error is not None:
+        jenni.say(error)
+
+youtube_info.commands = ['youtube_info', 'yt_info']
+youtube_info.priority = 'high'
+youtube_info.rate = 10
 
 
 def remove_spaces(x):
@@ -44,7 +187,7 @@ def title(bot, match):
     if match is None:
         return
 
-    uri = 'https://gdata.youtube.com/feeds/api/videos/' + match.group(2) + '?v=2&alt=json'
+    uri = BASE_URL + '/videos/' + match.group(2) + '?v=2&alt=json'
 
     video_info = ytget(bot, None, uri)
     if video_info is 'err':
