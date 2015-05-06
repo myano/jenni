@@ -13,7 +13,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import imp, os
+import imp, os, sys
 
 class Configs():
     def __init__(self, config_paths):
