@@ -53,7 +53,8 @@ def ytsearch(jenni, search_term):
             if link_hash['type'] == "text/html":
                 link = link_hash['href'].encode('utf8').\
                     replace('&feature=youtube_gdata','').\
-                    replace('https://www.youtube.com', 'https://youtu.be/')
+                    replace('https://www.youtube.com/', 'https://youtu.be/').\
+                    replace('watch?v=', '')
                 break
 
         authors = []
@@ -119,7 +120,8 @@ def ytinfo(jenni, vid_id):
         if link_hash['type'] == "text/html":
             link = link_hash['href'].encode('utf8').\
                        replace('&feature=youtube_gdata','').\
-                       replace('https://www.youtube.com', 'https://youtu.be/')
+                       replace('https://www.youtube.com/', 'https://youtu.be/').\
+                       replace('/watch?v=', '')
             break
 
     authors = []
