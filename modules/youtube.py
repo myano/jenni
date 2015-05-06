@@ -4,6 +4,7 @@
 youtube.py - Youtube Module Improved
 
 Copyright 2015, Josh Begleiter (kanedasan@gmail.com)
+Copyright 2015, Michael Yanovich (yanovich.net)
 Copyright 2014, Sujeet Akula (sujeet@freeboson.org)
 Copyright 2012, Dimitri Molenaars, Tyrope.nl.
 Copyright 2012-2013, Elad Alfassa, <elad@fedoraproject.org>
@@ -25,8 +26,10 @@ from modules import proxy
 
 BASE_URL = "https://gdata.youtube.com/feeds/api"
 
+
 def colorize(text):
   return '\x02\x0306' + text + '\x03\x02'
+
 
 def ytsearch(jenni, search_term):
     t = urllib.quote_plus(search_term)
@@ -72,6 +75,7 @@ def ytsearch(jenni, search_term):
 
     jenni.say(return_text + all_entries)
 
+
 def youtube_search(jenni, input):
     origterm = input.groups()[1]
     if not origterm:
@@ -96,6 +100,7 @@ def youtube_search(jenni, input):
 youtube_search.commands = ['youtube_search', 'yt_search']
 youtube_search.priority = 'high'
 youtube_search.rate = 10
+
 
 def ytinfo(jenni, vid_id):
     t = urllib.quote_plus(vid_id)
@@ -143,6 +148,7 @@ def ytinfo(jenni, vid_id):
 
     jenni.say(entry_text)
 
+
 def youtube_info(jenni, input):
     origterm = input.groups()[1]
     if not origterm:
@@ -175,6 +181,7 @@ def remove_spaces(x):
         return remove_spaces(x)
     else:
         return x
+
 
 def process_title(inc):
     outgoing = remove_spaces(inc)
