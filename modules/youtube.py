@@ -3,6 +3,7 @@
 '''
 youtube.py - Youtube Module Improved v3
 
+Copyright 2015, David Jarrett (jarada.co.uk)
 Copyright 2015, Josh Begleiter (kanedasan@gmail.com)
 Copyright 2015, Michael Yanovich (yanovich.net)
 Copyright 2014, Sujeet Akula (sujeet@freeboson.org)
