@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set fileencoding=UTF-8 :
 '''
-youtube.py - Youtube Module Improved
+youtube.py - Youtube Module Improved v3
 
 Copyright 2015, Josh Begleiter (kanedasan@gmail.com)
 Copyright 2015, Michael Yanovich (yanovich.net)
@@ -24,48 +24,46 @@ import web
 from HTMLParser import HTMLParser
 from modules import proxy
 
-BASE_URL = "https://gdata.youtube.com/feeds/api"
+BASE_URL = "https://www.googleapis.com/youtube/v3/"
 
 
 def colorize(text):
-  return '\x02\x0306' + text + '\x03\x02'
+    return '\x02\x0306' + text + '\x03\x02'
 
 
-def ytsearch(jenni, search_term):
-    t = urllib.quote_plus(search_term)
-    uri = "{0}/videos?q={1}&start-index=1&max-results=10&v=2&alt=json".format(BASE_URL, t)
-    bytes = proxy.get(uri)
-    result = json.loads(bytes)
+def ytsearch(jenni, trigger):
+    """Search YouTube"""
+    #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
+    if not hasattr(jenni.config, 'google_dev_apikey'):
+        return jenni.say('Please sign up for a Google Developer API key to use this function.')
+    key = jenni.config.google_dev_apikey
 
-    video_entry = result['feed']['entry']
-    num_results = result['feed']['openSearch$totalResults']['$t']
+    query = trigger.group(2).encode('utf-8').strip()
+    uri = BASE_URL + "search?part=snippet&type=video&q=" + query + "&key=" + key
+    result = json.loads(proxy.get(uri))
 
+    num_results = result['pageInfo']['totalResults']
     return_text = "YouTube returned {0} results: ".format(num_results)
 
     entry_text = []
-
-    for entry in video_entry:
-        title = entry['title']['$t'].encode('utf8')
+    for item in result['items']:
+        try:
+            title = item['snippet']['title']
+            title = title.encode('utf8')
+        except KeyError:
+            title = "N/A"
         if len(title) > 50:
             title = title[:50] + ' ...'
         title = colorize(title)
 
-        link = None
+        try:
+            author = item['snippet']['channelTitle']
+            author = author.encode('utf8')
+        except KeyError:
+            author = 'N/A'
 
-        for link_hash in entry['link']:
-            if link_hash['type'] == "text/html":
-                link = link_hash['href'].encode('utf8').\
-                    replace('&feature=youtube_gdata','').\
-                    replace('https://www.youtube.com/', 'https://youtu.be/').\
-                    replace('watch?v=', '')
-                break
-
-        authors = []
-
-        for author_hash in entry['author']:
-            authors.append(author_hash['name']['$t'])
-
-        author = ', '.join(authors).encode('utf8')
+        link = 'https://youtu.be/' + item['id']['videoId']
+        link = link.encode('utf8')
 
         entry_text.append("{0} by {1} ({2})".format(title, author, link))
 
@@ -79,14 +77,12 @@ def ytsearch(jenni, search_term):
 def youtube_search(jenni, input):
     origterm = input.groups()[1]
     if not origterm:
-        return jenni.say('Perhaps you meant ".youtube_search pugs"?')
-    origterm = origterm.encode('utf-8')
-    origterm = origterm.strip()
+        return jenni.say('Perhaps you meant ".yt pugs"?')
 
     error = None
 
     try:
-        ytsearch(jenni, origterm)
+        ytsearch(jenni, input)
     except IOError:
         error = "An error occurred connecting to YouTube"
         traceback.print_exc()
@@ -96,55 +92,31 @@ def youtube_search(jenni, input):
 
     if error is not None:
         jenni.say(error)
-
-youtube_search.commands = ['youtube_search', 'yt_search']
+youtube_search.commands = ['yt', 'youtube', 'youtube_search', 'yt_search']
 youtube_search.priority = 'high'
 youtube_search.rate = 10
 
 
-def ytinfo(jenni, vid_id):
-    t = urllib.quote_plus(vid_id)
-    uri = "{0}/videos/{1}?v=2&alt=json".format(BASE_URL, t)
+def ytinfo(jenni, input):
+    video_entry = ytget(jenni, input)
 
-    bytes = proxy.get(uri)
-    result = json.loads(bytes)
-
-    if 'feed' in result:
-        video_entry = result['feed']['entry'][0]
-    else:
-        video_entry = result['entry']
-
-    title = video_entry['title']['$t'].encode('utf8')
+    title = video_entry['title'].encode('utf8')
     if len(title) > 50:
         title = title[:50] + ' ...'
     title = colorize(title)
 
-    link = None
-
-    for link_hash in video_entry['link']:
-        if link_hash['type'] == "text/html":
-            link = link_hash['href'].encode('utf8').\
-                       replace('&feature=youtube_gdata','').\
-                       replace('https://www.youtube.com/', 'https://youtu.be/').\
-                       replace('/watch?v=', '')
-            break
-
-    authors = []
-
-    for author_hash in video_entry['author']:
-        authors.append(author_hash['name']['$t'])
-
-    author = ', '.join(authors).encode('utf8')
-    description = video_entry["media$group"]["media$description"]["$t"].encode('utf8')
+    link = video_entry['link'].encode('utf8')
+    author = video_entry['uploader'].encode('utf8')
+    description = video_entry["description"].encode('utf8')
 
     if len(description) > 75:
         description = description[:75] + ' ...'
 
-    duration = video_entry["media$group"]["media$content"][0]["duration"]
-    favorites = video_entry["yt$statistics"]["favoriteCount"]
-    views = video_entry["yt$statistics"]["viewCount"]
+    duration = video_entry["length"]
+    favorites = video_entry["favourites"]
+    views = video_entry["views"]
 
-    entry_text = "{0} by {1} ({2}). Description: {3}; Duration: {4} seconds; Favorites: {5}; Views: {6}".format(title, author, link, description, duration, favorites, views)
+    entry_text = "{0} by {1} ({2}). Description: {3}; Duration: {4}; Favorites: {5}; Views: {6}".format(title, author, link, description, duration, favorites, views)
 
     jenni.say(entry_text)
 
@@ -153,13 +125,11 @@ def youtube_info(jenni, input):
     origterm = input.groups()[1]
     if not origterm:
         return jenni.say('Perhaps you meant ".youtube_info pzPxhaYQQK8"?')
-    origterm = origterm.encode('utf-8')
-    origterm = origterm.strip()
 
     error = None
 
     try:
-        ytinfo(jenni, origterm)
+        ytinfo(jenni, input)
     except IOError:
         error = "An error occurred connecting to YouTube"
         traceback.print_exc()
@@ -189,16 +159,16 @@ def process_title(inc):
     return out
 
 
-def title(bot, match):
+def title(jenni, match):
     """
     Get information about the latest video uploaded by the channel provided.
     """
+    if not hasattr(jenni.config, 'google_dev_apikey'):
+        return
     if match is None:
         return
 
-    uri = BASE_URL + '/videos/' + match.group(2) + '?v=2&alt=json'
-
-    video_info = ytget(bot, None, uri)
+    video_info = ytget(jenni, match)
     if video_info is 'err':
         return
 
@@ -213,110 +183,115 @@ def title(bot, match):
               ' | Dislikes: ' + video_info['dislikes'] + \
               ' | Link: ' + video_info['link']
 
-    bot.say(HTMLParser().unescape(message))
+    jenni.say(HTMLParser().unescape(message))
 
     return True
 
 
-def ytget(bot, trigger, uri):
-    #try:
-    #bytes = web.get(uri)
-    bytes = proxy.get(uri)
-    result = json.loads(bytes)
-    if 'feed' in result:
-        video_entry = result['feed']['entry'][0]
-    else:
-        video_entry = result['entry']
-    #except:
-        #bot.say('Something went wrong when accessing the YouTube API.')
-        #return 'err'
-    vid_info = {}
-    try:
-        # The ID format is tag:youtube.com,2008:video:RYlCVwxoL_g
-        # So we need to split by : and take the last item
-        vid_id = video_entry['id']['$t'].split(':')
-        vid_id = vid_id[len(vid_id) - 1]  # last item is the actual ID
-        vid_info['link'] = 'https://youtu.be/' + vid_id
-    except KeyError:
-        vid_info['link'] = 'N/A'
+def ytget(jenni, trigger):
+    if not hasattr(jenni.config, 'google_dev_apikey'):
+        return 'err'
+
+    key = jenni.config.google_dev_apikey
 
     try:
-        vid_info['title'] = video_entry['title']['$t']
+        vid_id = trigger.group(2)
+        uri = BASE_URL + "videos?part=snippet,contentDetails,statistics&id=" + vid_id + "&key=" + key
+        bytes = proxy.get(uri)
+        result = json.loads(bytes)
+        video_entry = result['items'][0]
+    except Exception, e:
+        print e
+        jenni.say('Something went wrong when accessing the YouTube API.')
+        return 'err'
+
+    vid_info = {}
+    vid_info['link'] = 'https://youtu.be/' + vid_id
+
+    try:
+        vid_info['title'] = video_entry['snippet']['title']
     except KeyError:
         vid_info['title'] = 'N/A'
 
     #get youtube channel
     try:
-        vid_info['uploader'] = video_entry['author'][0]['name']['$t']
+        vid_info['uploader'] = video_entry['snippet']['channelTitle']
     except KeyError:
         vid_info['uploader'] = 'N/A'
 
     #get upload time in format: yyyy-MM-ddThh:mm:ss.sssZ
     try:
-        upraw = video_entry['published']['$t']
+        upraw = video_entry['snippet']['publishedAt']
         vid_info['uploaded'] = '%s/%s/%s, %s:%s' % (upraw[0:4], upraw[5:7],
                                                   upraw[8:10], upraw[11:13],
                                                   upraw[14:16])
     except KeyError:
         vid_info['uploaded'] = 'N/A'
 
-    #get duration in seconds
+    #get duration in seconds (contentDetails)
     try:
-        duration = int(video_entry['media$group']['yt$duration']['seconds'])
-        #Detect liveshow + parse duration into proper time format.
-        if duration < 1:
+        if video_entry["snippet"]["liveBroadcastContent"] == "live":
             vid_info['length'] = 'LIVE'
+        elif video_entry["snippet"]["liveBroadcastContent"] == "upcoming":
+            vid_info['length'] = 'UPCOMING'
         else:
-            hours = duration / (60 * 60)
-            minutes = duration / 60 - (hours * 60)
-            seconds = duration % 60
-            vid_info['length'] = ''
-            if hours:
-                vid_info['length'] = str(hours) + 'hours'
-                if minutes or seconds:
-                    vid_info['length'] = vid_info['length'] + ' '
-            if minutes:
-                vid_info['length'] = vid_info['length'] + str(minutes) + 'mins'
-                if seconds:
-                    vid_info['length'] = vid_info['length'] + ' '
-            if seconds:
-                vid_info['length'] = vid_info['length'] + str(seconds) + 'secs'
+            duration = video_entry["contentDetails"]["duration"]
+            # Now replace
+            duration = duration.replace("P", "")
+            duration = duration.replace("D", "days ")
+            duration = duration.replace("T", "")
+            duration = duration.replace("H", "hours ")
+            duration = duration.replace("M", "mins ")
+            duration = duration.replace("S", "secs")
+            vid_info['length'] = duration
     except KeyError:
         vid_info['length'] = 'N/A'
 
-    #get views
+    #get views (statistics)
     try:
-        views = video_entry['yt$statistics']['viewCount']
+        views = video_entry['statistics']['viewCount']
         vid_info['views'] = str('{0:20,d}'.format(int(views))).lstrip(' ')
     except KeyError:
         vid_info['views'] = 'N/A'
 
-    #get comment count
+    #get comment count (statistics)
     try:
-        comments = video_entry['gd$comments']['gd$feedLink']['countHint']
+        comments = video_entry['statistics']['commentCount']
         vid_info['comments'] = str('{0:20,d}'.format(int(comments))).lstrip(' ')
     except KeyError:
         vid_info['comments'] = 'N/A'
 
-    #get likes & dislikes
+    #get favourites (statistics)
     try:
-        likes = video_entry['yt$rating']['numLikes']
+        favourites = video_entry['statistics']['favoriteCount']
+        vid_info['favourites'] = str('{0:20,d}'.format(int(favourites))).lstrip(' ')
+    except KeyError:
+        vid_info['favourites'] = 'N/A'
+
+    #get likes & dislikes (statistics)
+    try:
+        likes = video_entry['statistics']['likeCount']
         vid_info['likes'] = str('{0:20,d}'.format(int(likes))).lstrip(' ')
     except KeyError:
         vid_info['likes'] = 'N/A'
     try:
-        dislikes = video_entry['yt$rating']['numDislikes']
+        dislikes = video_entry['statistics']['dislikeCount']
         vid_info['dislikes'] = str('{0:20,d}'.format(int(dislikes))).lstrip(' ')
     except KeyError:
         vid_info['dislikes'] = 'N/A'
+
+    #get video description (snippet)
+    try:
+        vid_info['description'] = video_entry['snippet']['description']
+    except KeyError:
+        vid_info['description'] = 'N/A'
     return vid_info
 
 
-def yt_title(bot, trigger):
-    uri = trigger.group(2)
+def yt_title(jenni, trigger):
     yt_catch = re.compile('http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
     yt_match = yt_catch.match(trigger.group(2))
-    title(bot, yt_match)
+    title(jenni, yt_match)
 yt_title.commands = ['ytitle']
 
 
