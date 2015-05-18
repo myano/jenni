@@ -23,7 +23,6 @@ import time
 import urllib2
 import web
 
-from modules import youtube
 from modules import arxiv
 
 # Place a file in your ~/jenni/ folder named, bitly.txt
@@ -46,7 +45,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 bitly_loaded = False
 BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
                    'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly',
-                   'untiny', 'youtube', 'yt']
+                   'untiny',]
 simple_channels = list()
 
 try:
@@ -75,14 +74,6 @@ url_finder = re.compile(r'(?iu)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 HTML_ENTITIES = { 'apos': "'" }
-
-yt_catch = re.compile(r'http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
-arxiv_catch = re.compile(
-    r"""http[s]?://                       # durr
-        [^/]*                             # for fr./www./&c.
-        (xxx\.lanl\.gov|arxiv\.org)/      # xxx.lanl.gov still works
-        [a-z]+/                           # for the category
-        (\d{4}\.\d{4,5}|[a-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
 
 def setup(jenni):
     # enable show_title_auto by default, but disable
@@ -419,10 +410,6 @@ def show_title_auto(jenni, input):
         ## Directory Listing of files
         return
 
-    yt_match =  yt_catch.match(input)
-    if (youtube.title(jenni, yt_match)):
-        return
-
     try:
         status, results = get_results(input)
     except Exception, e:
@@ -506,11 +493,6 @@ def show_title_demand(jenni, input):
         else:
             return jenni.say('No recent links seen in this channel.')
 
-    yt_match = yt_catch.match(uri) # don't lower() this ;)
-    if yt_match is not None:
-        youtube.title(jenni, yt_match)
-        return
-    
     arxiv_match = arxiv_catch.match(uri.lower())
     if arxiv_match is not None:
         arxiv.print_summary(jenni, arxiv_id=arxiv_match.group(2))

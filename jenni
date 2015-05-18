@@ -172,7 +172,10 @@ def config_names(config):
     if os.path.isfile(here + '.py'):
         return [here + '.py']
     if os.path.isdir(here):
-        return files(here)
+        here_files = files(here)
+        if(len(here_files) == 0):
+            print >> sys.stderr, "Error: Config directory '{0}' contained no .py files".format(here)
+        return here_files
 
     there = os.path.join(dotdir, config)
     if os.path.isfile(there):
@@ -180,14 +183,24 @@ def config_names(config):
     if os.path.isfile(there + '.py'):
         return [there + '.py']
     if os.path.isdir(there):
-        return files(there)
+        there_files = files(there)
+        if(len(there_files) == 0):
+            print >> sys.stderr, "Error: Config directory '{0}' contained no .py files".format(there)
+        return there_files
 
+    print >> sys.stderr, "Error: Couldn't find config '{0}' to import or .py files therein".format(config)
     sys.exit(1)
 
-def initialize_configs(config_paths):
+def initialize_configs(config_path):
     config_modules = []
 
-    config_helper = Configs(config_names(config_paths))
+    all_configs = config_names(config_path)
+
+    if(len(all_configs) == 0):
+        print >> sys.stderr, "Error: no config files found in config path '{0}'".format(config_path)
+        sys.exit(1)
+
+    config_helper = Configs(all_configs)
     config_helper.load_modules(config_modules)
 
     # Give at least one module the config helper
