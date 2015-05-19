@@ -24,7 +24,7 @@ import urlparse
 BASE_URL = "https://api.github.com"
 DEFAULT_HEADER = { "Accept": "application/vnd.github.v3+json" }
 
-def fetch_github(url, term):
+def fetch_github(jenni, url, term):
     t = urllib2.quote(term)
     if '%' in term:
         t = urllib.quote(term.replace('%', ''))
@@ -42,7 +42,7 @@ def fetch_github(url, term):
 def github_search(jenni, term):
     search_url = BASE_URL + "/search/repositories?q=%s"
 
-    content = fetch_github(search_url, term)
+    content = fetch_github(jenni, search_url, term)
     if content is None: return
 
     if "items" in content:
@@ -57,7 +57,7 @@ def github_search(jenni, term):
 def github_user_search(jenni, term):
     search_url = BASE_URL + "/search/users?q=%s"
 
-    content = fetch_github(search_url, term)
+    content = fetch_github(jenni, search_url, term)
     if content is None: return
 
     if "items" in content:
@@ -72,7 +72,7 @@ def github_user_search(jenni, term):
 def github_prs(jenni, project):
     pr_url = BASE_URL + "/repos/%s/pulls"
 
-    content = fetch_github(pr_url, project)
+    content = fetch_github(jenni, pr_url, project)
     if content is None: return
 
     num_pulls = len(content)
@@ -87,7 +87,7 @@ def github_prs(jenni, project):
 def github_user(jenni, login):
     user_url = BASE_URL + "/users/%s"
 
-    content = fetch_github(user_url, login)
+    content = fetch_github(jenni, user_url, login)
     if content is None: return
 
     if "login" not in content:
@@ -116,7 +116,7 @@ def github_user(jenni, login):
 def github_contribs(jenni, project):
     contrib_url = BASE_URL + "/repos/%s/contributors"
 
-    content = fetch_github(contrib_url, project)
+    content = fetch_github(jenni, contrib_url, project)
     if content is None: return
 
     num_contribs = len(content)
@@ -145,7 +145,7 @@ def gh_search(jenni, input):
     except Exception as e:
         error = "An unknown error occurred: " + str(e)
         traceback.print_exc()
-gh_search.commands = ['gh_search', 'github_search', 'gh_s']
+gh_search.commands = ['gh_search', 'github_search', 'gh_s', 'gh']
 gh_search.priority = 'low'
 gh_search.rate = 10
 
