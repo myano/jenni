@@ -53,6 +53,10 @@ def create_default_config(fn):
     # For example: yano@unaffiliated/yano
     owner = 'yournickname'
 
+    # user is the NickServ userid
+    # This is useful if your NickServ user is different than the nick you are using
+    # user = 'userid'
+
     # password is the NickServ password, serverpass is the server password
     # password = 'example'
     # serverpass = 'serverpass'
