@@ -10,6 +10,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
+from itertools import izip_longest
 
 def fchannels():
     try:
@@ -45,7 +46,7 @@ def commands(jenni, input):
     jenni.reply("I'm sending you a list of my most common commands in private.")
     jenni.reply('For a list of all of my commands, please visit: https://is.gd/CPStvK')
 
-    common_split = zip(*[iter(common_commands)]*445)
+    common_split = izip_longest(*[iter(common_commands)]*445, fillvalue='')
     for split_commands in common_split:
         jenni.msg(input.nick, ''.join(split_commands), False, False, 1)
 
