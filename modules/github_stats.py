@@ -194,7 +194,7 @@ gh_user_info.rate = 10
 def gh_prs(jenni, input):
     origterm = input.groups()[1]
     if not origterm:
-        return jenni.say('Perhaps you meant ".github_stats user/repo"?')
+        return jenni.say('Perhaps you meant ".github_prs user/repo"?')
     origterm = origterm.encode('utf-8')
     origterm = origterm.strip()
 
