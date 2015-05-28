@@ -75,6 +75,13 @@ r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 HTML_ENTITIES = { 'apos': "'" }
 
+arxiv_catch = re.compile(
+    r"""http[s]?://                       # durr
+        [^/]*                             # for fr./www./&c.
+        (xxx\.lanl\.gov|arxiv\.org)/      # xxx.lanl.gov still works
+        [a-z]+/                           # for the category
+        (\d{4}\.\d{4,5}|[a-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
+
 def setup(jenni):
     # enable show_title_auto by default, but disable
     # if show_title_auto=False in config
