@@ -202,6 +202,9 @@ class Jenni(irc.Bot):
                 if attr in ('bot',):
                     # Allow a limited set of attributes to be set on the wrapper itself
                     return super(JenniWrapper, self).__setattr__(attr, value)
+                elif attr in ('is_authenticated', 'is_connected'):
+                    # Allow a limited set of attributes to be set on the wrapped class
+                    return setattr(self.bot, attr, value)
                 else:
                     raise(Exception("Setting attribute '%s' is not allowed" % (attr,)))
 
