@@ -198,6 +198,13 @@ class Jenni(irc.Bot):
                     return lambda msg: self.bot.msg(sender, msg)
                 return getattr(self.bot, attr)
 
+            def __setattr__(self, attr, value):
+                if attr in ('bot',):
+                    # Allow a limited set of attributes to be set on the wrapper itself
+                    return super(JenniWrapper, self).__setattr__(attr, value)
+                else:
+                    raise(Exception("Setting attribute '%s' is not allowed" % (attr,)))
+
         return JenniWrapper(self)
 
     def input(self, origin, text, bytes, match, event, args):
