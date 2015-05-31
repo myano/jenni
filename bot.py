@@ -205,6 +205,14 @@ class Jenni(irc.Bot):
                     return self._bot
                 return getattr(self._bot, attr)
 
+            def __setattr__(self, attr, value):
+                if attr in ('_bot',):
+                    # Explicitly allow the wrapped class to be set during __init__()
+                    return super(JenniWrapper, self).__setattr__(attr, value)
+                else:
+                    # All other attributes will be set on the wrapped class transparently
+                    return setattr(self._bot, attr, value)
+
         return JenniWrapper(self)
 
     def input(self, origin, text, bytes, match, event, args):
