@@ -15,7 +15,7 @@ import re
 def rand(jenni, input):
     """.rand <arg1> <arg2> - Generates a random integer between <arg1> and <arg2>."""
     if input.group(2) == " " or not input.group(2):
-        jenni.say("I'm sorry, " + str(input.nick) + ", but you must enter at least one number.")
+        jenni.reply("I'm sorry, but you must enter at least one number.")
     else:
         random.seed()
         li_integers = input.group(2)
@@ -34,7 +34,7 @@ def rand(jenni, input):
                     a = li_integers_str
                     a = int(a)
                     randinte = random.randint(0, a)
-                jenni.say(str(input.nick) + ": your random integer is: " + str(randinte))
+                jenni.reply("your random integer is: " + str(randinte))
             else:
                 jenni.reply("lolwut")
         else:
@@ -53,7 +53,7 @@ def rand(jenni, input):
                     randinte = random.randint(a, b)
                 else:
                     randinte = random.randint(b, a)
-                jenni.say(str(input.nick) + ": your random integer is: " + str(randinte))
+                jenni.reply("your random integer is: " + str(randinte))
             else:
                 jenni.reply("I'm not sure what you want me to do!")
 
