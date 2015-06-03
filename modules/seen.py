@@ -21,11 +21,11 @@ def f_seen(jenni, input):
         return jenni.say('Please provide a nick.')
     nick = input.group(2).lower()
 
-    if not hasattr(jenni.bot, 'seen'):
+    if not hasattr(jenni, 'seen'):
         return jenni.reply('?')
 
-    if jenni.bot.seen.has_key(nick):
-        channel, t = jenni.bot.seen[nick]
+    if jenni.seen.has_key(nick):
+        channel, t = jenni.seen[nick]
         t = time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(t))
         msg = 'I last saw %s at %s in some channel.' % (nick, t)
         jenni.say(msg)
@@ -36,10 +36,10 @@ f_seen.rate = 15
 
 def f_note(jenni, input):
     try:
-        if not hasattr(jenni.bot, 'seen'):
-            jenni.bot.seen = dict()
+        if not hasattr(jenni, 'seen'):
+            jenni.seen = dict()
         if input.sender.startswith('#'):
-            jenni.bot.seen[input.nick.lower()] = (input.sender, time.time())
+            jenni.seen[input.nick.lower()] = (input.sender, time.time())
     except Exception, e: print e
 f_note.rule = r'(.*)'
 f_note.priority = 'low'
