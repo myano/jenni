@@ -187,16 +187,16 @@ class Jenni(irc.Bot):
     def wrapped(self, origin, text, match):
         class JenniWrapper(object):
             def __init__(self, jenni):
-                self.bot = jenni
+                self._bot = jenni
 
             def __getattr__(self, attr):
                 sender = origin.sender or text
                 if attr == 'reply':
                     return (lambda msg:
-                        self.bot.msg(sender, origin.nick + ': ' + msg))
+                        self._bot.msg(sender, origin.nick + ': ' + msg))
                 elif attr == 'say':
-                    return lambda msg: self.bot.msg(sender, msg)
-                return getattr(self.bot, attr)
+                    return lambda msg: self._bot.msg(sender, msg)
+                return getattr(self._bot, attr)
 
         return JenniWrapper(self)
 
