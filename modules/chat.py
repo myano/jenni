@@ -88,9 +88,9 @@ def chat(jenni, input):
         time.sleep(1 + rand_num)
 
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
-        response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), msgo)
-        response = re.sub('(?i)\bbot\b', noun.decode('base64'), msgo)
-        response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), msgo)
+        response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), response)
+        response = re.sub('(?i)\bbot\b', noun.decode('base64'), response)
+        response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), response)
         response = r_entity.sub(e, response)
 
         if random.random() <= 0.5:
