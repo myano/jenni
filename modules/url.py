@@ -233,6 +233,8 @@ def find_title(url):
 
     title = re.sub(r'(?i)dcc\ssend', '', title)
 
+    title += '\x0F'
+
     if title:
         return True, title
     else:
