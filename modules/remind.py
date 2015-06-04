@@ -129,6 +129,7 @@ def remind(jenni, input):
     else: duration = int(duration)
 
     t = int(time.time()) + duration
+    message += ' | Set on: ' + str(datetime.now().isoformat())
     reminder = (input.sender, input.nick, message)
 
     try: jenni.rdb[t].append(reminder)
