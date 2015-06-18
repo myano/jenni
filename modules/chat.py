@@ -18,7 +18,7 @@ import random
 import re
 import time
 
-mycb = cleverbot.Session()
+mycb = cleverbot.Cleverbot()
 
 nowords = ['reload', 'help', 'tell', 'ask', 'ping']
 
@@ -62,7 +62,7 @@ def chat(jenni, input):
         pm = False
         try:
             time.sleep(random.randint(5, 30))
-            msgo = mycb.Ask(msgi)
+            msgo = mycb.ask(msgi)
         except:
             return
     elif not channel.startswith('#'):
@@ -77,7 +77,7 @@ def chat(jenni, input):
                     return
         try:
             time.sleep(random.randint(3, 15))
-            msgo = mycb.Ask(msgi)
+            msgo = mycb.ask(msgi)
         except:
             return
     else:
