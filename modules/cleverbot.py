@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 """
 cleverbot.py - jenni's Cleverbot API module
-Copyright 2013 Michael Yanovich (yanovich.net)
-Copyright 2013 Manishrw (github.com/manishrw)
+Copyright 2013-2015 Michael Yanovich (yanovich.net)
+Copyright 2013-2015 Rodney Folz, (github.com/folz)
 Licensed under the Eiffel Forum License 2.
 
 More info:
  * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
+ * https://github.com/folz/cleverbot.py
 
 This library lets you open chat session with cleverbot (www.cleverbot.com)
 
