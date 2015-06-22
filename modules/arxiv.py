@@ -69,18 +69,20 @@ def summary(jenni, input):
 
     query = input.group(2)
 
+    if not query:
+        return jenni.say('Pleaes provide an input to lookup via arVix.')
+
     try:
         (arxivid, authors, title, abstract, url) = get_arxiv(query)
     except:
-        jenni.say("[arXiv] Could not lookup " + query + " in the arXiv.")
-        return
+        return jenni.say("[arXiv] Could not lookup " + query + " in the arXiv.")
 
     arxiv_summary = "[arXiv:" + arxivid + "] " + authors + ', "' \
                     + title + '" :: ' + abstract
 
     long_summary = arxiv_summary + " " + url
     if len(long_summary) > 300:
-        ending = '[...] ' + url 
+        ending = '[...] ' + url
         clipped = arxiv_summary[:(300-len(ending))] + ending
     else:
         clipped = long_summary
