@@ -187,16 +187,31 @@ class Jenni(irc.Bot):
     def wrapped(self, origin, text, match):
         class JenniWrapper(object):
             def __init__(self, jenni):
-                self.bot = jenni
+                self._bot = jenni
 
             def __getattr__(self, attr):
                 sender = origin.sender or text
                 if attr == 'reply':
                     return (lambda msg:
-                        self.bot.msg(sender, origin.nick + ': ' + msg))
+                        self._bot.msg(sender, origin.nick + ': ' + msg))
                 elif attr == 'say':
-                    return lambda msg: self.bot.msg(sender, msg)
-                return getattr(self.bot, attr)
+                    return lambda msg: self._bot.msg(sender, msg)
+                elif attr == 'bot':
+                    # Allow deprecated usage of jenni.bot.foo but print a warning to the console
+                    print "Warning: Direct access to jenni.bot.foo is deprecated.  Please use jenni.foo instead."
+                    import traceback
+                    traceback.print_stack()
+                    # Let this keep working by passing it transparently to _bot
+                    return self._bot
+                return getattr(self._bot, attr)
+
+            def __setattr__(self, attr, value):
+                if attr in ('_bot',):
+                    # Explicitly allow the wrapped class to be set during __init__()
+                    return super(JenniWrapper, self).__setattr__(attr, value)
+                else:
+                    # All other attributes will be set on the wrapped class transparently
+                    return setattr(self._bot, attr, value)
 
         return JenniWrapper(self)
 

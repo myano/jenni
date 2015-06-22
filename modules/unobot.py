@@ -141,7 +141,7 @@ class UnoBot:
             jenni.msg(CHANNEL, STRINGS['CANT_STOP'] % (self.game_on, self.timeout.seconds - (tmptime - self.lastActive).seconds))
 
     def join(self, jenni, input):
-        #print dir(jenni.bot)
+        #print dir(jenni)
         #print dir(input)
         nickk = (input.nick).lower()
         if self.game_on:

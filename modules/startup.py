@@ -63,7 +63,7 @@ def startup(jenni, input):
 
     if not jenni.is_authenticated and hasattr(jenni.config, 'password'):
         jenni.msg('NickServ', 'IDENTIFY %s' % jenni.config.password)
-        time.sleep(5)
+        time.sleep(10)
 
     # Cf. http://swhack.com/logs/2005-12-05#T19-32-36
     for channel in jenni.channels:
