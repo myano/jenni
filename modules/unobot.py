@@ -696,7 +696,8 @@ leave.thread = False
 leave.rate = 0
 
 def remove_on_part(jenni, input):
-    unobot.remove_player(jenni, (input.nick).lower())
+    if input.sender == CHANNEL:
+        unobot.remove_player(jenni, (input.nick).lower())
 remove_on_part.event = 'PART'
 remove_on_part.rule = '.*'
 remove_on_part.priority = 'low'
@@ -704,7 +705,8 @@ remove_on_part.thread = False
 remove_on_part.rate = 0
 
 def remove_on_quit(jenni, input):
-    unobot.remove_player(jenni, (input.nick).lower())
+    if input.sender == CHANNEL:
+        unobot.remove_player(jenni, (input.nick).lower())
 remove_on_quit.event = 'QUIT'
 remove_on_quit.rule = '.*'
 remove_on_quit.priority = 'low'
@@ -712,7 +714,8 @@ remove_on_quit.thread = False
 remove_on_quit.rate = 0
 
 def remove_on_kick(jenni, input):
-    unobot.remove_player(jenni, (input.nick).lower())
+    if input.sender == CHANNEL:
+        unobot.remove_player(jenni, (input.args[1].lower()))
 remove_on_kick.event = 'KICK'
 remove_on_kick.rule = '.*'
 remove_on_kick.priority = 'low'
