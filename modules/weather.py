@@ -70,7 +70,7 @@ def location(name):
 
     for each_location in locations:
         #print "feature_class", each_location['feature_class'], each_location['feature_code'], each_location['placetype']
-        if each_location['feature_class'] == 'P':
+        if 'feature_class' in each_location and each_location['feature_class'] == 'P':
             proper_locations.append(each_location)
 
     if len(proper_locations) >= 1:
