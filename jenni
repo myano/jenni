@@ -21,7 +21,7 @@ from textwrap import dedent as trim
 dotdir = os.path.expanduser('~/.jenni')
 configpath = os.path.expanduser(dotdir + '/default.py')
 
-if os.geteuid() == 0:
+if getattr(os, 'geteuid', None) and os.geteuid() == 0:
     error = 'Error: Refusing to run as root.'
     print >> sys.stderr, error
     sys.exit(1)
@@ -52,6 +52,10 @@ def create_default_config(fn):
     # You can also specify nick@hostmask
     # For example: yano@unaffiliated/yano
     owner = 'yournickname'
+
+    # user is the NickServ userid
+    # This is useful if your NickServ user is different than the nick you are using
+    # user = 'userid'
 
     # password is the NickServ password, serverpass is the server password
     # password = 'example'

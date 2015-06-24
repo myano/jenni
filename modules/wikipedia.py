@@ -21,6 +21,8 @@ r_tr = re.compile(r'(?ims)<tr[^>]*>.*?</tr>')
 r_paragraph = re.compile(r'(?ims)<p[^>]*>.*?</p>|<li(?!n)[^>]*>.*?</li>')
 r_tag = re.compile(r'<(?!!)[^>]+>')
 r_whitespace = re.compile(r'[\t\r\n ]+')
+r_empty = re.compile(r'<span style="display:none" \S+>\S+</span>')
+#<span style="display:none" class="sortkey">
 r_redirect = re.compile(
     r'(?ims)class=.redirectText.>\s*<a\s*href=./wiki/([^"/]+)'
 )
@@ -41,6 +43,7 @@ def unescape(s):
     return s
 
 def text(html):
+    html = r_empty.sub('', html)
     html = r_tag.sub('', html)
     html = r_whitespace.sub(' ', html)
     return unescape(html).strip()

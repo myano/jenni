@@ -163,7 +163,8 @@ def nws_lookup(jenni, input):
     master_url = False
     if len(bits) == 2:
         ## county given
-        name, county, state, countryName, lat, lng = weather.location(text)
+        county = bits[0]
+        state = bits[1]
         url_part1 = 'http://alerts.weather.gov'
         state = (state).strip().lower()
         county = (county).strip().lower()

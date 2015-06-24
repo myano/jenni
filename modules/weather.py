@@ -44,67 +44,59 @@ def clean(txt, delim=''):
 
 
 def location(name):
+    nothing = ('', '', '', '', '', '')
+
     name = urllib.quote(name.encode('utf-8'))
-    uri = "http://www.geonames.org/search.html?q=%s" % (name)
+    uri = 'http://services.gisgraphy.com/fulltext/fulltextsearch?format=json&q=%s' % (name)
     in_usa = False
     if re.match('\d{5}', name):
         uri += '&country=us'
         in_usa = True
-    page = web.get(uri)
 
-    line = re_line.findall(page)
-    if not line:
-        return ('?', '?', '?', '?', '?', '?',)
-    line = line[0]
+    try:
+        page = web.get(uri)
+        useful = json.loads(page)
+    except:
+        return nothing
 
-    find_lat = re_lat.findall(line)
+    #print "useful", useful
 
-    find_lng = re_long.findall(line)
+    if 'response' not in useful:
+        return nothing
 
-    find_cnty = re_cnty.findall(line)
+    locations = useful['response']['docs']
 
-    find_city = re_city.findall(line)
+    proper_locations = list()
 
-    find_region = re_region.findall(line)
+    for each_location in locations:
+        #print "feature_class", each_location['feature_class'], each_location['feature_code'], each_location['placetype']
+        if 'feature_class' in each_location and each_location['feature_class'] == 'P':
+            proper_locations.append(each_location)
 
-    find_county = re_county.findall(line)
+    if len(proper_locations) >= 1:
+        this_location = proper_locations[0]
+    else:
+        return nothing
 
+    find_lat = str(this_location['lat'])
+    find_lng = str(this_location['lng'])
+    find_country = (this_location['country_name']).encode('utf-8')
+    find_county = str()
+    find_region = str()
+    find_name = (this_location['name_ascii']).encode('utf-8')
 
-    name = '?'
-    countryName = '?'
-    lng = '0'
-    lat = '0'
-    region = '?'
-    county = '?'
+    if find_country == 'United States':
+        temp = this_location['fully_qualified_name']
+        parts = temp.split(',')
+        find_county = (parts[1].strip()).encode('utf-8')
+        find_region = (parts[2].strip()).encode('utf-8')
 
-
-    if find_city:
-        name = clean(find_city[0])
-    if find_cnty:
-        countryName = clean(find_cnty[0])
-    if find_lat:
-        lat = clean(find_lat[0])
-    if find_lng:
-        lng = clean(find_lng[0])
-    if find_region:
-        region = clean(find_region[0])
-    if find_county:
-        county = clean(find_county[0])
-
-    if in_usa:
-        re_columns = re.compile('<td.*?>(.*?)</td>')
-        columns = re_columns.findall(line)
-        if lat == '0' and lng == '0':
-            gps_clean = clean(columns[-1])
-            gps = gps_clean.split('/')
-            lat = clean(gps[0]).replace('&nbsp;', '')
-            lng = clean(gps[1]).replace('&nbsp;', '')
-        if name == '?':
-            name = clean(columns[0])
-        if countryName == '?':
-            countryName = clean(columns[2])
-        if region == '?':
-            region = clean(columns[3])
+    name =  find_name
+    countryName = find_country
+    lng = find_lng
+    lat = find_lat
+    region = find_region
+    county = find_county
 
     #print 'name', name
     #print 'county', county
@@ -609,71 +601,6 @@ def f_weather(jenni, input):
 f_weather.rule = (['weather-noaa', 'wx-noaa'], r'(.*)')
 
 
-def fucking_weather(jenni, input):
-    """.fw (ZIP|City, State) -- provide a ZIP code or a city state pair to hear about the fucking weather"""
-    ## thefuckingweather.com website is not very reliable, in fat this often breaks due to their site
-    ## not returning correct data
-
-    text = input.group(2)
-
-    if not text:
-        jenni.reply('INVALID FUCKING INPUT. PLEASE ENTER A FUCKING ZIP CODE, OR A FUCKING CITY-STATE PAIR.')
-        return
-
-    new_text = str()
-
-    new_text = uc.encode(text)
-    search = urllib.quote((new_text).strip())
-
-    url = 'http://thefuckingweather.com/?where=%s' % (search)
-
-    try:
-        page = web.get(url)
-    except:
-        return jenni.say("I COULDN'T ACCESS THE FUCKING SITE.")
-
-    ## hacky, yes, I know, but the position of this information has yet to change
-    re_mark = re.compile('<p class="remark">(.*?)</p>')
-    re_temp = re.compile('<span class="temperature" tempf="\S+">(\S+)</span>')
-    re_condition = re.compile('<p class="large specialCondition">(.*?)</p>')
-    re_flavor = re.compile('<p class="flavor">(.*?)</p>')
-    re_location = re.compile('<span id="locationDisplaySpan" class="small">(.*?)</span>')
-
-    ## find relevant information
-    temps = re_temp.findall(page)
-    remarks = re_mark.findall(page)
-    conditions = re_condition.findall(page)
-    flavor = re_flavor.findall(page)
-    new_location = re_location.findall(page)
-
-    ## build return string
-    response = str()
-
-    if new_location and new_location[0]:
-        response += new_location[0] + ': '
-
-    if temps:
-        tempf = float(temps[0])
-        tempc = (tempf - 32.0) * (5 / 9.0)
-        response += u'%.1f°F?! %.1f°C?! ' % (tempf, tempc)
-
-    if remarks:
-        response += remarks[0]
-    else:
-        response += "THE FUCKING SITE DOESN'T CONTAIN ANY FUCKING INFORMATION ABOUT THE FUCKING WEATHER FOR THE PROVIDED FUCKING LOCATION. FUCK!"
-
-    if conditions:
-        response += ' ' + conditions[0]
-
-    if flavor:
-        response += ' -- ' + flavor[0].replace('  ', ' ')
-
-    jenni.say(response)
-fucking_weather.commands = ['fucking_weather', 'fw']
-fucking_weather.priority = 'low'
-fucking_weather.rate = 5
-
-
 def windchill(jenni, input):
     '''.windchill <temp> <wind speed> -- shows Windchill in F'''
     ## this is pretty hacky
@@ -754,7 +681,12 @@ def forecast(jenni, input):
     new_countryName = uc.decode(countryName)
     new_county = uc.decode(county)
 
-    output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
+    #output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
+    #output = u'[' + new_name + ', '
+    #if region:
+    #    output += region + ', '
+    #output += new_countryName + '] '
+    output = preface_location(new_name, region, new_countryName)
 
     if 'alerts' in data:
         ## TODO: modularize the colourful parsing of alerts from nws.py so this can be colourized
@@ -764,8 +696,9 @@ def forecast(jenni, input):
     k = 1
     units = data['flags']['units']
 
-    second_output = str()
-    second_output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
+    #second_output = str()
+    #second_output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
+    second_output = preface_location(new_name, region, new_countryName)
 
     for day in days:
         ## give me floats with only one significant digit
@@ -939,7 +872,11 @@ def forecastio_current_weather(jenni, input):
     output += ', \x1FWind\x1F: ' + wind
     output += ' - '
     if name != '?' and countryName != '?':
-        output += '%s, %s, %s' % (name, region, countryName)
+        output += name + ', '
+        if region:
+            output += region + ', '
+        output += countryName
+        #output += '%s, %s, %s' % (name, region, countryName)
     else:
         output += 'Lat: %s, Long: %s' % (lat, lng)
     output + '; %s UTC' % (time)
@@ -1064,6 +1001,15 @@ def weather_wunderground(jenni, input):
 weather_wunderground.commands = ['wx-wg', 'weather-wg']
 
 
+def preface_location(ci, reg, cty):
+    out = str()
+    out += '[' + ci
+    if reg:
+        out += ', ' + reg
+    out += ', %s] ' % (cty)
+    return out
+
+
 def forecast_wg(jenni, input):
     if not hasattr(jenni.config, 'wunderground_apikey'):
         return jenni.say('Please sign up for a wunderground.com API key at http://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
@@ -1091,6 +1037,8 @@ def forecast_wg(jenni, input):
     if 'response' in useful and 'error' in useful['response'] and 'description' in useful['response']['error']:
         return jenni.say(str(useful['response']['error']['description']))
 
+    if 'forecast' not in useful:
+        return jenni.say('We could not find a forecast for the given location.')
 
     days = useful['forecast']['simpleforecast']['forecastday']
     forecast_text = useful['forecast']['txt_forecast']['forecastday']
@@ -1114,14 +1062,6 @@ def forecast_wg(jenni, input):
         region += useful['location']['state']
 
     country = useful['location']['country_name']
-
-    def preface_location(ci, reg, cty):
-        out = str()
-        out += '[' + ci
-        if reg:
-            out += ', ' + reg
-        out += ', %s] ' % (country)
-        return out
 
     output = preface_location(city, region, country)
     output_second = preface_location(city, region, country)
