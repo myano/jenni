@@ -60,7 +60,7 @@ STRINGS = {
     'NOT_ENOUGH': '\x0300,01Not enough players to deal yet.',
     'NEEDS_TO_DEAL': '\x0300,01%s needs to deal.',
     'ALREADY_DEALT': '\x0300,01Already dealt.',
-    'ON_TURN': '\x0300,01It\'s %s\'s turn.',
+    'ON_TURN': '\x0300,01It\'s the turn of %s',
     'DONT_HAVE': '\x0300,01You don\'t have that card, %s',
     'DOESNT_PLAY': '\x0300,01That card does not play, %s',
     'UNO': '\x0300,01UNO! %s has ONE card left!',
@@ -71,7 +71,7 @@ STRINGS = {
     'DRAW_FIRST': '\x0300,01%s, you need to draw first!',
     'PASSED': '\x0300,01%s passed!',
     'NO_SCORES': '\x0300,01No scores yet',
-    'TOP_CARD': '\x0300,01%s\'s turn. Top Card: %s',
+    'TOP_CARD': '\x0300,01It\'s the turn of %s | Top Card: %s',
     'YOUR_CARDS': '\x0300,01Your cards: %s',
     'NEXT_START': '\x0300,01Next: ',
     'NEXT_PLAYER': '\x0300,01%s (%s cards)',
@@ -813,6 +813,7 @@ def uno_get_names(jenni, input):
             new_list.append(x)
     new_list.remove(jenni.config.nick)
     new_list.remove('ChanServ')
+    new_list.remove('AntiSpamMeta')
     new_list.sort()
     final_string = ', '.join(new_list)
     if user_triggered:
