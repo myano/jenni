@@ -201,6 +201,9 @@ def ytget(jenni, trigger):
         bytes = proxy.get(uri)
         result = json.loads(bytes)
         video_entry = result['items'][0]
+    except IndexError:
+        jenni.say('Video not found through the YouTube API.')
+        return 'err'
     except Exception:
         jenni.say('Something went wrong when accessing the YouTube API.')
         traceback.print_exc()
