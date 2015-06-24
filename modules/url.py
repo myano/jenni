@@ -23,8 +23,6 @@ import time
 import urllib2
 import web
 
-from modules import youtube
-
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
 # and then your username. For example, the only line in that
@@ -45,7 +43,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
 bitly_loaded = False
 BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
                    'short', 'st', 'tell', 'title', 'tw', 'twitter', 'unbitly',
-                   'untiny', 'ytitle']
+                   'untiny',]
 simple_channels = list()
 
 try:
@@ -75,7 +73,6 @@ r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 HTML_ENTITIES = { 'apos': "'" }
 
-yt_catch = re.compile('http[s]*:\/\/[w\.]*(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
@@ -406,10 +403,6 @@ def show_title_auto(jenni, input):
         ## Directory Listing of files
         return
 
-    yt_match = yt_catch.match(input)
-    if (youtube.title(jenni, yt_match)):
-        return
-
     try:
         status, results = get_results(input)
     except Exception, e:
@@ -495,10 +488,6 @@ def show_title_demand(jenni, input):
             uri = jenni.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
-
-    yt_match =  yt_catch.match(uri)
-    if (youtube.title(jenni, yt_match)):
-        return
 
     status, results = get_results(uri, True)
 
