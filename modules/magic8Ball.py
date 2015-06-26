@@ -44,8 +44,8 @@ def magic8Ball(jenni, input):
 				'Cannot predict now',
 				'Concentrate and ask again']
 	
-	#1 in 4 chance of getting an ask again answer
-	if (random.randint(0,4) < 1):
+	#1 in 5 chance of getting an ask again answer (randint() is inclusive)
+	if (random.randint(1,5) == 1):
 		jenni.reply(random.choice(askAgainAnswers))
 	else:  #else produce a real answer
 		hash = hashlib.sha224(input)
