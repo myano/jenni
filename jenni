@@ -72,6 +72,11 @@ def create_default_config(fn):
     # This is optional and doesn't need to be added.
     # wunderground_apikey = ''
 
+    # google_dev_apikey is for an API key from Google Developers
+    # https://developers.google.com/api-client-library/python/guide/aaa_apikeys
+    # Get a Server API Key; this is required for YouTube to work.
+    # google_dev_apikey = ''
+
     # You can add bannable words / regex per channel
     # bad_words = {
     #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
