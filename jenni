@@ -98,7 +98,7 @@ def create_default_config(fn):
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
-    exclude = ['adminchannel', 'insult', 'lispy', 'twss']
+    exclude = ['adminchannel', 'chicken_reply', 'insult', 'lispy', 'twss']
 
     # This allows one to allow specific people to use ".msg channel message here"
     # in specific channels.
