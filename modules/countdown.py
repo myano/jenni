@@ -121,7 +121,7 @@ def generic_countdown(jenni, input):
         try:
             offset = text[3]
         except:
-            offset = '0'
+            offset = 0
     else:
         if text:
             offset = text.split()[0]
@@ -134,7 +134,8 @@ def generic_countdown(jenni, input):
     try:
         float(offset)
     except:
-        return jenni.reply(':-(')
+        #return jenni.reply(':-(')
+        offset = 0
 
 
     if text and len(text) >= 3 and year.isdigit() and month.isdigit() and day.isdigit():
