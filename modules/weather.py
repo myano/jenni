@@ -17,7 +17,6 @@ import re
 import urllib
 import web
 from tools import deprecated
-from modules import latex
 from modules import unicode as uc
 from icao import data
 
@@ -89,7 +88,9 @@ def location(name):
         temp = this_location['fully_qualified_name']
         parts = temp.split(',')
         find_county = (parts[1].strip()).encode('utf-8')
-        find_region = (parts[2].strip()).encode('utf-8')
+        find_region = str()
+        if len(parts) >= 3:
+            find_region = (parts[2].strip()).encode('utf-8')
 
     name =  find_name
     countryName = find_country
@@ -197,6 +198,7 @@ def show_metar(jenni, input):
 show_metar.commands = ['metar']
 show_metar.example = '.metar London'
 show_metar.priority = 'low'
+show_metar.rate = 10
 
 
 def speed_desc(speed):
@@ -638,6 +640,8 @@ def windchill(jenni, input):
     jenni.say(u'Windchill: %2.f \u00B0F' % (wc))
 windchill.commands = ['windchill', 'wc']
 windchill.priority = 'low'
+windchill.rate = 10
+
 
 dotw = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -771,6 +775,7 @@ def forecast(jenni, input):
     second_output += ' (Powered by Forecast, forecast.io)'
     jenni.say(second_output)
 forecast.commands = ['forecast', 'fct', 'fc']
+forecast.rate = 15
 
 
 def forecastio_current_weather(jenni, input):
@@ -885,6 +890,7 @@ def forecastio_current_weather(jenni, input):
     output += ' (Powered by Forecast, forecast.io)'
     jenni.say(output)
 forecastio_current_weather.commands = ['wxi-ft', 'wx-ft', 'weather-ft', 'weather', 'wx']
+forecastio_current_weather.rate = 15
 
 
 def make_rh_C(temp, dewpoint):
@@ -999,6 +1005,7 @@ def weather_wunderground(jenni, input):
     jenni.say(output)
 
 weather_wunderground.commands = ['wx-wg', 'weather-wg']
+weather_wunderground.rate = 10
 
 
 def preface_location(ci, reg, cty):
@@ -1089,6 +1096,7 @@ def forecast_wg(jenni, input):
     jenni.say(output_second)
 
 forecast_wg.commands = ['forecast-wg']
+forecast_wg.rate = 15
 
 
 
