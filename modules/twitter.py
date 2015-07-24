@@ -110,8 +110,8 @@ def twitter(jenni, input):
     arg = input.group(2)
 
     if not arg:
-        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
-            temp = jenni.bot.last_seen_uri[input.sender]
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.last_seen_uri:
+            temp = jenni.last_seen_uri[input.sender]
             if '//twitter.com' in temp:
                 arg = temp
             else:

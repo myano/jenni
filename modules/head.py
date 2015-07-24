@@ -25,7 +25,7 @@ def head(jenni, input):
     else: uri, header = uri, None
 
     if not uri and hasattr(jenni, 'last_seen_uri'):
-        try: uri = jenni.bot.last_seen_uri[input.sender]
+        try: uri = jenni.last_seen_uri[input.sender]
         except KeyError: return jenni.say('?')
 
     if not uri.startswith('htt'):

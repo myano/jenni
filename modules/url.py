@@ -93,8 +93,8 @@ def setup(jenni):
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
     if not hasattr(jenni, 'last_seen_uri'):
-        jenni.bot.last_seen_uri = {}
-    jenni.bot.last_seen_uri[input.sender] = uri
+        jenni.last_seen_uri = {}
+    jenni.last_seen_uri[input.sender] = uri
 noteuri.rule = r'(?u).*(http[s]?://[^<> "\x01]+)[,.]?'
 noteuri.priority = 'low'
 
@@ -249,6 +249,8 @@ def find_title(url):
 
     title = re.sub(r'(?i)dcc\ssend', '', title)
 
+    title += '\x0F'
+
     if title:
         return True, title
     else:
@@ -301,8 +303,8 @@ def short(text):
 def generateBitLy(jenni, input):
     url = input.group(2)
     if not url:
-        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
-            url = jenni.bot.last_seen_uri[input.sender]
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.last_seen_uri:
+            url = jenni.last_seen_uri[input.sender]
         else:
             return jenni.say('No URL provided')
 
@@ -494,9 +496,9 @@ def show_title_demand(jenni, input):
     if not uri:
         channel = input.sender
         if not hasattr(jenni, 'last_seen_uri'):
-            jenni.bot.last_seen_uri = dict()
-        if channel in jenni.bot.last_seen_uri:
-            uri = jenni.bot.last_seen_uri[channel]
+            jenni.last_seen_uri = dict()
+        if channel in jenni.last_seen_uri:
+            uri = jenni.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
 
@@ -531,8 +533,8 @@ def collect_links(jenni, input):
     channel = input.sender
     link = link[0]
     if not hasattr(jenni, 'last_seen_uri'):
-        jenni.bot.last_seen_uri = dict()
-    jenni.bot.last_seen_uri[channel] = link
+        jenni.last_seen_uri = dict()
+    jenni.last_seen_uri[channel] = link
 collect_links.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
 collect_links.priority = 'low'
 
@@ -543,8 +545,8 @@ def unbitly(jenni, input):
     '''.longurl <link> -- obtain the final destination URL from a short URL'''
     url = input.group(2)
     if not url:
-        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
-            url = jenni.bot.last_seen_uri[input.sender]
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.last_seen_uri:
+            url = jenni.last_seen_uri[input.sender]
         else:
             return jenni.say('No URL provided')
     if not url.startswith(('http://', 'https://')):

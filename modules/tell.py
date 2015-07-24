@@ -119,8 +119,10 @@ def f_remind(jenni, input):
         if len(whogets) > 1:
             listing = ', '.join(whogets[:-1]) + ', or ' + whogets[-1]
             response = response % (listing)
-        else:
+        elif len(whogets) == 1:
             response = response % (whogets[0])
+        else:
+            return jenni.say('Huh?')
 
     if not whogets: # Only get cute if there are not legits
         rand = random.random()

@@ -29,7 +29,11 @@ def join(jenni, input):
     '''Join the specified channel. This is an admin-only command.'''
     # Can only be done in privmsg by an admin
     if input.sender.startswith('#'): return
+    if not input.owner:
+        return jenni.say('You do not have admin privs.')
     incoming = input.group(2)
+    if not incoming:
+        return jenni.say('Please provide some channels to join.')
     inc = incoming.split(' ')
     if len(inc) > 2:
         ## 3 or more inputs
