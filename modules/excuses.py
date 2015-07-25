@@ -10,13 +10,13 @@ More info:
 """
 
 import re
-import proxy
+import web
 
 
 def excuse(jenni, input):
     a = re.compile('<a [\s\S]+>(.*)</a>')
     try:
-        page = proxy.get('http://programmingexcuses.com/')
+        page = web.get('http://programmingexcuses.com/')
     except:
         return jenni.say("I'm all out of excuses!")
     results = a.findall(page)
