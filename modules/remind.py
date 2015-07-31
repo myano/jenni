@@ -18,6 +18,45 @@ import threading
 
 r_command = None
 
+scaling = {
+    'years': 365.25 * 24 * 3600,
+    'year': 365.25 * 24 * 3600,
+    'yrs': 365.25 * 24 * 3600,
+    'y': 365.25 * 24 * 3600,
+
+    'months': 29.53059 * 24 * 3600,
+    'month': 29.53059 * 24 * 3600,
+    'mo': 29.53059 * 24 * 3600,
+
+    'weeks': 7 * 24 * 3600,
+    'week': 7 * 24 * 3600,
+    'wks': 7 * 24 * 3600,
+    'wk': 7 * 24 * 3600,
+    'w': 7 * 24 * 3600,
+
+    'days': 24 * 3600,
+    'day': 24 * 3600,
+    'd': 24 * 3600,
+
+    'hours': 3600,
+    'hour': 3600,
+    'hrs': 3600,
+    'hr': 3600,
+    'h': 3600,
+
+    'minutes': 60,
+    'minute': 60,
+    'mins': 60,
+    'min': 60,
+    'm': 60,
+
+    'seconds': 1,
+    'second': 1,
+    'secs': 1,
+    'sec': 1,
+    's': 1
+}
+
 def filename(self):
     name = self.nick + '-' + self.config.host + '.reminders.db'
     return os.path.join(os.path.expanduser('~/.jenni'), name)
@@ -81,45 +120,6 @@ def setup(jenni):
     targs = (jenni,)
     t = threading.Thread(target=monitor, args=targs)
     t.start()
-
-scaling = {
-    'years': 365.25 * 24 * 3600,
-    'year': 365.25 * 24 * 3600,
-    'yrs': 365.25 * 24 * 3600,
-    'y': 365.25 * 24 * 3600,
-
-    'months': 29.53059 * 24 * 3600,
-    'month': 29.53059 * 24 * 3600,
-    'mo': 29.53059 * 24 * 3600,
-
-    'weeks': 7 * 24 * 3600,
-    'week': 7 * 24 * 3600,
-    'wks': 7 * 24 * 3600,
-    'wk': 7 * 24 * 3600,
-    'w': 7 * 24 * 3600,
-
-    'days': 24 * 3600,
-    'day': 24 * 3600,
-    'd': 24 * 3600,
-
-    'hours': 3600,
-    'hour': 3600,
-    'hrs': 3600,
-    'hr': 3600,
-    'h': 3600,
-
-    'minutes': 60,
-    'minute': 60,
-    'mins': 60,
-    'min': 60,
-    'm': 60,
-
-    'seconds': 1,
-    'second': 1,
-    'secs': 1,
-    'sec': 1,
-    's': 1
-}
 
 def remind(jenni, input):
     m = r_command.match(input.bytes)
