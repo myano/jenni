@@ -16,6 +16,8 @@ import re
 import time
 import threading
 
+r_command = None
+
 def filename(self):
     name = self.nick + '-' + self.config.host + '.reminders.db'
     return os.path.join(os.path.expanduser('~/.jenni'), name)
@@ -42,6 +44,15 @@ def dump_database(name, data):
     f.close()
 
 def setup(jenni):
+    global r_command
+
+    periods = '|'.join(scaling.keys())
+    p_command = r'{}in ([0-9]+(?:\.[0-9]+)?)\s?((?:{})\b)?:?\s?(.*)'.format(
+        jenni.config.prefix,
+        periods,
+    )
+    r_command = re.compile(p_command)
+
     jenni.rfn = filename(jenni)
 
     # jenni.sending.acquire()
@@ -109,10 +120,6 @@ scaling = {
     'sec': 1,
     's': 1
 }
-
-periods = '|'.join(scaling.keys())
-p_command = r'\.in ([0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
-r_command = re.compile(p_command)
 
 def remind(jenni, input):
     m = r_command.match(input.bytes)
