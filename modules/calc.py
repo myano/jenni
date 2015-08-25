@@ -202,7 +202,7 @@ def py(jenni, input):
     if not code:
         return jenni.reply('No code provided.')
     query = code.encode('utf-8')
-    uri = 'https://tumbolia.appspot.com/py/'
+    uri = 'https://tumbolia-two.appspot.com/py/'
     try:
         answer = web.get(uri + web.urllib.quote(query))
         if answer is not None and answer != "\n":
@@ -220,7 +220,7 @@ def get_wa(search):
     txt = txt.decode('utf-8')
     txt = txt.encode('utf-8')
     query = txt
-    uri = 'https://tumbolia.appspot.com/wa/'
+    uri = 'https://tumbolia-two.appspot.com/wa/'
     uri += urllib.quote(query.replace('+', '%2B'))
     answer = web.get(uri)
     if answer:
