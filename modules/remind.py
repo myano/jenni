@@ -16,60 +16,7 @@ import re
 import time
 import threading
 
-def filename(self):
-    name = self.nick + '-' + self.config.host + '.reminders.db'
-    return os.path.join(os.path.expanduser('~/.jenni'), name)
-
-def load_database(name):
-    data = {}
-    if os.path.isfile(name):
-        f = open(name, 'rb')
-        for line in f:
-            unixtime, channel, nick, message = line.split('\t')
-            message = message.rstrip('\n')
-            t = int(unixtime)
-            reminder = (channel, nick, message)
-            try: data[t].append(reminder)
-            except KeyError: data[t] = [reminder]
-        f.close()
-    return data
-
-def dump_database(name, data):
-    f = open(name, 'wb')
-    for unixtime, reminders in data.iteritems():
-        for channel, nick, message in reminders:
-            f.write('%s\t%s\t%s\t%s\n' % (unixtime, channel, nick, message))
-    f.close()
-
-def setup(jenni):
-    jenni.rfn = filename(jenni)
-
-    # jenni.sending.acquire()
-    jenni.rdb = load_database(jenni.rfn)
-    # jenni.sending.release()
-
-    def monitor(jenni):
-        time.sleep(5)
-        while True:
-            now = int(time.time())
-            unixtimes = [int(key) for key in jenni.rdb]
-            oldtimes = [t for t in unixtimes if t <= now]
-            if oldtimes:
-                for oldtime in oldtimes:
-                    for (channel, nick, message) in jenni.rdb[oldtime]:
-                        if message:
-                            jenni.msg(channel, nick + ': ' + message)
-                        else: jenni.msg(channel, nick + '!')
-                    del jenni.rdb[oldtime]
-
-                # jenni.sending.acquire()
-                dump_database(jenni.rfn, jenni.rdb)
-                # jenni.sending.release()
-            time.sleep(2.5)
-
-    targs = (jenni,)
-    t = threading.Thread(target=monitor, args=targs)
-    t.start()
+r_command = None
 
 scaling = {
     'years': 365.25 * 24 * 3600,
@@ -110,9 +57,69 @@ scaling = {
     's': 1
 }
 
-periods = '|'.join(scaling.keys())
-p_command = r'\.in ([0-9]+(?:\.[0-9]+)?)\s?((?:%s)\b)?:?\s?(.*)' % periods
-r_command = re.compile(p_command)
+def filename(self):
+    name = self.nick + '-' + self.config.host + '.reminders.db'
+    return os.path.join(os.path.expanduser('~/.jenni'), name)
+
+def load_database(name):
+    data = {}
+    if os.path.isfile(name):
+        f = open(name, 'rb')
+        for line in f:
+            unixtime, channel, nick, message = line.split('\t')
+            message = message.rstrip('\n')
+            t = int(unixtime)
+            reminder = (channel, nick, message)
+            try: data[t].append(reminder)
+            except KeyError: data[t] = [reminder]
+        f.close()
+    return data
+
+def dump_database(name, data):
+    f = open(name, 'wb')
+    for unixtime, reminders in data.iteritems():
+        for channel, nick, message in reminders:
+            f.write('%s\t%s\t%s\t%s\n' % (unixtime, channel, nick, message))
+    f.close()
+
+def setup(jenni):
+    global r_command
+
+    periods = '|'.join(scaling.keys())
+    p_command = r'{}in ([0-9]+(?:\.[0-9]+)?)\s?((?:{})\b)?:?\s?(.*)'.format(
+        jenni.config.prefix,
+        periods,
+    )
+    r_command = re.compile(p_command)
+
+    jenni.rfn = filename(jenni)
+
+    # jenni.sending.acquire()
+    jenni.rdb = load_database(jenni.rfn)
+    # jenni.sending.release()
+
+    def monitor(jenni):
+        time.sleep(5)
+        while True:
+            now = int(time.time())
+            unixtimes = [int(key) for key in jenni.rdb]
+            oldtimes = [t for t in unixtimes if t <= now]
+            if oldtimes:
+                for oldtime in oldtimes:
+                    for (channel, nick, message) in jenni.rdb[oldtime]:
+                        if message:
+                            jenni.msg(channel, nick + ': ' + message)
+                        else: jenni.msg(channel, nick + '!')
+                    del jenni.rdb[oldtime]
+
+                # jenni.sending.acquire()
+                dump_database(jenni.rfn, jenni.rdb)
+                # jenni.sending.release()
+            time.sleep(2.5)
+
+    targs = (jenni,)
+    t = threading.Thread(target=monitor, args=targs)
+    t.start()
 
 def remind(jenni, input):
     m = r_command.match(input.bytes)
