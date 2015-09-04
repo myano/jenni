@@ -10,21 +10,24 @@ More info:
 """
 
 import re
-import proxy
+from modules import proxy
+import web
 
 
 def excuse(jenni, input):
     a = re.compile('<a [\s\S]+>(.*)</a>')
+
     try:
         page = proxy.get('http://programmingexcuses.com/')
     except:
         return jenni.say("I'm all out of excuses!")
+
     results = a.findall(page)
+
     if results:
         result = results[0]
         result = result.strip()
         if result[-1] not in ['.', '?', '!']:
-            print 'lastchar:', str(result[-1])
             result += '.'
         jenni.say(result)
     else:

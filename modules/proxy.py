@@ -27,7 +27,7 @@ urllib._urlopener = Grab()
 
 
 def remote_call(uri, info=False):
-    pyurl = u'https://tumbolia.appspot.com/py/'
+    pyurl = u'https://tumbolia-two.appspot.com/py/'
     code = 'import json;'
     code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
     code += "req.add_header('User-Agent','%s');" % (user_agent)

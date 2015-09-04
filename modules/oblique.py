@@ -13,7 +13,7 @@ More info:
 import re, urllib
 import web
 
-definitions = 'https://github.com/nslater/oblique/wiki'
+definitions = 'https://github.com/myano/jenni/wiki/oblique'
 
 r_item = re.compile(r'(?i)<li>(.*?)</li>')
 r_tag = re.compile(r'<[^>]+>')
@@ -27,7 +27,7 @@ def mappings(uri):
 
         command, template = item.split(' ', 1)
         if not command.isalnum(): continue
-        if not template.startswith('http://'): continue
+        if not template.startswith(('http://', 'https://')): continue
         result[command] = template.replace('&amp;', '&')
     return result
 

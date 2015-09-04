@@ -51,28 +51,29 @@ class Jenni(irc.Bot):
         self.variables = {}
 
         filenames = []
-        if not hasattr(self.config, 'enable'):
-            for fn in os.listdir(os.path.join(home, 'modules')):
-                if fn.endswith('.py') and not fn.startswith('_'):
-                    filenames.append(os.path.join(home, 'modules', fn))
-        else:
-            for fn in self.config.enable:
-                filenames.append(os.path.join(home, 'modules', fn + '.py'))
 
-        if hasattr(self.config, 'extra'):
-            for fn in self.config.extra:
-                if os.path.isfile(fn):
-                    filenames.append(fn)
-                elif os.path.isdir(fn):
-                    for n in os.listdir(fn):
-                        if n.endswith('.py') and not n.startswith('_'):
-                            filenames.append(os.path.join(fn, n))
+        # Default module folder + extra folders
+        module_folders = [os.path.join(home, 'modules')]
+        module_folders.extend(getattr(self.config, 'extra', []))
+        
+        excluded = getattr(self.config, 'exclude', [])
+        enabled = getattr(self.config, 'enable', [])
+
+        for folder in module_folders:
+            if os.path.isfile(folder):
+                filenames.append(folder)
+            elif os.path.isdir(folder):
+                for fn in os.listdir(folder):
+                    if fn.endswith('.py') and not fn.startswith('_'):
+                        name = os.path.basename(fn)[:-3]
+                        # If whitelist is present only include whitelisted
+                        # Never include blacklisted items
+                        if name in enabled or not enabled and name not in excluded:
+                            filenames.append(os.path.join(folder, fn))
 
         modules = []
-        excluded_modules = getattr(self.config, 'exclude', [])
         for filename in filenames:
             name = os.path.basename(filename)[:-3]
-            if name in excluded_modules: continue
             # if name in sys.modules:
             #     del sys.modules[name]
             try: module = imp.load_source(name, filename)

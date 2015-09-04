@@ -28,7 +28,7 @@ c_answer = re.compile(c_pattern)
 r_tag = re.compile(r'<(?!!)[^>]+>')
 
 try:
-    import proxy
+    from modules import proxy
 except:
     pass
 
@@ -110,6 +110,7 @@ def c(jenni, input):
                 attempt_two = False
 
             output = str()
+            """
             if attempt_two:
                 new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
                 try:
@@ -133,6 +134,8 @@ def c(jenni, input):
                     output = search.remove_spaces(output)
                 except:
                     output = str()
+            """
+            output = False
 
             if output:
                 ## If Attempt #2 worked, display the answer
@@ -199,7 +202,7 @@ def py(jenni, input):
     if not code:
         return jenni.reply('No code provided.')
     query = code.encode('utf-8')
-    uri = 'https://tumbolia.appspot.com/py/'
+    uri = 'https://tumbolia-two.appspot.com/py/'
     try:
         answer = web.get(uri + web.urllib.quote(query))
         if answer is not None and answer != "\n":
@@ -217,7 +220,7 @@ def get_wa(search):
     txt = txt.decode('utf-8')
     txt = txt.encode('utf-8')
     query = txt
-    uri = 'https://tumbolia.appspot.com/wa/'
+    uri = 'https://tumbolia-two.appspot.com/wa/'
     uri += urllib.quote(query.replace('+', '%2B'))
     answer = web.get(uri)
     if answer:
