@@ -109,7 +109,12 @@ def notify(jenni, recipient, text):
 
 
 def print_album(jenni, album):
-    jenni.say("\"\x02%s\x02\" by \x02%s\x02, released in \x02%s\x02 and is available in \x02%d\x02 countries." % (album['name'], album['artist'], album['released'], len(album['availability']['territories'].split(' '))))
+    territories = len(album['availability']['territories'].split(' '))
+
+    jenni.say("\"\x02%s\x02\"" % album['name'] +
+        " by \x02%s\x02," % album['artist'] +
+        " released in \x02%s\x02 and is" % album['released'] +
+        " available in \x02%d\x02 countries." % territories)
 
 
 def print_artist(jenni, artist):
@@ -124,7 +129,11 @@ def print_track(jenni, track):
     artist_names = [artist['name'] for artist in track['artists']]
     artists = artist_list(artist_names)
 
-    jenni.say("\"\x02%s\x02\" [\x02%s\x02] by \x02%s\x02 from \x02\"%s\"\x02 which was released in \x02%s\x02." % (track['name'], length, artists, track['album']['name'], track['album']['released']))
+    jenni.say("\"\x02%s\x02\"" % track['name'] +
+        " [\x02%s\x02]" % length +
+        " by \x02%s\x02" % artists +
+        " from \x02\"%s\"\x02," % track['album']['name'] +
+        " which was released in \x02%s\x02." % track['album']['released'])
 
 
 def query(jenni, input):
