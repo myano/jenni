@@ -75,6 +75,9 @@ SpotifyStatusCodes = {
     503: ServiceUnavailable
 }
 
+TRACK_MSG = '"{0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}", which was released in {0}{5}{0}.'
+ALBUM_MSG = '"{0}{1}{0}" by {0}{2}{0}, released in {0}{3}{0} and is available in {0}{4}{0} countries.'
+ARTIST_MSG = 'Artist: {0}{1}{0}'
 
 class Spotify:
 
@@ -111,14 +114,24 @@ def notify(jenni, recipient, text):
 def print_album(jenni, album):
     territories = len(album['availability']['territories'].split(' '))
 
-    jenni.say("\"\x02%s\x02\"" % album['name'] +
-        " by \x02%s\x02," % album['artist'] +
-        " released in \x02%s\x02 and is" % album['released'] +
-        " available in \x02%d\x02 countries." % territories)
+    message = ALBUM_MSG.format(
+        "\x02",
+        album['name'],
+        album['artist'],
+        album['released'],
+        len(album['availability']['territories'].split(' '))
+    )
+
+    jenni.say(message)
 
 
 def print_artist(jenni, artist):
-    jenni.say("Artist: \x02%s\x02" % artist['name'])
+    message = ARTIST_MSG.format(
+        "\x02",
+        artist['name']
+    )
+
+    jenni.say(message)
 
 
 def print_track(jenni, track):
@@ -129,11 +142,16 @@ def print_track(jenni, track):
     artist_names = [artist['name'] for artist in track['artists']]
     artists = artist_list(artist_names)
 
-    jenni.say("\"\x02%s\x02\"" % track['name'] +
-        " [\x02%s\x02]" % length +
-        " by \x02%s\x02" % artists +
-        " from \x02\"%s\"\x02," % track['album']['name'] +
-        " which was released in \x02%s\x02." % track['album']['released'])
+    message = TRACK_MSG.format(
+        "\x02",
+        track['name'],
+        length,
+        artists,
+        track['album']['name'],
+        track['album']['released']
+    )
+    
+    jenni.say(message);
 
 
 def query(jenni, input):
@@ -161,11 +179,15 @@ def query(jenni, input):
 
 def artist_list(data):
     if (len(data) > 1):
-        artists = '\x02, \x02'.join(data[:-1])
-        artists = artists + '\x02 and \x02' + data[-1]
+        artists = ""
+        for artist in data[:-1]:
+            artists += "{0}{1}{0}".format("\x02", artist)
+            if artist is not data[-2]:
+                artists += ", "
+        artists += " and {0}{1}{0}".format("\x02", data[-1])
         return artists
     else:
-        return data[0]
+        return "{0}{1}{0}".format("\x02", data[0])
 
 query.rule = r'.*spotify:(.*)$'
 query.priority = 'low'
