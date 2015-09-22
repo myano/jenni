@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """
 spotify.py - An api interface for spotify lookups
+Copyright 2015 Micheal Harker <micheal@michealharker.com>
 Copyright 2012 Patrick Andrew <missionsix@gmail.com>
 
 Licensed under the Eiffel Forum License, version 2
@@ -74,6 +75,9 @@ SpotifyStatusCodes = {
     503: ServiceUnavailable
 }
 
+TRACK_MSG = '"{0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}", which was released in {0}{5}{0}.'
+ALBUM_MSG = '"{0}{1}{0}" by {0}{2}{0}, released in {0}{3}{0} and is available in {0}{4}{0} countries.'
+ARTIST_MSG = 'Artist: {0}{1}{0}'
 
 class Spotify:
 
@@ -108,22 +112,46 @@ def notify(jenni, recipient, text):
 
 
 def print_album(jenni, album):
-    jenni.say(album['name'])
-    jenni.say("   Artist: %s" % album['artist'])
-    jenni.say("   Released: %s" % album['released'])
+    territories = len(album['availability']['territories'].split(' '))
+
+    message = ALBUM_MSG.format(
+        "\x02",
+        album['name'],
+        album['artist'],
+        album['released'],
+        len(album['availability']['territories'].split(' '))
+    )
+
+    jenni.say(message)
 
 
 def print_artist(jenni, artist):
-    jenni.say("Artist: %s" % artist['name'])
+    message = ARTIST_MSG.format(
+        "\x02",
+        artist['name']
+    )
+
+    jenni.say(message)
 
 
 def print_track(jenni, track):
     length = str(timedelta(seconds=track['length']))[2:7]
     if length[0] == '0':
         length = length[1:]
-    jenni.say("%s by %s" % (track['name'], track['artists'][0]['name']))
-    jenni.say("   Length: %s" % length)
-    jenni.say("   Album: \"%s\" " % track['album']['name'])
+
+    artist_names = [artist['name'] for artist in track['artists']]
+    artists = artist_list(artist_names)
+
+    message = TRACK_MSG.format(
+        "\x02",
+        track['name'],
+        length,
+        artists,
+        track['album']['name'],
+        track['album']['released']
+    )
+    
+    jenni.say(message);
 
 
 def query(jenni, input):
@@ -148,6 +176,18 @@ def query(jenni, input):
         formatters[type](jenni, result[type])
     except KeyError:
         notify(jenni, input.nick, "Unknown response from API server")
+
+def artist_list(data):
+    if (len(data) > 1):
+        artists = ""
+        for artist in data[:-1]:
+            artists += "{0}{1}{0}".format("\x02", artist)
+            if artist is not data[-2]:
+                artists += ", "
+        artists += " and {0}{1}{0}".format("\x02", data[-1])
+        return artists
+    else:
+        return "{0}{1}{0}".format("\x02", data[0])
 
 query.rule = r'.*spotify:(.*)$'
 query.priority = 'low'
