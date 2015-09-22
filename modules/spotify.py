@@ -79,6 +79,7 @@ TRACK_MSG = '"{0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}", which was released
 ALBUM_MSG = '"{0}{1}{0}" by {0}{2}{0}, released in {0}{3}{0} and is available in {0}{4}{0} countries.'
 ARTIST_MSG = 'Artist: {0}{1}{0}'
 
+
 class Spotify:
 
     base_url = "ws.spotify.com"
@@ -150,8 +151,8 @@ def print_track(jenni, track):
         track['album']['name'],
         track['album']['released']
     )
-    
-    jenni.say(message);
+
+    jenni.say(message)
 
 
 def query(jenni, input):
@@ -177,6 +178,7 @@ def query(jenni, input):
     except KeyError:
         notify(jenni, input.nick, "Unknown response from API server")
 
+
 def artist_list(data):
     if (len(data) > 1):
         artists = ""
@@ -191,3 +193,7 @@ def artist_list(data):
 
 query.rule = r'.*spotify:(.*)$'
 query.priority = 'low'
+
+
+if __name__ == '__main__':
+    print __doc__.strip()
