@@ -59,9 +59,7 @@ def retrievequote(jenni, input):
         jenni.reply("I'm not sure which quote you would like to see.")
     else:
         if lines:
-            if number == 1:
-                line = lines[0]
-            elif number == 0:
+            if number == 0:
                 return jenni.say('There is no "0th" quote!')
             else:
                 line = lines[number - 1]
