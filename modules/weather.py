@@ -18,20 +18,15 @@ import urllib
 import web
 from tools import deprecated
 from modules import unicode as uc
+from modules import proxy
 from icao import data
 
-r_from = re.compile(r'(?i)([+-]\d+):00 from')
-r_tag = re.compile(r'<(?!!)[^>]+>')
-re_line = re.compile('<small>1</small>(.*)')
-re_lat = re.compile('<span class="latitude">(\S+)</span>')
-re_long = re.compile('<span class="longitude">(\S+)</span>')
-re_lat_long_usa = re.compile('<small>(\S+)/(\S+)</small></a>')
-re_region = re.compile('(?i),\s(.*)<br><small>')
-re_county = re.compile('(?i)</a>,\s\S+<br><small>(.*?)\sCounty</small>')
-re_cnty = re.compile('<a href="/countries/\S+\.html">(.+)</a>')
-re_cnty_usa = re.compile('</td><td>\d{5}</td><td>(.*?)</td><td>')
-re_city = re.compile('<a href="/maps/\S+">(.+?)&nbsp;.+?</a>')
-re_city_usa = re.compile('</td><td>(.*?)</td><td>')
+install_geopy = "Please install geopy via 'pip' to use weather.py"
+
+try:
+    import geopy
+except ImportError:
+    print install_geopy
 
 
 def clean(txt, delim=''):
@@ -43,71 +38,23 @@ def clean(txt, delim=''):
 
 
 def location(name):
-    nothing = ('', '', '', '', '', '')
+    try:
+        from geopy.geocoders import Nominatim
+        geolocator = Nominatim()
+        #raise ImportError
+    except ImportError:
+        return 'ImportError', '', ''
 
-    name = urllib.quote(name.encode('utf-8'))
-    uri = 'http://services.gisgraphy.com/fulltext/fulltextsearch?format=json&q=%s' % (name)
-    in_usa = False
-    if re.match('\d{5}', name):
-        uri += '&country=us'
-        in_usa = True
+    location = geolocator.geocode(name)
 
     try:
-        page = web.get(uri)
-        useful = json.loads(page)
-    except:
-        return nothing
+        outgoing_name = location.address
+        lat = location.latitude
+        lng = location.longitude
+    except AttributeError:
+        return '', '', ''
 
-    #print "useful", useful
-
-    if 'response' not in useful:
-        return nothing
-
-    locations = useful['response']['docs']
-
-    proper_locations = list()
-
-    for each_location in locations:
-        #print "feature_class", each_location['feature_class'], each_location['feature_code'], each_location['placetype']
-        if 'feature_class' in each_location and each_location['feature_class'] == 'P':
-            proper_locations.append(each_location)
-
-    if len(proper_locations) >= 1:
-        this_location = proper_locations[0]
-    else:
-        return nothing
-
-    find_lat = str(this_location['lat'])
-    find_lng = str(this_location['lng'])
-    find_country = (this_location['country_name']).encode('utf-8')
-    find_county = str()
-    find_region = str()
-    find_name = (this_location['name_ascii']).encode('utf-8')
-
-    if find_country == 'United States':
-        temp = this_location['fully_qualified_name']
-        parts = temp.split(',')
-        find_county = (parts[1].strip()).encode('utf-8')
-        find_region = str()
-        if len(parts) >= 3:
-            find_region = (parts[2].strip()).encode('utf-8')
-
-    name =  find_name
-    countryName = find_country
-    lng = find_lng
-    lat = find_lat
-    region = find_region
-    county = find_county
-
-    #print 'name', name
-    #print 'county', county
-    #print 'region', region
-    #print 'countryName', countryName
-    #print 'lat', lat
-    #print 'lng', lng
-    #print ''
-
-    return name, county, region, countryName, lat, lng
+    return outgoing_name, str(lat), str(lng)
 
 
 class GrumbleError(object):
@@ -136,7 +83,7 @@ def code(jenni, search):
     if search.upper() in data:
         return search.upper()
     else:
-        name, county, region, country, latitude, longitude = location(search)
+        name, latitude, longitude = location(search)
         if name == '?': return False
         sumOfSquares = (99999999999999999999999999999, 'ICAO')
         for icao_code in data:
@@ -654,7 +601,9 @@ def forecast(jenni, input):
     if not txt:
         return jenni.say('Please provide a location.')
 
-    name, county, region, countryName, lat, lng = location(txt)
+    name, lat, lng = location(txt)
+    if name == 'ImportError' and not lat and not lng:
+        return install_geopy
 
     url = 'https://api.forecast.io/forecast/%s/%s,%s'
 
@@ -680,17 +629,13 @@ def forecast(jenni, input):
 
     days = data['daily']['data']
 
-    new_name = uc.decode(name)
-    new_region = uc.decode(region)
-    new_countryName = uc.decode(countryName)
-    new_county = uc.decode(county)
+    try:
+        new_name = uc.decode(name)
+    except UnicodeEncodeError:
+        new_name = uc.encode(name)
+        new_name = uc.decode(new_name)
 
-    #output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
-    #output = u'[' + new_name + ', '
-    #if region:
-    #    output += region + ', '
-    #output += new_countryName + '] '
-    output = preface_location(new_name, region, new_countryName)
+    output = preface_location(new_name)
 
     if 'alerts' in data:
         ## TODO: modularize the colourful parsing of alerts from nws.py so this can be colourized
@@ -700,9 +645,7 @@ def forecast(jenni, input):
     k = 1
     units = data['flags']['units']
 
-    #second_output = str()
-    #second_output = u'[%s, %s, %s] ' % (new_name, region, new_countryName)
-    second_output = preface_location(new_name, region, new_countryName)
+    second_output = preface_location(new_name) #, region, new_countryName)
 
     for day in days:
         ## give me floats with only one significant digit
@@ -786,7 +729,10 @@ def forecastio_current_weather(jenni, input):
     if not txt:
         return jenni.say('Please provide a location.')
 
-    name, county, region, countryName, lat, lng = location(txt)
+    #name, county, region, countryName, lat, lng = location(txt)
+    name, lat, lng = location(txt)
+    if name == 'ImportError' and not lat and not lng:
+        return install_geopy
 
     url = 'https://api.forecast.io/forecast/%s/%s,%s'
 
@@ -810,7 +756,7 @@ def forecastio_current_weather(jenni, input):
 
     if 'currently' not in data:
         ## doesn't happen until the GPS coords are completely bonkers
-        return jenni.say('No information obtained from forecast.io for the given location: %s, %s, %s, %s, %s, %s,' % (name, county, region, countryName, lat, lng,) )
+        return jenni.say('No information obtained from forecast.io for the given location: %s,' % (name, lat, lng,) )
 
     ## let the fun begin!!
 
@@ -876,14 +822,7 @@ def forecastio_current_weather(jenni, input):
         output += ', \x1FCondition\x1F: ' + (cond).encode('utf-8')
     output += ', \x1FWind\x1F: ' + wind
     output += ' - '
-    if name != '?' and countryName != '?':
-        output += name + ', '
-        if region:
-            output += region + ', '
-        output += countryName
-        #output += '%s, %s, %s' % (name, region, countryName)
-    else:
-        output += 'Lat: %s, Long: %s' % (lat, lng)
+    output += uc.encode(name)
     output + '; %s UTC' % (time)
 
     ## required according to ToS by forecast.io
@@ -939,6 +878,8 @@ def weather_wunderground(jenni, input):
     txt = input.group(2)
     if not txt:
         return jenni.say('No input provided. Please provide a locaiton.')
+
+    txt = txt.encode('utf-8')
 
     url_new = url % (apikey, urllib.quote(txt))
 
@@ -997,7 +938,7 @@ def weather_wunderground(jenni, input):
     output += ', \x1FFeels Like\x1F: ' + add_degree(feelslike)
     output += ', \x1FPressure\x1F: ' + '[%s] %sin (%smb)' % (pressure_trend, pressure_in, pressure_mb)
     output += ', \x1FWind\x1F: ' + 'From the %s at %s mph (%s kmh)' % (wind_dir, wind_mph, wind_kph)
-    output += ', \x1FLocation\x1F: ' + location
+    output += ', \x1FLocation\x1F: ' + (location).encode('utf-8').decode('utf-8')
     output += ', ' + time_updated
 
     output += ', (Powered by wunderground.com)'
@@ -1008,12 +949,14 @@ weather_wunderground.commands = ['wx-wg', 'weather-wg']
 weather_wunderground.rate = 10
 
 
-def preface_location(ci, reg, cty):
+def preface_location(ci, reg='', cty=''):
     out = str()
     out += '[' + ci
     if reg:
         out += ', ' + reg
-    out += ', %s] ' % (cty)
+    if cty:
+        out += ', %s' % (cty)
+    out += '] '
     return out
 
 
