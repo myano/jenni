@@ -73,12 +73,15 @@ def f_remind(jenni, input):
         return jenni.say('Please tell me who and what to tell people.')
 
     # @@ Multiple comma-separated tellees? Cf. Terje, #swhack, 2006-04-15
-    if input.group() and (input.group()).lower().startswith('.tell'):
+    line_prefix = (input.group()).lower()
+    if input.group() and (line_prefix.startswith('.tell') or line_prefix.startswith('.yell')):
         verb = 'tell'.encode('utf-8')
         line = input.groups()
         line_txt = line[1].split()
         tellee = line_txt[0]
         msg = ' '.join(line_txt[1:])
+        if line_prefix.startswith('.yell'):
+            msg = (msg).upper()
     else:
         verb, tellee, msg = input.groups()
 
@@ -132,8 +135,8 @@ def f_remind(jenni, input):
     jenni.reply(response)
 
     dumpReminders(jenni.tell_filename, jenni.reminders, jenni.tell_lock) # @@ tell
-f_remind.rule = ('$nick', ['[tT]ell', '[aA]sk'], r'(\S+) (.*)')
-f_remind.commands = ['tell', 'to']
+f_remind.rule = ('$nick', ['[tTyY]ell', '[aA]sk'], r'(\S+) (.*)')
+f_remind.commands = ['tell', 'to', 'yell']
 
 
 def getReminders(jenni, channel, key, tellee):
