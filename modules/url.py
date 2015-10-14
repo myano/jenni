@@ -23,6 +23,8 @@ import time
 import urllib2
 import web
 
+from modules import arxiv
+
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
 # and then your username. For example, the only line in that
@@ -73,6 +75,20 @@ r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 INVALID_WEBSITE = 0x01
 HTML_ENTITIES = { 'apos': "'" }
 
+arxiv_catch = re.compile(
+    r"""http[s]?://                       # durr
+        [^/]*                             # for fr./www./&c.
+        (xxx\.lanl\.gov|arxiv\.org)/      # xxx.lanl.gov still works
+        [a-z]+/                           # for the category
+        (\d{4}\.\d{4,5}|[a-z\-\.]+/\d{7}) # arXiv id in group(2)""", re.X)
+
+def setup(jenni):
+    # enable show_title_auto by default, but disable
+    # if show_title_auto=False in config
+    if (not hasattr(jenni.config, 'show_title_auto') or 
+            jenni.config.show_title_auto is True):
+        show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
+        show_title_auto.priority = 'high'
 
 def noteuri(jenni, input):
     uri = input.group(1).encode('utf-8')
@@ -469,9 +485,6 @@ def show_title_auto(jenni, input):
 
     if output_shorts:
         jenni.say((output_shorts).strip())
-show_title_auto.rule = '(?iu).*(%s?(http|https)(://\S+)).*' % (EXCLUSION_CHAR)
-show_title_auto.priority = 'high'
-
 
 def show_title_demand(jenni, input):
     '''.title http://google.com/ -- forcibly show titles for a given URL'''
@@ -488,6 +501,11 @@ def show_title_demand(jenni, input):
             uri = jenni.last_seen_uri[channel]
         else:
             return jenni.say('No recent links seen in this channel.')
+
+    arxiv_match = arxiv_catch.match(uri.lower())
+    if arxiv_match is not None:
+        arxiv.print_summary(jenni, arxiv_id=arxiv_match.group(2))
+        return
 
     status, results = get_results(uri, True)
 

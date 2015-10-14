@@ -12,7 +12,6 @@ More info:
 
 import web, re, feedparser
 from web import urllib
-from modules.url import short
 
 # Base api query url
 base_url = 'http://export.arxiv.org/api/query?';
@@ -28,6 +27,8 @@ no_http = re.compile(r'.*\/\/(.*)')
 no_newlines = re.compile(r'\n')
 
 def get_arxiv(query):
+
+    from modules.url import short
 
     url = base_url + request.format(urllib.quote(query))
     xml = web.get(url)
@@ -65,19 +66,22 @@ def get_arxiv(query):
 
     return (arxivid, authors, title, abstract, short_url)
 
-def summary(jenni, input):
+def print_summary(jenni, input=None, arxiv_id=None):
 
-    query = input.group(2)
+    if arxiv_id is not None:
+        query = 'id:' + arxiv_id
+    else:
+        query = input.group(2)
 
     if not query:
         return jenni.say('Pleaes provide an input to lookup via arVix.')
 
     try:
-        (arxivid, authors, title, abstract, url) = get_arxiv(query)
+        (arxiv_id, authors, title, abstract, url) = get_arxiv(query)
     except:
         return jenni.say("[arXiv] Could not lookup " + query + " in the arXiv.")
 
-    arxiv_summary = "[arXiv:" + arxivid + "] " + authors + ', "' \
+    arxiv_summary = "[arXiv:" + arxiv_id + "] " + authors + ', "' \
                     + title + '" :: ' + abstract
 
     long_summary = arxiv_summary + " " + url
@@ -89,8 +93,8 @@ def summary(jenni, input):
 
     jenni.say(clipped)
 
-summary.commands = ['arxiv']
-summary.priority = 'high'
+print_summary.commands = ['arxiv']
+print_summary.priority = 'high'
 
 if __name__ == '__main__':
     print __doc__.strip()

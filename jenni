@@ -61,6 +61,13 @@ def create_default_config(fn):
     # password = 'example'
     # serverpass = 'serverpass'
 
+    # jenni will automatically display the titles of url's posted in the 
+    # channels she is in, unless you set:
+    # show_title_auto = False
+    # also, if you do not set it to False, jenni will automatically bitly 
+    # the url and post the shortened version, unless the channel is added 
+    # to ~/.jenni/simple_channels.txt
+
     # forecastio_apikey is for an API key from https://forecast.io/
     # This is useful if you want extended weather information.
     # Required if you want .weather to work.

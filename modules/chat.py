@@ -10,7 +10,7 @@ More info:
 """
 
 
-import cleverbot
+from modules import cleverbot
 from htmlentitydefs import name2codepoint
 import json
 from modules import unicode as uc
