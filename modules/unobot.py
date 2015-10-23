@@ -188,7 +188,8 @@ class UnoBot:
             for p in self.players:
                 self.players[p].append(self.getCard ())
         self.topCard = self.getCard()
-        while self.topCard in ['R', 'S', 'D2', 'W', 'WD4']: self.topCard = self.getCard()
+        while self.topCard.lstrip(self.colors) not in 'R S D2 W WD4':
+           self.topCard = self.getCard()
         self.currentPlayer = 1
         self.cardPlayed(jenni, self.topCard)
         self.showOnTurn(jenni)
