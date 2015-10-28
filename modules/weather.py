@@ -29,6 +29,9 @@ except ImportError:
     print install_geopy
 
 
+r_from = re.compile(r'(?i)([+-]\d+):00 from')
+r_tag = re.compile(r'<(?!!)[^>]+>')
+
 def clean(txt, delim=''):
     '''Remove HTML entities from a given text'''
     if delim:
@@ -44,6 +47,10 @@ def location(name):
         #raise ImportError
     except ImportError:
         return 'ImportError', '', ''
+
+    geolocator.country_bias = str()
+    if re.match('\d{5}', name):
+        geolocator.country_bias = 'US'
 
     location = geolocator.geocode(name)
 
