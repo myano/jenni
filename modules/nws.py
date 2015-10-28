@@ -273,6 +273,7 @@ def nws_lookup(jenni, input):
 nws_lookup.commands = ['nws', 'nws-more']
 nws_lookup.priority = 'high'
 nws_lookup.thread = True
+nws_lookup.rate = 10
 
 
 def warns_control(jenni, input):
