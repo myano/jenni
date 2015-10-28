@@ -15,7 +15,7 @@ import socket, asyncore, asynchat, ssl, select
 import os, codecs
 import errno
 
-IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '332', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
+IRC_CODES = ('251', '252', '254', '255', '265', '266', '250', '328', '332', '333', '353', '366', '372', '375', '376', 'QUIT', 'NICK')
 cwd = os.getcwd()
 
 class Origin(object):

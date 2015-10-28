@@ -24,7 +24,7 @@ nowords = ['reload', 'help', 'tell', 'ask', 'ping']
 
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 HTML_ENTITIES = { 'apos': "'" }
-noun = 'ZHVjaw=='
+noun = ['ZHVjaw==', 'Y2F0', 'ZG9n', 'aHVtYW4=',]
 
 random.seed()
 
@@ -57,11 +57,14 @@ def chat(jenni, input):
 
     msgi = text.strip()
     msgo = str()
-    if channel.startswith('#') and txt[0]:
+
+    if channel.startswith('+#') or channel.startswith('@#'):
+        return
+    elif channel.startswith('#') and txt[0]:
         ## in a channel and prepended with jenni's name
         pm = False
         try:
-            time.sleep(random.randint(5, 30))
+            time.sleep(random.randint(3, 15))
             msgo = mycb.ask(msgi)
         except:
             return
@@ -84,13 +87,13 @@ def chat(jenni, input):
         return
 
     if msgo:
-        rand_num = random.randint(0, 5)
+        rand_num = random.randint(0, 15)
         time.sleep(1 + rand_num)
 
         response = re.sub('(?i)cleverbot', 'jenni', msgo)
-        response = re.sub('(?i)\b\S+bot\b', noun.decode('base64'), response)
-        response = re.sub('(?i)\bbot\b', noun.decode('base64'), response)
-        response = re.sub('(?i)\bcomputer\b', noun.decode('base64'), response)
+        response = re.sub('(?i)\S+bot', (random.choice(noun)).decode('base64'), response)
+        response = re.sub('(?i)bot', (random.choice(noun)).decode('base64'), response)
+        response = re.sub('(?i)computer', (random.choice(noun)).decode('base64'), response)
         response = r_entity.sub(e, response)
 
         if random.random() <= 0.5:
@@ -103,15 +106,31 @@ def chat(jenni, input):
             random_int_rm = random.randint(1, len(txt))
             return txt[:random_int_rm-1] + txt[random_int_rm:]
 
+        def switcharoo(txt):
+            temp = random.randint(1, len(txt) - 2)
+            return txt[:temp] + txt[temp + 1] + txt[temp] + txt[temp + 2:]
+
+
         if random.random() <= 0.25:
             l_response = len(response) // 20
             for x in range(1, l_response):
                 response = chomp(response)
 
+        if random.random() <= 0.15:
+            l_response = len(response) // 30
+            for x in range(1, l_response):
+                response = switcharoo(response)
+
+        if random.random() <= 0.05:
+            response = response.upper()
+
+
         if pm:
+            if random.random() <= 0.07:
+                return
             jenni.say(response)
-            beginning = ':%s PRIVMSG %s :' % (jenni.config.nick, input.sender)
             if hasattr(jenni.config, 'logchan_pm'):
+                beginning = ':%s PRIVMSG %s :' % (jenni.config.nick, input.sender)
                 jenni.msg(jenni.config.logchan_pm, beginning + response)
         else:
             delim = random.choice((',', ':'))
@@ -119,10 +138,14 @@ def chat(jenni, input):
 
             if random.random() <= 0.25:
                 msg = input.nick + delim + ' ' + msg
-            if random.random() <= 0.15:
-                chat(jenni, input)
+            if random.random() <= 0.05:
+                return
 
             jenni.say(msg)
+
+    if random.random() <= 0.05:
+        chat(jenni, input)
+
 chat.rule = r'(?i)($nickname[:,]?\s)?(.*)'
 
 
@@ -131,8 +154,7 @@ def random_chat(jenni, input):
     if bad_chans and (input.sender).lower() in bad_chans:
         return
 
-    temp = random.random()
-    if temp <= 0.0004:
+    if random.random() <= (1 / 2500.0):
         old_input = input
         chat(jenni, old_input)
 random_chat.rule = r'.*'
