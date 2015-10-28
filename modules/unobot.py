@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 """
 Copyright 2010 Tamas Marki. All rights reserved.
 
@@ -33,8 +34,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import random
 from datetime import datetime, timedelta
 import time
-
-random.seed()
 
 away_last = 0
 
@@ -291,7 +290,6 @@ class UnoBot:
 
         if len(self.playerOrder) > 4:
             ret *= 2
-            random.shuffle(ret)
 
         random.shuffle(ret)
 
