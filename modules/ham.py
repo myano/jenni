@@ -154,6 +154,8 @@ cs.example = '.cs W8LT'
 def cw(jenni, input):
     re_cw = re.compile("[/\.\- ]+")
     re_noncw = re.compile("[^/\.\- ]+")
+    if not input.group(2):
+        return jenni.say('Please provide some input.')
     text = input.group(2).lower().rstrip().lstrip()
     temp = text.split(" ")
     output = str()
