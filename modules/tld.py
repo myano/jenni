@@ -53,9 +53,9 @@ def gettld(jenni, input):
             text = '.' + text
         if len(tld_tds[0]('a')) > 0 and tld_tds[0]('a')[0].text == text:
             if tld_tds[1]('a') and tld_tds[1]('img'):
-                out['entity'] = str(tld_tds[1]('a')[0].text)
+                out['entity'] = tld_tds[1]('a')[0].text
             else:
-                out['entity'] = str(tld_tds[1].text)
+                out['entity'] = tld_tds[1].text
             none_avail = 'N/A'
             out['expl'] = none_avail
             if tld_tds[2].text:
