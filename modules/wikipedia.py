@@ -184,7 +184,7 @@ def wik(jenni, input):
 
 wik.commands = ['w', 'wik', 'wiki']
 wik.priority = 'high'
-wik.rate = 30
+wik.rate = 5
 
 if __name__ == '__main__':
     print __doc__.strip()
