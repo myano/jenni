@@ -30,7 +30,7 @@ responses = {'what' : 'chicken butt',
 def chicken_reply(jenni, input):
     question = re.sub('[?!]', '', input.groups()[0])
     message = responses[question.lower()]
-    message = message.upper() if question.isupper() else message 
+    message = message.upper() if question.isupper() else message
     jenni.reply(message)
 
 chicken_reply.rule = r'(?i)(^({qs})[\?\!]*$)'.format(qs="|".join(responses.keys()))
