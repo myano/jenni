@@ -150,6 +150,9 @@ def findandreplace(jenni, input):
 
     if not new_phrase or new_phrase == line: return # Didn't find anything
 
+    if len(new_phrase) > 512:
+        new_phrase = new_phrase[:512]
+
     # Save the new "edited" message.
     templist = search_dict[channel][rnick]
     templist.append((me and '\x01ACTION ' or '') + new_phrase)
