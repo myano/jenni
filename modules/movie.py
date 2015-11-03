@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 '''
 movie.py - jenni Movie Information Module
-Copyright 2014, Michael Yanovich, yanovich.net
+Copyright 2014-2015, Michael Yanovich, yanovich.net
 Copyright 2012, Elad Alfassa, <elad@fedoraproject.org>
 Licensed under the Eiffel Forum License 2.
 
@@ -12,9 +12,10 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
+from modules import proxy
 import json
-import urllib2
 import re
+import urllib2
 
 API_BASE_URL = 'http://www.omdbapi.com/'
 
@@ -47,15 +48,16 @@ def movie(jenni, input):
         uri = API_BASE_URL + '?t=%s&plot=short&r=json' % (title)
 
     try:
-        page = urllib2.urlopen(uri).read()
+        page = proxy.get(uri)
     except:
-        return jenni.say('[MOVIE] Connection to API did not succeed.')
+        return jenni.say('[IMDB] Connection to API did not succeed.')
 
     try:
         data = json.loads(page)
     except:
-        return jenni.say("[MOVIE] Couldn't make sense of information from API")
-    message = '[MOVIE] '
+        return jenni.say("[IMDB] Couldn't make sense of information from API")
+
+    message = '[IMDB] '
 
     if data['Response'] == 'False':
         if 'Error' in data:
@@ -63,13 +65,31 @@ def movie(jenni, input):
         else:
             message += 'Got an error from imdbapi'
     else:
-        temp = 'Title: %s | Released: %s | Plot: %s '
-        temp += '| IMDB Link: http://imdb.com/title/%s/'
-        message += temp % (data['Title'], data['Released'], data['Plot'],
-                           data['imdbID'])
+        pre_plot_output = 'Title: {0} | Released: {1} | Rated: {2} '
+        pre_plot_output += '| Rating: {3} | Metascore: {4} | Genre: {5} '
+        pre_plot_output += '| Runtime: {6} | Plot: '
+        pre_plot = pre_plot_output.format(data['Title'], data['Released'],
+                                          data['Rated'], data['imdbRating'],
+                                          data['Metascore'], data['Genre'],
+                                          data['Runtime'])
+
+        after_plot_output = ' | IMDB Link: http://imdb.com/title/{0}'
+        after_plot = after_plot_output.format(data['imdbID'])
+        truncation = '[...]'
+
+        ## 510 - (16 + 8 + 63)
+        ## max_chars (minus \r\n) - (max_nick_length + max_ident_length
+        ##     + max_vhost_lenth_on_freenode)
+        max_len_of_plot = 423 - (len(pre_plot) + len(after_plot) + len(truncation))
+
+        new_plot = data['Plot']
+        if len(data['Plot']) > max_len_of_plot:
+            new_plot = data['Plot'][:max_len_of_plot] + truncation
+
+        message = pre_plot + new_plot + after_plot
 
     jenni.say(message)
-movie.commands = ['movie', 'imdb', 'show', 'tv']
+movie.commands = ['imdb', 'movie', 'movies', 'show', 'tv', 'television']
 movie.example = '.movie Movie Title, 2015'
 
 if __name__ == '__main__':
