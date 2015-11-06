@@ -55,7 +55,7 @@ class Jenni(irc.Bot):
         # Default module folder + extra folders
         module_folders = [os.path.join(home, 'modules')]
         module_folders.extend(getattr(self.config, 'extra', []))
-        
+
         excluded = getattr(self.config, 'exclude', [])
         enabled = getattr(self.config, 'enable', [])
 
