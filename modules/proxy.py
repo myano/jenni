@@ -13,7 +13,7 @@ import re
 import urllib
 import time
 
-user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
+user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'
 
 
 class Grab(urllib.URLopener):
@@ -29,9 +29,19 @@ urllib._urlopener = Grab()
 def remote_call(uri, info=False):
     pyurl = u'https://tumbolia-two.appspot.com/py/'
     code = 'import json;'
-    code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
-    code += "req.add_header('User-Agent','%s');" % (user_agent)
+    #code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
+    #code += "req.add_header('User-Agent','%s');" % (user_agent)
+    #code += "u=urllib2.urlopen(req);"
+
+    code += 'opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(),'
+    code += 'urllib2.BaseHandler(), urllib2.HTTPHandler(),'
+    code += 'urllib2.HTTPRedirectHandler(), urllib2.HTTPErrorProcessor(),'
+    code += 'urllib2.UnknownHandler());'
+    code += 'urllib2.install_opener(opener);'
+    code += "req=urllib2.Request(%s, headers={'Accept':'*/*'});"
+    code += "req.add_header('User-Agent', '%s');" % (user_agent)
     code += "u=urllib2.urlopen(req);"
+
     code += "rtn=dict();"
     if info:
         code += "rtn['info']=u.info();"

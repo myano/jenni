@@ -23,6 +23,7 @@ import time
 import urllib2
 import web
 
+
 # Place a file in your ~/jenni/ folder named, bitly.txt
 # and inside this file place your API key followed by a ','
 # and then your username. For example, the only line in that
