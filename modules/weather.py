@@ -42,9 +42,8 @@ def clean(txt, delim=''):
 
 def location(name):
     try:
-        from geopy.geocoders import Nominatim
-        geolocator = Nominatim()
-        #raise ImportError
+        import geopy.geocoders as geo
+        geolocator = geo.GoogleV3()
     except ImportError:
         return 'ImportError', '', ''
 
