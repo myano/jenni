@@ -26,11 +26,11 @@ reload_confs.commands = ['reload_configs', 'reload_config', 'reload_conf']
 reload_confs.priority = 'low'
 
 def join(jenni, input):
-    '''Join the specified channel. This is an admin-only command.'''
-    # Can only be done in privmsg by an admin
+    '''Join the specified channel. This is an owner-only command.'''
+    # Can only be done in privmsg by an owner
     if input.sender.startswith('#'): return
     if not input.owner:
-        return jenni.say('You do not have admin privs.')
+        return jenni.say('You do not have owner privs.')
     incoming = input.group(2)
     if not incoming:
         return jenni.say('Please provide some channels to join.')
