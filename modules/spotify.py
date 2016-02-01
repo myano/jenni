@@ -1,7 +1,8 @@
 #!/usr/bin/python
+
 """
 spotify.py - An api interface for spotify lookups
-Copyright 2015 Micheal Harker <micheal@michealharker.com>
+Copyright 2015 - 2016 Micheal Harker <micheal@michealharker.com>
 Copyright 2012 Patrick Andrew <missionsix@gmail.com>
 
 Licensed under the Eiffel Forum License, version 2
@@ -75,27 +76,26 @@ SpotifyStatusCodes = {
     503: ServiceUnavailable
 }
 
-TRACK_MSG = '"{0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}", which was released in {0}{5}{0}.'
-ALBUM_MSG = '"{0}{1}{0}" by {0}{2}{0}, released in {0}{3}{0} and is available in {0}{4}{0} countries.'
+TRACK_MSG = '"{0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}".'
+EXPLICIT_TRACK_MSG = '[{0}E{0}]" {0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}".'
+ALBUM_MSG = '"{0}{1}{0}" by {2}, released in {0}{3}{0}.'
 ARTIST_MSG = 'Artist: {0}{1}{0}'
 
 
 class Spotify:
 
-    base_url = "ws.spotify.com"
-    service_url = '/lookup/1/.json'
+    base_url = "api.spotify.com"
+    service_url = '/v1'
 
     def __init__(self):
-        self.conn = httplib.HTTPConnection(self.base_url)
+        self.conn = httplib.HTTPSConnection(self.base_url)
 
     def __del__(self):
         self.conn.close()
 
-    def lookup(self, uri, extras=None):
+    def lookup(self, typ, objid):
 
-        lookup_url = "%s?uri=%s" % (self.service_url, uri)
-        if extras is not None:
-            lookup_url += "&extras=%s" % extras
+        lookup_url = "%s/%ss/%s" % (self.service_url, typ, objid)
 
         self.conn.request("GET", lookup_url)
         resp = self.conn.getresponse()
@@ -113,14 +113,14 @@ def notify(jenni, recipient, text):
 
 
 def print_album(jenni, album):
-    territories = len(album['availability']['territories'].split(' '))
+    artist_names = [artist['name'] for artist in album['artists']]
+    artists = artist_list(artist_names)
 
     message = ALBUM_MSG.format(
         "\x02",
         album['name'],
-        album['artist'],
-        album['released'],
-        len(album['availability']['territories'].split(' '))
+        artists,
+        album['release_date'][:4]
     )
 
     jenni.say(message)
@@ -136,20 +136,24 @@ def print_artist(jenni, artist):
 
 
 def print_track(jenni, track):
-    length = str(timedelta(seconds=track['length']))[2:7]
+    length = str(timedelta(seconds=(track['duration_ms']/1000)))[2:7]
     if length[0] == '0':
         length = length[1:]
 
     artist_names = [artist['name'] for artist in track['artists']]
     artists = artist_list(artist_names)
 
-    message = TRACK_MSG.format(
+    if track['explicit']:
+        message_format = EXPLICIT_TRACK_MSG
+    else:
+        message_format = TRACK_MSG
+
+    message = message_format.format(
         "\x02",
         track['name'],
         length,
         artists,
-        track['album']['name'],
-        track['album']['released']
+        track['album']['name']
     )
 
     jenni.say(message)
@@ -159,8 +163,11 @@ def query(jenni, input):
     spotify = Spotify()
     result = None
     lookup = input.group(1).lstrip().rstrip()
+    data = lookup.split(':')
+    typ = data[0] # type of object we wanna lookup
+    objid = data[1] # ID of the object like a track, artist etc.
     try:
-        result = spotify.lookup('spotify:%s' % lookup)
+        result = spotify.lookup(typ, objid)
     except:
         e = sys.exc_info()[0]
         notify(jenni, input.nick, e)
@@ -172,11 +179,11 @@ def query(jenni, input):
         'artist': print_artist
     }
 
-    try:
-        type = result['info']['type']
-        formatters[type](jenni, result[type])
-    except KeyError:
-        notify(jenni, input.nick, "Unknown response from API server")
+    #try:
+        #type = result['type']
+    formatters[typ](jenni, result)
+    #except KeyError:
+    #    notify(jenni, input.nick, "Unknown response from API server")
 
 
 def artist_list(data):
