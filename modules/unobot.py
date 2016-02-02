@@ -811,8 +811,10 @@ def uno_get_names(jenni, input):
         if x not in away_list:
             new_list.append(x)
     new_list.remove(jenni.config.nick)
-    new_list.remove('ChanServ')
-    new_list.remove('AntiSpamMeta')
+    if 'ChanServ' in new_list:
+        new_list.remove('ChanServ')
+    if 'AntiSpamMeta' in new_list:
+        new_list.remove('AntiSpamMeta')
     new_list.sort()
     final_string = ', '.join(new_list)
     if user_triggered:
