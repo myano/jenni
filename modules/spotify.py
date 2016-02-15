@@ -104,8 +104,8 @@ class Spotify:
             return result
         try:
             raise SpotifyStatusCodes[resp.status]
-        except ValueError:
-            raise Exception("Unknown response from the Spotify API")
+        except KeyError, ValueError:
+            raise Exception("HTTP Error {0}: {1}".format(resp.status, httplib.responses[resp.status]))
 
 
 def notify(jenni, recipient, text):
@@ -162,16 +162,8 @@ def print_track(jenni, track):
 def query(jenni, input):
     spotify = Spotify()
     result = None
-    lookup = input.group(1).lstrip().rstrip()
-    data = lookup.split(':')
-    typ = data[0] # type of object we wanna lookup
-    objid = data[1] # ID of the object like a track, artist etc.
-    try:
-        result = spotify.lookup(typ, objid)
-    except:
-        e = sys.exc_info()[0]
-        notify(jenni, input.nick, e)
-        return
+    typ = input.group(1).lower()  # type of object we wanna lookup
+    objid = input.group(2)  # ID of the object like a track, artist, etc.
 
     formatters = {
         'track': print_track,
@@ -179,11 +171,20 @@ def query(jenni, input):
         'artist': print_artist
     }
 
-    #try:
-        #type = result['type']
-    formatters[typ](jenni, result)
-    #except KeyError:
-    #    notify(jenni, input.nick, "Unknown response from API server")
+    if typ not in formatters:
+        notify(jenni, input.nick, "Unknown object type: {0}".format(typ))
+        return
+
+    try:
+        result = spotify.lookup(typ, objid)
+    except Exception as e:
+        notify(jenni, input.nick, str(e))
+        return
+
+    try:
+        formatters[typ](jenni, result)
+    except Exception as e:
+        notify(jenni, input.nick, str(e))
 
 
 def artist_list(data):
@@ -198,7 +199,7 @@ def artist_list(data):
     else:
         return "{0}{1}{0}".format("\x02", data[0])
 
-query.rule = r'.*spotify:(.*)$'
+query.rule = r'(?i).*\bspotify:(\S+):(\S+)\b'
 query.priority = 'low'
 
 
