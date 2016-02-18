@@ -95,6 +95,13 @@ def create_default_config(fn):
         'token_secret': ''
         }
 
+    # Specify a path to enable brain.py to save data that modules might be
+    # using. If no path is specified data will only be stored in memory and not
+    # saved through reloading or restarting Jenni.
+    brain = {
+        'path': None,
+    }
+
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:
