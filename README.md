@@ -5,6 +5,7 @@ jenni is a python IRC bot maintained and developed by Michael Yanovich. This pro
 
 Installation & Configuration
 ============================
+jenni requires python 2.7, jenni will not work with python 3.x.
 
 1. Run ./jenni - this creates a default config file
 2. Edit ~/.jenni/default.py
