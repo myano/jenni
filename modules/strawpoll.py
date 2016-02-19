@@ -81,7 +81,7 @@ def strawpoll(jenni, input):
 
     jenni.say(link)
 
-strawpoll.commands = ['sp', 'straw', 'strawpoll']
+strawpoll.commands = ['straw', 'strawpoll']
 strawpoll.priority = 'medium'
 strawpoll.example = '.strawpoll -t "Title Here" "Option 1" "Option 2" "Option 3"'
 
