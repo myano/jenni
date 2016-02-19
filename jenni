@@ -85,6 +85,13 @@ def create_default_config(fn):
     # This is needed in order to make .calc/.c have more comprehensive answers.
     # wolframalpha_apikey = ''
 
+
+    # twitter_consumer_key and twitter_consumer_secret are for Twitter's API
+    # https://apps.twitter.com/
+    # This is needed if you'd like to make .twitter usable
+    # twitter_consumer_key = ''
+    # twitter_consumer_secret = ''
+
     # Fill in Yelp API information here
     # This is for using the .food command
     yelp_api_credentials = {

@@ -11,9 +11,12 @@ More info:
 """
 
 from htmlentitydefs import name2codepoint
+import json
+import oauth2 as oauth
 import re
 import time
 import urllib
+import urllib2
 import web
 
 from modules import unicode as uc
@@ -28,11 +31,35 @@ r_whiteline = re.compile(r'(?ims)[ \t]+[\r\n]+')
 r_breaks = re.compile(r'(?ims)[\r\n]+')
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 
+request_token_url = 'https://twitter.com/oauth/request_token'
+access_token_url = 'https://twitter.com/oauth/access_token'
+authorize_url = 'https://twitter.com/oauth/authorize'
+
+
+def initialize_keys(jenni, consumer_key='', consumer_secret=''):
+    global client
+    if not hasattr(jenni.config, 'twitter_consumer_key') or\
+           not hasattr(jenni.config, 'twitter_consumer_secret'):
+               return False, "Please sign up for Twitter's API and provide the keys in the configuration."
+    consumer_key = jenni.config.twitter_consumer_key
+    consumer_secret = jenni.config.twitter_consumer_secret
+
+    try:
+        consumer = oauth.Consumer(consumer_key, consumer_secret)
+        client = oauth.Client(consumer)
+    except:
+        return False, "Could not initailize Twitter OAuth connection."
+
+    return True, ''
+
+
 def entity(*args, **kargs):
-    return web.entity(*args, **kargs).encode('utf-8')
+         return web.entity(*args, **kargs).encode('utf-8')
+
 
 def decode(html):
     return web.r_entity.sub(entity, html)
+
 
 def expand(tweet):
     def replacement(match):
@@ -58,60 +85,112 @@ def e(m):
     except:
         return uc.decode(uc.encode(meep))
 
+def fixURLs(jcont):
+    out_text = jcont['text']
+    list_of_urls = jcont['entities']['urls']
+    for url in list_of_urls:
+        #print url['url']
+        if url['url'] in out_text:
+            out_text = out_text.replace(url['url'], url['expanded_url'])
+    if 'extended_entities' in jcont:
+        list_of_more_urls = jcont['extended_entities']['media']
+        for url in list_of_more_urls:
+            if url['url'] in out_text:
+                out_text = out_text.replace(url['url'], url['expanded_url'])
+    return out_text
 
-def read_tweet(url):
-    bytes = web.get(url)
-    shim = '<div class="content clearfix">'
-    if shim in bytes:
-        bytes = bytes.split(shim, 1).pop()
-
-    for text in r_p.findall(bytes):
-        text = expand(text)
-        text = r_tag.sub('', text)
-        text = text.strip()
-        text = r_entity.sub(e, uc.decode(text))
-        text = r_whiteline.sub(' ', text)
-        text = r_breaks.sub(' ', text)
-        return decode(text)
-    return "Sorry, couldn't get a tweet from %s" % url
-
-def format(tweet, username):
-    return '%s (@%s)' % (tweet, username)
-
-def user_tweet(username):
-    tweet = read_tweet('https://twitter.com/' + username + '/with_replies?' + str(time.time()))
-    return format(tweet, username)
-
-def id_tweet(tid):
-    link = 'https://twitter.com/-/status/' + tid
-    error = "Sorry, couldn't get a tweet from %s" % link
-
-    data = web.head_info(link)
-    code = data.get('code', 0)
-    code = int(code)
-
-    url = str()
-
-    if code == 301:
-        url = data.get('info', dict()).get('Location')
-    elif code == 200:
-        url = data.get('geturl')
+def remove_spaces(x):
+    if '  ' in x:
+        x = x.replace('  ', ' ')
+        return remove_spaces(x)
     else:
-        return error
+        return x
 
-    if not url:
-        return error
 
-    username = url.split('/')[3]
-    tweet = read_tweet(url)
-    return format(tweet, username)
+def fetchbyID(term):
+    global client
+    resp, content = client.request('https://api.twitter.com/1.1/statuses/show.json?id=' + urllib2.quote(term), 'GET')
+    if resp['status'] != '200':
+        return 'Could not reach Twitter API.'
+    return content
+
+
+def fetchbyUserName(term):
+    global client
+    resp, content = client.request("https://api.twitter.com/1.1/statuses/user_timeline.json?count=1&screen_name=" + term, "GET")
+    if resp['status'] != '200':
+        return 'Could not reach Twitter API.'
+    try:
+        json_content = json.loads(content)
+    except:
+        return 'Could not make sense of data from Twitter API.'
+
+    #return format_tweet(json_content[0])
+    return json.dumps(json_content[0])
+
+
+def format_tweet(content):
+    txt = fixURLs(content)
+    #txt = uc.encode(txt)
+    txt = expand(txt)
+    txt = txt.strip()
+    #txt = uc.decode(txt)
+    #txt = uc.encode(txt)
+    #txt = uc.decode(txt)
+    txt = r_entity.sub(e, txt)
+    txt = r_whiteline.sub(' ', txt)
+    txt = r_breaks.sub(' ', txt)
+    txt = decode(txt)
+    txt = remove_spaces(txt)
+    txt = txt.replace('http://twitter.c', 'https://twitter.c')
+
+    posted = content['created_at']
+    fav_count = content['favorite_count']
+    rt_count = content['retweet_count']
+    name = content['user']['screen_name']
+
+    return u'{1} | By: @{0}, Date: {2}, RT#: {3}, Favs: {4}'.format(name, txt, posted, rt_count, fav_count)
+
+
+def call_twitter(query):
+    ans = None
+
+    params = query.strip().split()
+
+    if len(params) == 1:
+        # Only one parameter. By default a username.
+        # Also allow a twitter URL or an id number
+        if query.startswith('http'):
+            ## example: https://twitter.com/username/status/46611258765606912
+            m = re.match(r'https?://(?:www\.)?twitter\.com/\w*/status/(\d+)', query)
+            if not m:
+                return 'Could not parse twitter url.'
+            return fetchbyID(m.group(1))
+
+        if query.isdigit():
+            return fetchbyID(query)
+        else:
+            return fetchbyUserName(query)
+
+    elif len(params) == 2:
+        # two params means user and status id, which is the same as
+        # just status id
+        return fetchbyID(params[1])
+
+    else:
+        return '??'
+
 
 def twitter(jenni, input):
+    status = initialize_keys(jenni)
+    if not status:
+        return jenni.say("Please sign up for Twitter's API and provide the keys in the configuration.")
+
     arg = input.group(2)
 
     if not arg:
-        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.last_seen_uri:
-            temp = jenni.last_seen_uri[input.sender]
+        if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.bot.last_seen_uri:
+            temp = jenni.bot.last_seen_uri[input.sender]
             if '//twitter.com' in temp:
                 arg = temp
             else:
@@ -119,27 +198,22 @@ def twitter(jenni, input):
         else:
             return jenni.reply('Give me a link, a username, or a tweet id.')
 
-    arg = arg.strip()
-    if isinstance(arg, unicode):
-        arg = arg.encode('utf-8')
+    page = call_twitter(arg)
 
-    output = str()
-    if arg.startswith('@'):
-        arg = arg[1:]
+    try:
+        json_page = json.loads(page)
+    except:
+        return jenni.say(str(page))
+    if 'user' in json_page and 'protected' in json_page['user'] and json_page['user']['protected']:
+        return jenni.say('This user has their tweets "protected."')
 
-    if arg.isdigit():
-        output = id_tweet(arg)
-    elif r_username.match(arg):
-        output = user_tweet(arg)
-    elif r_link.match(arg):
-        username = arg.split('/')[3]
-        tweet = read_tweet(arg)
-        output = format(tweet, username)
+    if 'retweeted_status' in json_page:
+        out = u'RT: '
+        out += format_tweet(json_page['retweeted_status'])
     else:
-        output = 'Give me a link, a username, or a tweet id.'
+        out = format_tweet(json_page)
+    return jenni.say(out)
 
-    output = output.replace('pic.twitter.com', 'https://pic.twitter.com')
-    jenni.say(output)
 twitter.commands = ['tw', 'twitter']
 twitter.thread = True
 
