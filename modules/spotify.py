@@ -25,11 +25,11 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
 """
 
-import httplib
 import json
 import sys
-
 from datetime import timedelta
+
+from modules import proxy
 
 
 class NotModifiedError(Exception):
@@ -81,31 +81,26 @@ EXPLICIT_TRACK_MSG = '[{0}E{0}]" {0}{1}{0}" [{0}{2}{0}] by {3} from "{0}{4}{0}".
 ALBUM_MSG = '"{0}{1}{0}" by {2}, released in {0}{3}{0}.'
 ARTIST_MSG = 'Artist: {0}{1}{0}'
 
+API_URL = "api.spotify.com"
+API_ENDPOINT = "/v1"
 
-class Spotify:
 
-    base_url = "api.spotify.com"
-    service_url = '/v1'
+def lookup(typ, objid):
+    url = "https://%s%s/%ss/%s" % (API_URL, API_ENDPOINT, typ, objid)
 
-    def __init__(self):
-        self.conn = httplib.HTTPSConnection(self.base_url)
+    success, response = proxy.get_more(url)
 
-    def __del__(self):
-        self.conn.close()
+    if not success:
+        raise Exception("Unable to connect to proxy: {0}".format(response))
 
-    def lookup(self, typ, objid):
+    if response['code'] == 200:
+        result = json.loads(response['read'])
+        return result
 
-        lookup_url = "%s/%ss/%s" % (self.service_url, typ, objid)
-
-        self.conn.request("GET", lookup_url)
-        resp = self.conn.getresponse()
-        if resp.status == 200:
-            result = json.loads(resp.read())
-            return result
-        try:
-            raise SpotifyStatusCodes[resp.status]
-        except KeyError, ValueError:
-            raise Exception("HTTP Error {0}: {1}".format(resp.status, httplib.responses[resp.status]))
+    try:
+        raise SpotifyStatusCodes[response['code']]
+    except KeyError, ValueError:
+        raise Exception("HTTP Error {0}".format(response['code']))
 
 
 def notify(jenni, recipient, text):
@@ -160,8 +155,6 @@ def print_track(jenni, track):
 
 
 def query(jenni, input):
-    spotify = Spotify()
-    result = None
     typ = input.group(1).lower()  # type of object we wanna lookup
     objid = input.group(2)  # ID of the object like a track, artist, etc.
 
@@ -176,7 +169,7 @@ def query(jenni, input):
         return
 
     try:
-        result = spotify.lookup(typ, objid)
+        result = lookup(typ, objid)
     except Exception as e:
         notify(jenni, input.nick, str(e))
         return
