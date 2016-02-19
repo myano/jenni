@@ -155,8 +155,8 @@ def print_track(jenni, track):
 
 
 def query(jenni, input):
-    typ = input.group(1).lower()  # type of object we wanna lookup
-    objid = input.group(2)  # ID of the object like a track, artist, etc.
+    typ = (input.group(1) or input.group(3)).lower()  # type of object we wanna lookup
+    objid = input.group(2) or input.group(4)  # ID of the object like a track, artist, etc.
 
     formatters = {
         'track': print_track,
@@ -179,6 +179,9 @@ def query(jenni, input):
     except Exception as e:
         notify(jenni, input.nick, str(e))
 
+query.rule = r'(?i).*\bspotify:(\S+):(\S+)|^\.sp(?:otify)? +https?://open\.spotify\.com/(\S+)/(\S+)$'
+query.priority = 'low'
+
 
 def artist_list(data):
     if (len(data) > 1):
@@ -191,9 +194,6 @@ def artist_list(data):
         return artists
     else:
         return "{0}{1}{0}".format("\x02", data[0])
-
-query.rule = r'(?i).*\bspotify:(\S+):(\S+)\b'
-query.priority = 'low'
 
 
 if __name__ == '__main__':
