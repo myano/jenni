@@ -18,14 +18,13 @@ import string
 import urllib
 import web
 
-from modules import search
 from modules import unicode as uc
-from socket import timeout
 
 
 c_pattern = r'(?ims)<(?:h2 class="r"|div id="aoba")[^>]*>(.*?)</(?:h2|div)>'
 c_answer = re.compile(c_pattern)
 r_tag = re.compile(r'<(?!!)[^>]+>')
+WAKEY_NOTFOUND = "Please sign up for WolframAlpha's API to use this function. http://products.wolframalpha.com/api/"
 
 try:
     from modules import proxy
@@ -60,7 +59,7 @@ def c(jenni, input):
     temp_q = q.replace(' ', '')
 
     ## Attempt #1 (Google)
-    uri_base = 'http://www.google.com/search?gbv=1&q='
+    uri_base = 'https://www.google.com/search?gbv=1&q='
     uri = uri_base + web.urllib.quote(temp_q)
 
     ## To the webs!
@@ -69,10 +68,11 @@ def c(jenni, input):
         page = proxy.get(uri)
     except:
         ## if we can't access Google for calculating
-        ## let us move on to Attempt #2
+        ## let us try with good ole' web.get
         page = web.get(uri)
 
     answer = False
+
     if page:
         ## if we get a response from Google
         ## let us parse out an equation from Google Search results
@@ -95,103 +95,59 @@ def c(jenni, input):
 
         if page:
             answer = c_answer.findall(page)
+
         if answer:
             answer = answer[0]
             answer = clean_up_answer(answer)
             jenni.say(answer)
         else:
+            #### Attempt #2 (DuckDuckGo's API)
+            ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
+            ddg_uri += urllib.quote(q)
 
-            #### Attempt #2
-            attempt_two = False
+            ## Try to grab page (results)
+            ## If page can't be accessed, we shall fail!
             try:
-                from BeautifulSoup import BeautifulSoup
-                attempt_two = True
+                page = proxy.get(ddg_uri)
             except:
-                attempt_two = False
+                page = web.get(ddg_uri)
 
-            output = str()
-            """
-            if attempt_two:
-                new_url = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % (web.urllib.quote(q))
-                try:
-                    ddg_html_page = proxy.get(new_url)
-                except:
-                    ddg_html_page = web.get(new_url)
-                soup = BeautifulSoup(ddg_html_page)
+            ## Try to take page source and json-ify it!
+            try:
+                json_response = json.loads(page)
+            except:
+                ## if it can't be json-ified, then we shall fail!
+                json_response = None
 
-                ## use BeautifulSoup to parse HTML for an answer
-                zero_click = str()
-                if soup('div', {'class': 'zero-click-result'}):
-                    zero_click = str(soup('div', {'class': 'zero-click-result'})[0])
+            ## Check for 'AnswerType' (stolen from search.py)
+            ## Also 'fail' to None so we can move on to Attempt #3
+            if (not json_response) or (hasattr(json_response, 'AnswerType') and json_response['AnswerType'] != 'calc'):
+                answer = None
+            else:
+                ## If the json contains an Answer that is the result of 'calc'
+                ## then continue
+                answer = json_response['Answer']
+                if hasattr(answer, 'result'):
+                    answer = answer['result']
+                parts = answer.split('</style>')
+                answer = ''.join(parts[1:])
+                answer = re.sub(r'<.*?>', '', answer).strip()
 
-                ## remove some excess text
-                output = r_tag.sub('', zero_click).strip()
-                output = output.replace('\n', '').replace('\t', '')
-
-                ## test to see if the search module has 'remove_spaces'
-                ## otherwise, let us fail
-                try:
-                    output = search.remove_spaces(output)
-                except:
-                    output = str()
-            """
-            output = False
-
-            if output:
-                ## If Attempt #2 worked, display the answer
-                jenni.say(output + ' [DDG HTML]')
+            if answer:
+                ## If we have found answer with Attempt #2
+                ## go ahead and display it
+                answer += ' [DDG API]'
+                return jenni.say(answer)
 
             else:
-                #### Attempt #3 (DuckDuckGo's API)
-                ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
-                ddg_uri += urllib.quote(q)
+                #### Attempt #3 (Wolfram Alpha)
+                if not hasattr(jenni.config, 'wolframalpha_apikey'):
+                    return jenni.say(WAKEY_NOTFOUND)
 
-                ## Try to grab page (results)
-                ## If page can't be accessed, we shall fail!
-                try:
-                    page = proxy.get(ddg_uri)
-                except:
-                    page = web.get(ddg_uri)
+                answer = get_wa(q, jenni.config.wolframalpha_apikey)
 
-                ## Try to take page source and json-ify it!
-                try:
-                    json_response = json.loads(page)
-                except:
-                    ## if it can't be json-ified, then we shall fail!
-                    json_response = None
+                return jenni.say(answer + ' [WA]')
 
-                ## Check for 'AnswerType' (stolen from search.py)
-                ## Also 'fail' to None so we can move on to Attempt #3
-                if (not json_response) or (hasattr(json_response, 'AnswerType') and json_response['AnswerType'] != 'calc'):
-                    answer = None
-                else:
-                    ## If the json contains an Answer that is the result of 'calc'
-                    ## then continue
-                    answer = json_response['Answer']
-                    if hasattr(answer, 'result'):
-                        answer = answer['result']
-                    parts = answer.split('</style>')
-                    answer = ''.join(parts[1:])
-                    answer = re.sub(r'<.*?>', '', answer).strip()
-
-                if answer:
-                    ## If we have found answer with Attempt #2
-                    ## go ahead and display it
-                    answer += ' [DDG API]'
-                    jenni.say(answer)
-
-                else:
-                    #### Attempt #4 (DuckDuckGo's HTML)
-                    ## This relies on BeautifulSoup; if it can't be found, don't even bother
-
-                    #### Attempt #3 (Wolfram Alpha)
-                    status, answer = get_wa(q)
-
-                    if status:
-                        jenni.say(answer + ' [WA]')
-                    else:
-                        ## If we made it this far, we have tried all available resources
-                        jenni.say('Absolutely no results!')
 c.commands = ['c', 'cal', 'calc']
 c.example = '.c 5 + 3'
 
@@ -215,52 +171,85 @@ py.commands = ['py', 'python']
 py.example = '.py print "Hello world, %s!" % ("James")'
 
 
-def get_wa(search):
-    txt = search
-    txt = txt.decode('utf-8')
-    txt = txt.encode('utf-8')
-    query = txt
-    uri = 'https://tumbolia-two.appspot.com/wa/'
-    uri += urllib.quote(query.replace('+', '%2B'))
-    answer = web.get(uri)
-    if answer:
-        answer = answer.decode("string_escape")
-        answer = HTMLParser.HTMLParser().unescape(answer)
-        match = re.search('\\\:([0-9A-Fa-f]{4})', answer)
-        if match is not None:
-            char_code = match.group(1)
-            char = unichr(int(char_code, 16))
-            answer = answer.replace('\:' + char_code, char)
-        waOutputArray = string.split(answer, ";")
-        newOutput = list()
-        for each in waOutputArray:
-            temp = each.replace('\/', '/')
-            newOutput.append(temp)
-        waOutputArray = newOutput
-        if (len(waOutputArray) < 2):
-            return True, answer
-        else:
-            return True, waOutputArray[0] + ' | ' + ' | '.join(waOutputArray[1:4])
-        waOutputArray = list()
-    else:
-        return False, str()
-
-
-def wa(jenni, input):
-    """.wa <input> -- queries WolframAlpha with the given input."""
+def math(jenni, input):
     if not input.group(2):
         return jenni.reply("No search term.")
+
     txt = input.group(2)
     txt = txt.encode('utf-8')
     txt = txt.decode('utf-8')
     txt = txt.encode('utf-8')
-    status, answer = get_wa(txt)
-    if status:
-        jenni.say(answer)
+    txt = urllib.quote(txt.replace('+', '%2B'))
+
+    url = 'http://gamma.sympy.org/input/?i='
+
+    re_answer = re.compile(r'<script type="\S+; mode=display".*?>(.*?)</script>')
+
+    page = proxy.get(url + txt)
+
+    results = re_answer.findall(page)
+
+    if results:
+        jenni.say(results[0])
     else:
-        jenni.say('Sorry, no result from WolframAlpha.')
-wa.commands = ['wa', 'wolfram']
-wa.example = '.wa land area of the European Union'
+        jenni.say('No results found on gamma.sympy.org!')
+math.commands = ['math']
+
+
+def get_wa(search, appid):
+    txt = search
+    txt = txt.decode('utf-8')
+    txt = txt.encode('utf-8')
+    txt = urllib.quote(txt)
+
+    uri = 'https://api.wolframalpha.com/v2/query?reinterpret=true&appid=' + appid
+    uri += '&input=' + txt
+
+    page = web.get(uri)
+
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        return jenni.say("Please install 'bs4', also known as BeautifulSoup via pip to use WolframAlpha.")
+
+    soup = BeautifulSoup(page, 'xml')
+    attempt_one = soup.find_all(attrs={'primary':'true'})
+
+    answer = 'No answers found!'
+
+    if attempt_one:
+        answer = attempt_one[0].plaintext.get_text()
+        if not answer:
+            answer = attempt_one[0].imagesource.get_text()
+    else:
+        for pod in soup.find_all('pod'):
+            if pod.get('title') != 'Input interpretation' and pod.plaintext.get_text():
+                answer = pod.plaintext.get_text()
+                break
+    return answer
+
+
+def wa(jenni, input):
+    if not hasattr(jenni.config, 'wolframalpha_apikey'):
+        return jenni.say(WAKEY_NOTFOUND)
+
+    appid = jenni.config.wolframalpha_apikey
+
+    if not input.group(2):
+        return jenni.reply("No search term.")
+
+    txt = input.group(2)
+    txt = txt.encode('utf-8')
+    txt = txt.decode('utf-8')
+    txt = txt.encode('utf-8')
+
+    result = get_wa(txt, appid)
+
+    if not result:
+        return jenni.say("No results found.")
+
+    return jenni.say(result)
+wa.commands = ['wa']
 
 if __name__ == '__main__':
     print __doc__.strip()

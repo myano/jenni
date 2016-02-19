@@ -61,6 +61,9 @@ def create_default_config(fn):
     # password = 'example'
     # serverpass = 'serverpass'
 
+
+    ## API KEYS
+
     # forecastio_apikey is for an API key from https://forecast.io/
     # This is useful if you want extended weather information.
     # Required if you want .weather to work.
@@ -77,14 +80,10 @@ def create_default_config(fn):
     # Get a Server API Key; this is required for YouTube to work.
     # google_dev_apikey = ''
 
-    # You can add bannable words / regex per channel
-    # bad_words = {
-    #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
-    # }
-    #
-    # This controls the number of warnings a user will receive
-    # before they are banned from the channel
-    # bad_word_limit = 1
+    # wolframalpha_apikey is for an API key from Wolfram|Alpha
+    # http://products.wolframalpha.com/api/
+    # This is needed in order to make .calc/.c have more comprehensive answers.
+    # wolframalpha_apikey = ''
 
     # Fill in Yelp API information here
     # This is for using the .food command
@@ -94,6 +93,17 @@ def create_default_config(fn):
         'token': '',
         'token_secret': ''
         }
+
+
+
+    # You can add bannable words / regex per channel
+    # bad_words = {
+    #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
+    # }
+    #
+    # This controls the number of warnings a user will receive
+    # before they are banned from the channel
+    # bad_word_limit = 1
 
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
