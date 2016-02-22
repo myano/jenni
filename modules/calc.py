@@ -210,7 +210,7 @@ def get_wa(search, appid):
     try:
         from bs4 import BeautifulSoup
     except ImportError:
-        return jenni.say("Please install 'bs4', also known as BeautifulSoup via pip to use WolframAlpha.")
+        return "Please install 'bs4', also known as BeautifulSoup via pip to use WolframAlpha."
 
     soup = BeautifulSoup(page, 'xml')
     attempt_one = soup.find_all(attrs={'primary':'true'})
