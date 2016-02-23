@@ -10,6 +10,7 @@ More info:
 """
 
 import random
+import itertools
 from modules import unicode as uc
 
 def write_addquote(text):
@@ -35,7 +36,7 @@ addquote.example = '.addquote'
 
 
 def retrievequote(jenni, input):
-    '''.quote <number> -- displays a given quote'''
+    '''.quote <number | nick> -- displays a given quote'''
     NO_QUOTES = 'There are currently no quotes saved.'
     text = input.group(2)
     try:
@@ -49,11 +50,25 @@ def retrievequote(jenni, input):
     MAX = len(lines)
     fn.close()
     random.seed()
-    try:
-        number = int(text)
-        if number < 0:
-            number = MAX - abs(number) + 1
-    except:
+
+    if text != None:
+        try:
+            number = int(text)
+            if number < 0:
+                number = MAX - abs(number) + 1
+        except:
+            nick = "<" + text + ">"
+
+            indices = range(1, len(lines) + 1)
+            selectors = map(lambda x: x.split()[0] == nick, lines)
+            filtered_indices = list(itertools.compress(indices, selectors))
+
+            if len(filtered_indices) < 1:
+                return jenni.say('No quotes by that nick!')
+
+            filtered_index_index = random.randint(1, len(filtered_indices))
+            number = filtered_indices[filtered_index_index - 1]
+    else:
         number = random.randint(1, MAX)
     if not (0 <= number <= MAX):
         jenni.reply("I'm not sure which quote you would like to see.")
