@@ -26,6 +26,35 @@ r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 HTML_ENTITIES = { 'apos': "'" }
 noun = ['ZHVjaw==', 'Y2F0', 'ZG9n', 'aHVtYW4=',]
 
+kb_nearby = {
+        'a': ['q', 'w', 's', 'z'],
+        'b': ['v', 'g', 'h', 'n'],
+        'c': ['x', 'd', 'f', 'v'],
+        'd': ['s', 'x', 'c', 'f', 'r', 'e'],
+        'e': ['w', 's', 'd', 'r'],
+        'f': ['r', 'd', 'c', 'v', 'g', 't'],
+        'g': ['f', 'v', 'b', 'h', 'y', 't'],
+        'h': ['g', 'b', 'n', 'j', 'u', 'y'],
+        'i': ['u', 'j', 'k', 'o'],
+        'j': ['h', 'n', 'm', 'k', 'i', 'u'],
+        'k': ['j', 'm', ',', 'l', 'o', 'i'],
+        'l': ['k', 'p', 'o'],
+        'm': ['n', 'j', 'k', ','],
+        'n': ['b', 'h', 'j', 'm'],
+        'o': ['i', 'k', 'l', ';', 'p'],
+        'p': ['o', 'l', '['],
+        'q': ['a', 'w', '1', '2'],
+        'r': ['e', 'd', 'f', 't', '4'],
+        's': ['a', 'z', 'x', 'd', 'e', 'w'],
+        't': ['r', 'f', 'g', 'y', '5'],
+        'u': ['y', 'h', 'j', 'i', '7'],
+        'v': ['c', 'b', 'g', 'f'],
+        'w': ['q', 'a', 's', 'e', '2'],
+        'x': ['z', 's', 'd', 'c'],
+        'y': ['t', 'g', 'h', 'u', '6'],
+        'z': ['a', 's', 'x'],
+}
+
 random.seed()
 
 
@@ -64,7 +93,7 @@ def chat(jenni, input):
         ## in a channel and prepended with jenni's name
         pm = False
         try:
-            time.sleep(random.randint(3, 15))
+            time.sleep(random.randint(1, 5))
             msgo = mycb.ask(msgi)
         except:
             return
@@ -79,7 +108,7 @@ def chat(jenni, input):
                 if spt.startswith(x):
                     return
         try:
-            time.sleep(random.randint(3, 15))
+            time.sleep(random.randint(1, 5))
             msgo = mycb.ask(msgi)
         except:
             return
@@ -87,12 +116,11 @@ def chat(jenni, input):
         return
 
     if msgo:
-        rand_num = random.randint(0, 15)
-        time.sleep(1 + rand_num)
+        time.sleep(random.randint(1, 5))
 
-        response = re.sub('(?i)cleverbot', 'jenni', msgo)
+        response = re.sub('(?i)clever(me|script|bot)', 'jenni', msgo)
         response = re.sub('(?i)\S+bot', (random.choice(noun)).decode('base64'), response)
-        response = re.sub('(?i)bot', (random.choice(noun)).decode('base64'), response)
+        response = re.sub('(?i)(bot|human)', (random.choice(noun)).decode('base64'), response)
         response = re.sub('(?i)computer', (random.choice(noun)).decode('base64'), response)
         response = r_entity.sub(e, response)
 
@@ -110,6 +138,14 @@ def chat(jenni, input):
             temp = random.randint(1, len(txt) - 2)
             return txt[:temp] + txt[temp + 1] + txt[temp] + txt[temp + 2:]
 
+        def swaparoo(txt):
+            random_to_rm = random.randint(1, len(txt) - 1)
+            txt_char = txt[random_to_rm]
+            new_char = txt_char
+            if (txt_char).lower() in kb_nearby:
+                new_char = random.choice(kb_nearby[(txt_char).lower()])
+            return txt[:random_to_rm] + new_char + txt[random_to_rm + 1:]
+
 
         if random.random() <= 0.25:
             l_response = len(response) // 20
@@ -121,12 +157,17 @@ def chat(jenni, input):
             for x in range(1, l_response):
                 response = switcharoo(response)
 
+        if random.random() <= 0.20:
+            l_response = len(response) // 15
+            for x in range(1, l_response):
+                response = swaparoo(response)
+
         if random.random() <= 0.05:
             response = response.upper()
 
 
         if pm:
-            if random.random() <= 0.07:
+            if random.random() <= 0.04:
                 return
             jenni.say(response)
             if hasattr(jenni.config, 'logchan_pm'):
