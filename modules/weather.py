@@ -598,6 +598,17 @@ windchill.rate = 10
 
 dotw = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+def chomp_desc(txt):
+    out = txt
+    def upper_repl(match):
+        return match.group(1).upper()
+    out = re.sub('([Tt])hunderstorm', r'\1storm', out)
+    out = re.sub('with', 'w/', out)
+    out = re.sub('([Ss])cattered', r'\1cat.', out)
+    out = re.sub('([Mm])orning', r'\1orn.', out)
+    out = re.sub('Then the (\S)', upper_repl, out)
+    return out
+
 
 def forecast(jenni, input):
     if not hasattr(jenni.config, 'forecastio_apikey'):
@@ -698,6 +709,8 @@ def forecast(jenni, input):
         dew = uc.decode(dew)
         windspeed = uc.decode(windspeed)
         summary = uc.decode(summary)
+
+        summary = chomp_desc(summary)
 
         ## only show 'today' and the next 3-days.
         ## but only show 2 days on each line
@@ -880,7 +893,7 @@ def weather_wunderground(jenni, input):
 
     apikey = jenni.config.wunderground_apikey
 
-    url = 'https://api.wunderground.com/api/%s/conditions/geolookup/q/%s.json'
+    url = 'http://api.wunderground.com/api/%s/conditions/geolookup/q/%s.json'
     txt = input.group(2)
     if not txt:
         return jenni.say('No input provided. Please provide a locaiton.')
@@ -972,7 +985,7 @@ def forecast_wg(jenni, input):
 
     apikey = jenni.config.wunderground_apikey
 
-    url = 'https://api.wunderground.com/api/%s/forecast10day/geolookup/q/%s.json'
+    url = 'http://api.wunderground.com/api/%s/forecast10day/geolookup/q/%s.json'
 
     txt = input.group(2)
     if not txt:
@@ -1009,6 +1022,8 @@ def forecast_wg(jenni, input):
         temp = temp.split('. High')
         temp = temp[0]
 
+        temp = chomp_desc(temp)
+
         days_text.append(temp)
 
     city = useful['location']['city']
@@ -1030,12 +1045,12 @@ def forecast_wg(jenni, input):
         lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
         #wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
 
-        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FConditions\x1F: %s. Eve: %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
+        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FCond\x1F: %s. Eve: %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
 
-        k += 1
-        if k <= 2:
+        k += 2
+        if (k / 2.) <= 2:
             output += temp
-        elif 4 >= k > 2:
+        elif 4 >= (k / 2.) > 2:
             output_second += temp
 
     output = output[:-3]
