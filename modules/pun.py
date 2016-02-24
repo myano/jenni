@@ -25,7 +25,7 @@ def puns(jenni, input):
         return jenni.say(pun)
     else:
         return jenni.say("I'm afraid I'm not feeling punny today!")
-puns.commands = ['puns', 'pun']
+puns.commands = ['puns', 'pun', 'badpun', 'badpuns']
 
 if __name__ == '__main__':
     print __doc__.strip()
