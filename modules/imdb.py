@@ -65,13 +65,15 @@ def movie(jenni, input):
         else:
             message += 'Got an error from imdbapi'
     else:
-        pre_plot_output = 'Title: {0} | Released: {1} | Rated: {2} '
+        pre_plot_output = u'Title: {0} | Released: {1} | Rated: {2} '
         pre_plot_output += '| Rating: {3} | Metascore: {4} | Genre: {5} '
         pre_plot_output += '| Runtime: {6} | Plot: '
+        genre = data['Genre']
+        runtime = data['Runtime']
         pre_plot = pre_plot_output.format(data['Title'], data['Released'],
                                           data['Rated'], data['imdbRating'],
-                                          data['Metascore'], data['Genre'],
-                                          data['Runtime'])
+                                          data['Metascore'], genre,
+                                          runtime)
 
         after_plot_output = ' | IMDB Link: http://imdb.com/title/{0}'
         after_plot = after_plot_output.format(data['imdbID'])
