@@ -39,6 +39,10 @@ def retrievequote(jenni, input):
     '''.quote <number | nick> -- displays a given quote'''
     NO_QUOTES = 'There are currently no quotes saved.'
     text = input.group(2)
+    if text:
+        text = text.strip()
+        text = text.split()[0]
+
     try:
         fn = open('quotes.txt', 'r')
     except:
