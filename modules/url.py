@@ -104,26 +104,25 @@ def find_title(url):
     """
     This finds the title when provided with a string of a URL.
     """
-    uri = url
 
     for item in IGNORE:
-        if item in uri:
+        if item in url:
             return False, 'ignored'
 
-    if not re.search('^((https?)|(ftp))://', uri):
-        uri = 'http://' + uri
+    if not re.search('^((https?)|(ftp))://', url):
+        url = 'http://' + url
 
-    if '/#!' in uri:
-        uri = uri.replace('/#!', '/?_escaped_fragment_=')
+    if '/#!' in url:
+        url = url.replace('/#!', '/?_escaped_fragment_=')
 
-    if 'i.imgur' in uri:
-        a = uri.split('.')
-        uri = a[0][:-1] + '.'.join(a[1:-1])
+    if 'i.imgur' in url:
+        a = url.split('.')
+        url = a[0][:-1] + '.'.join(a[1:-1])
 
-    if 'zerobin.net' in uri:
+    if 'zerobin.net' in url:
         return True, 'ZeroBin'
 
-    uri = uc.decode(uri)
+    url = uc.decode(url)
 
     msg = str()
     k = 0
