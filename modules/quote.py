@@ -142,7 +142,12 @@ def grabquote(jenni, input):
         return jenni.say('Could not load "find" module.')
 
     txt = input.group(2)
+
+    if not txt:
+        return jenni.say('Please provide a nick for me to look for recent activity.')
+
     parts = txt.split()
+
     if not parts:
         return jenni.say('Please provide me with a valid nick.')
 
