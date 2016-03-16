@@ -276,7 +276,7 @@ class Jenni(irc.Bot):
                     if '!' in self.excludes[(input.sender).lower()]:
                         # block all function calls for this channel
                         return
-                    fname = func.func_code.co_filename.split('/')[-1].split('.')[0]
+                    fname = os.path.splitext(os.path.basename(func.func_code.co_filename))[0]
                     if fname in self.excludes[(input.sender).lower()]:
                         # block function call if channel is blacklisted
                         return

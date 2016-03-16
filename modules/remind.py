@@ -59,7 +59,7 @@ scaling = {
 
 def filename(self):
     name = self.nick + '-' + self.config.host + '.reminders.db'
-    return os.path.join(os.path.expanduser('~/.jenni'), name)
+    return os.path.expanduser(os.path.join('~', '.jenni', name))
 
 def load_database(name):
     data = {}
