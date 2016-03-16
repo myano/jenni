@@ -182,9 +182,9 @@ def call_twitter(query):
 
 
 def twitter(jenni, input):
-    status = initialize_keys(jenni)
+    status, response = initialize_keys(jenni)
     if not status:
-        return jenni.say("Please sign up for Twitter's API and provide the keys in the configuration.")
+        return jenni.say(response)
 
     arg = input.group(2)
 
