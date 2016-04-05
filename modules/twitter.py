@@ -118,6 +118,8 @@ def fetchbyID(term):
 def fetchbyUserName(term):
     global client
     resp, content = client.request("https://api.twitter.com/1.1/statuses/user_timeline.json?count=1&screen_name=" + term, "GET")
+    if resp['status'] == '401':  # tweets are private
+        return '{0}\'s tweets are not public.'.format(term)
     if resp['status'] != '200':
         return 'Could not reach Twitter API.'
     try:
@@ -182,9 +184,9 @@ def call_twitter(query):
 
 
 def twitter(jenni, input):
-    status = initialize_keys(jenni)
+    status, response = initialize_keys(jenni)
     if not status:
-        return jenni.say("Please sign up for Twitter's API and provide the keys in the configuration.")
+        return jenni.say(response)
 
     arg = input.group(2)
 
