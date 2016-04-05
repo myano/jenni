@@ -113,8 +113,8 @@ def print_album(jenni, album):
 
     message = ALBUM_MSG.format(
         "\x02",
-        album['name'],
-        artists,
+        album['name'].encode('utf-8'),
+        artists.encode('utf-8'),
         album['release_date'][:4]
     )
 
@@ -124,7 +124,7 @@ def print_album(jenni, album):
 def print_artist(jenni, artist):
     message = ARTIST_MSG.format(
         "\x02",
-        artist['name']
+        artist['name'].encode('utf-8')
     )
 
     jenni.say(message)
@@ -145,10 +145,10 @@ def print_track(jenni, track):
 
     message = message_format.format(
         "\x02",
-        track['name'],
+        track['name'].encode('utf-8'),
         length,
-        artists,
-        track['album']['name']
+        artists.encode('utf-8'),
+        track['album']['name'].encode('utf-8')
     )
 
     jenni.say(message)
