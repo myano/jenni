@@ -738,7 +738,7 @@ unostats.rate = 0
 
 def uno_help(jenni, input):
     nick = input.group(2)
-    txt = 'For rules, examples, and getting started: https://j.mp/esl47K'
+    txt = 'For rules, examples, and getting started: https://is.gd/4YxydS'
     if nick:
         nick = (nick).strip()
         output = "%s: %s" % (nick, txt)
