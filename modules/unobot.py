@@ -188,7 +188,8 @@ class UnoBot:
                 self.players[p].append(self.getCard ())
         self.topCard = self.getCard()
         while self.topCard.lstrip(self.colors) in 'R S D2 W WD4':
-           self.topCard = self.getCard()
+            self.deck.append(self.topCard)
+            self.topCard = self.getCard()
         self.currentPlayer = 1
         self.cardPlayed(jenni, self.topCard)
         self.showOnTurn(jenni)
@@ -293,6 +294,13 @@ class UnoBot:
         for a in self.special_cards:
             for i in range(4):
                 ret.append(a)
+
+        if self.topCard != None:
+            for player in self.players:
+                for player_card in player:
+                    ret.remove(player_card)
+
+            ret.remove(self.topCard)
 
         if len(self.playerOrder) > 4:
             ret *= 2
