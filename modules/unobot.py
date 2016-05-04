@@ -282,12 +282,17 @@ class UnoBot:
 
     def createnewdeck(self):
         ret = list()
-        for a in self.colored_card_nums:
-            for b in self.colors:
-                ret.append(b + a)
+
+        for i in range(2):
+            for a in self.colored_card_nums:
+                for b in self.colors:
+                    if i > 0 and a == '0':
+                        continue
+                    ret.append(b + a)
+
         for a in self.special_cards:
-            ret.append(a)
-            ret.append(a)
+            for i in range(4):
+                ret.append(a)
 
         if len(self.playerOrder) > 4:
             ret *= 2
