@@ -112,6 +112,12 @@ def create_default_config(fn):
     # before they are banned from the channel
     # bad_word_limit = 1
 
+    # auto_title_disable_chans is for disabling the auto URL title feature
+    # simply add a channel to this list (preferably in all lower-case)
+    # and it won't auto-title URLs in that channel, but .title and other features
+    # will still work
+    # auto_title_disable_chans = ['##yano',]
+
     # These are people who will be able to use admin.py's functions...
     admins = [owner, 'someoneyoutrust']
     # But admin.py is disabled by default, as follows:

@@ -33,7 +33,7 @@ import web
 # this variable is to determine when to use bitly. If the URL is more
 # than this length, it'll display a bitly URL instead. To disable bit.ly,
 # put None even if it's set to None, triggering .bitly command will still work!
-BITLY_TRIGGER_LEN_TITLE = 20
+BITLY_TRIGGER_LEN_TITLE = 30
 BITLY_TRIGGER_LEN_NOTITLE = 80
 EXCLUSION_CHAR = '!'
 IGNORE = list()
@@ -42,7 +42,7 @@ IGNORE = list()
 bitly_loaded = False
 BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
                    'short', 'spotify', 'sp', 'st', 'tell', 'title', 'tw',
-                   'twitter', 'unbitly', 'untiny',]
+                   'twitter', 'unbitly', 'untiny', 'fixurl', 'fix_url']
 simple_channels = list()
 
 try:
@@ -397,6 +397,12 @@ def show_title_auto(jenni, input):
         if input.startswith('.%s ' % (each)):
             ## Don't want it to show duplicate titles
             return
+
+    if hasattr(jenni.config, 'auto_title_disable_chans'):
+        disabled_channels = jenni.config.auto_title_disable_chans
+        if input.sender in disabled_channels or (input.sender).lower() in disabled_channels:
+            return
+
     if len(re.findall('\([\d]+\sfiles\sin\s[\d]+\sdirs\)', input)) == 1:
         ## Directory Listing of files
         return
@@ -427,7 +433,7 @@ def show_title_auto(jenni, input):
             ## let's make it 'https' instead of 'http'
             bitly_link = bitly_link.replace('http:', 'https:')
 
-        if returned_title == 'imgur: the simple image sharer':
+        if 'imgur: the most awesome images on the internet' in (returned_title).lower():
             ## because of the i.imgur hack above this is done
             ## to prevent from showing useless titles on image
             ## files
@@ -547,6 +553,11 @@ def unbitly(jenni, input):
             new_url = results['geturl']
         except:
             return jenni.say('Failed to grab URL: %s' % (url))
+
+    channel = input.sender
+    if not hasattr(jenni, 'last_seen_uri'):
+        jenni.last_seen_uri = dict()
+    jenni.last_seen_uri[channel] = new_url
 
     if new_url.startswith(('http://', 'https://')):
         jenni.say(new_url)
