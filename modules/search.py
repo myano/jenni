@@ -15,8 +15,10 @@ import json
 import re
 import urllib
 import web
+from modules import proxy
 
 r_tag = re.compile(r'<(?!!)[^>]+>')
+r_bing = re.compile(r'<h2><a href="([^"]+)"')
 
 
 def remove_spaces(x):
@@ -27,115 +29,13 @@ def remove_spaces(x):
         return x
 
 
-class Grab(web.urllib.URLopener):
-    def __init__(self, *args):
-        self.version = 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0'
-        web.urllib.URLopener.__init__(self, *args)
-        self.addheader('Referer', 'https://github.com/myano/jenni')
-        self.addheader('Accept', '*/*')
-    def http_error_default(self, url, fp, errcode, errmsg, headers):
-        return web.urllib.addinfourl(fp, [headers, errcode], "http:" + url)
-
-def google_ajax(query):
-    """Search using AjaxSearch, and return its JSON."""
-    if isinstance(query, unicode):
-        query = query.encode('utf-8')
-    uri = 'https://ajax.googleapis.com/ajax/services/search/web'
-    args = '?v=1.0&safe=off&q=' + web.urllib.quote(query)
-    handler = web.urllib._urlopener
-    web.urllib._urlopener = Grab()
-    bytes = web.get(uri + args)
-    web.urllib._urlopener = handler
-    return json.loads(bytes)
-
-def google_search(query):
-    results = google_ajax(query)
-    try: return results['responseData']['results'][0]['unescapedUrl']
-    except IndexError: return None
-    except TypeError:
-        print results
-        return False
-
-def google_count(query):
-    results = google_ajax(query)
-    if not results.has_key('responseData'): return '0'
-    if not results['responseData'].has_key('cursor'): return '0'
-    if not results['responseData']['cursor'].has_key('estimatedResultCount'):
-        return '0'
-    return results['responseData']['cursor']['estimatedResultCount']
-
-def formatnumber(n):
-    """Format a number with beautiful commas."""
-    parts = list(str(n))
-    for i in range((len(parts) - 3), 0, -3):
-        parts.insert(i, ',')
-    return ''.join(parts)
-
-def g(jenni, input):
-    """Queries Google for the specified input."""
-    query = input.group(2)
-    if not query:
-        return jenni.reply('.g what?')
-    query = query.encode('utf-8')
-    uri = google_search(query)
-    if uri:
-        if 'wikipedia.org/' in uri:
-            uri = uri.replace('http:', 'https:')
-        jenni.reply(uri)
-        if not hasattr(jenni, 'last_seen_uri'):
-            jenni.last_seen_uri = {}
-        jenni.last_seen_uri[input.sender] = uri
-    elif uri is False: jenni.reply("Problem getting data from Google.")
-    else: jenni.reply("No results found for '%s'." % query)
-g.commands = ['g']
-g.priority = 'high'
-g.example = '.g swhack'
-
-def gc(jenni, input):
-    """Returns the number of Google results for the specified input."""
-    query = input.group(2)
-    if not query:
-        return jenni.reply('.gc what?')
-    query = query.encode('utf-8')
-    num = formatnumber(google_count(query))
-    jenni.say(query + ': ' + num)
-gc.commands = ['gc']
-gc.priority = 'high'
-gc.example = '.gc extrapolate'
-
-r_query = re.compile(
-    r'\+?"[^"\\]*(?:\\.[^"\\]*)*"|\[[^]\\]*(?:\\.[^]\\]*)*\]|\S+'
-)
-
-def gcs(jenni, input):
-    if not input.group(2):
-        return jenni.reply("Nothing to compare.")
-    queries = r_query.findall(input.group(2))
-    if len(queries) > 6:
-        return jenni.reply('Sorry, can only compare up to six things.')
-
-    results = []
-    for i, query in enumerate(queries):
-        query = query.strip('[]')
-        query = query.encode('utf-8')
-        n = int((formatnumber(google_count(query)) or '0').replace(',', ''))
-        results.append((n, query))
-        if i >= 2: __import__('time').sleep(0.25)
-        if i >= 4: __import__('time').sleep(0.25)
-
-    results = [(term, n) for (n, term) in reversed(sorted(results))]
-    reply = ', '.join('%s (%s)' % (t, formatnumber(n)) for (t, n) in results)
-    jenni.say(reply)
-gcs.commands = ['gcs', 'comp']
-
-r_bing = re.compile(r'<h3><a href="([^"]+)"')
-
 def bing_search(query, lang='en-GB'):
     query = web.urllib.quote(query)
-    base = 'http://www.bing.com/search?mkt=%s&q=' % lang
-    bytes = web.get(base + query)
-    m = r_bing.search(bytes)
+    base = 'https://www.bing.com/search?mkt=%s&q=' % lang
+    page = proxy.get(base + query)
+    m = r_bing.search(page)
     if m: return m.group(1)
+
 
 def bing(jenni, input):
     """Queries Bing for the specified input."""
@@ -150,7 +50,7 @@ def bing(jenni, input):
     query = query.encode('utf-8')
     uri = bing_search(query, lang)
     if uri:
-        jenni.reply(uri)
+        jenni.say(uri)
         if not hasattr(jenni, 'last_seen_uri'):
             jenni.last_seen_uri = {}
         jenni.last_seen_uri[input.sender] = uri
@@ -213,14 +113,19 @@ def duck_search(query):
         ## if we still can't find a search result via the API
         ## let's try scraping the html page
         uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % web.urllib.quote(query)
-        page = web.get(uri)
+        #page = web.get(uri)
+        page = proxy.get(uri)
         r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
+        bad_results = ['/y.js?', '//ad.ddg.gg/', '.msn.com/', 'r.search.yahoo.com/',]
         m = r_duck.findall(page)
         output = str()
         if m:
             for result in m:
-                if '/y.js?' not in result and '//ad.ddg.gg/' not in result and '.msn.com/' not in result:
-                    ## ignore ads
+                valid_result = True
+                for each in bad_results:
+                    if each in result:
+                        valid_result = False
+                if valid_result:
                     output = result
                     break
         else:
@@ -233,13 +138,15 @@ def min_size(key, dictt):
     ## I am lazy
     return len(dictt[key]) > 0
 
+
 def duck_api(query):
     '''Send 'query' to DDG's API and return results as a dictionary'''
     query = web.urllib.quote(query)
     uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1&kp=-1' % query
-    results = web.get(uri)
-    results = json.loads(web.get(uri))
+    results = proxy.get(uri)
+    results = json.loads(results)
     return results
+
 
 def duck_zero_click_api(query):
     output = list()
@@ -260,8 +167,8 @@ def duck_zero_click_api(query):
         ## if we can't find anything in the API for Zero-Click
         ## give up
         return None
-
     return output
+
 
 def duck(jenni, input):
     '''Perform a DuckDuckGo Search and Zero-Click lookup'''
@@ -302,32 +209,8 @@ def duck(jenni, input):
     ## fail
     if not uri and (not result or not len(result) >= 1):
         return jenni.reply("No results found for '%s'." % query)
-duck.commands = ['duck', 'ddg']
+duck.commands = ['duck', 'ddg', 'g', 'search']
 
-def search(jenni, input):
-    if not input.group(2):
-        return jenni.reply('.search for what?')
-    query = input.group(2).encode('utf-8')
-    gu = google_search(query) or '-'
-    bu = bing_search(query) or '-'
-    du = duck_search(query) or '-'
-
-    if (gu == bu) and (bu == du):
-        result = '%s (g, b, d)' % gu
-    elif (gu == bu):
-        result = '%s (g, b), %s (d)' % (gu, du)
-    elif (bu == du):
-        result = '%s (b, d), %s (g)' % (bu, gu)
-    elif (gu == du):
-        result = '%s (g, d), %s (b)' % (gu, bu)
-    else:
-        if len(gu) > 250: gu = '(extremely long link)'
-        if len(bu) > 150: bu = '(extremely long link)'
-        if len(du) > 150: du = '(extremely long link)'
-        result = '%s (g), %s (b), %s (d)' % (gu, bu, du)
-
-    jenni.reply(result)
-search.commands = ['search']
 
 def suggest(jenni, input):
     if not input.group(2):
