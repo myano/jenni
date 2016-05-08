@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
 configs.py - jenni IRC bot config manager
-Copyright 2009-2015, Michael Yanovich (yanovich.net)
+Copyright 2014-2016, Josh Begleiter (jbegleiter).com
+Copyright 2009-2016, Michael Yanovich (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
-Written by kaneda (http://jbegleiter.com), is invoked in
-the jenni starter to store the config helper in jenni.config
+This is invoked in the jenni starter to store the
+config helper in jenni.config
 
 More info:
  * jenni: https://github.com/myano/jenni/
@@ -21,6 +22,7 @@ class Configs():
 
     def load_modules(self, config_modules):
         for config_name in self.config_paths:
+            # Ensure we take the basename, even if the file includes periods
             name = os.path.basename(config_name).split('.')[0] + '_config'
             module = imp.load_source(name, config_name)
             module.filename = config_name
@@ -40,9 +42,11 @@ class Configs():
             if not hasattr(module, 'ssl'):
                 module.ssl = False
 
-            if module.host == 'irc.example.net':
-                error = ('Error: you must edit the config file first!\n' +
-                            "You're currently using %s" % module.filename)
+            if hasattr(module, 'host') and module.host == 'irc.example.net':
+                error = "\n".join([
+                    'Error: you must edit the config file first!',
+                    "You're currently using {0}".format(module.filename)
+                ])
                 print >> sys.stderr, error
                 sys.exit(1)
 

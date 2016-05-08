@@ -20,6 +20,7 @@ From Pip:
 - *feedparser* - allows the optional rss.py and nws.py modules to work.
 - *BeautifulSoup* - allows better output from DuckDuckGo in search.py, image_me module and animate_me_module to work, and allow more in-depth results for .calc
 - *yelpapi* - allows you to use the food module
+- *sqlite* - This is *optional*, and will be used as the persistence layer for Jenni if installed
 
 Google Developer API Key
 ========================

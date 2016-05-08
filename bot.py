@@ -12,6 +12,7 @@ More info:
 
 import time, sys, os, re, threading, imp
 import irc
+from db.db_factory import DbFactory
 
 home = os.getcwd()
 
@@ -26,15 +27,33 @@ def decode(bytes):
 class Jenni(irc.Bot):
     def __init__(self, config):
         lc_pm = None
-        if hasattr(config, "logchan_pm"): lc_pm = config.logchan_pm
+        if hasattr(config, "logchan_pm"):
+            lc_pm = config.logchan_pm
+
         logging = False
-        if hasattr(config, "logging"): logging = config.logging
+        if hasattr(config, "logging"):
+            logging = config.logging
+
         ipv6 = False
-        if hasattr(config, 'ipv6'): ipv6 = config.ipv6
+        if hasattr(config, 'ipv6'):
+            ipv6 = config.ipv6
+
         serverpass = None
-        if hasattr(config, 'serverpass'): serverpass = config.serverpass
+        if hasattr(config, 'serverpass'):
+            serverpass = config.serverpass
+
         user = None
-        if hasattr(config, 'user'): user = config.user
+        if hasattr(config, 'user'):
+            user = config.user
+
+        db_engine = 'sqlite'
+        if hasattr(config, 'db_engine'):
+            db_engine = config.db_engine
+
+        if not hasattr(config, 'db_path'):
+            # Try the default if one isn't specified
+            config.db_path = os.path.expanduser(os.path.join('~/.jenni', 'jenni_db.sqlite'))
+
         args = (config.nick, config.name, config.channels, user, serverpass, lc_pm, logging, ipv6)
         ## next, try putting a try/except around the following line
         irc.Bot.__init__(self, *args)
@@ -45,6 +64,11 @@ class Jenni(irc.Bot):
         self.excludes = {}
         if hasattr(config, 'excludes'):
             self.excludes = config.excludes
+
+        # Attempt to initialize the DB, if it fails we won't
+        # use the DB at all
+        self.db_layer = DbFactory.get_db_object(db_engine, config.db_path)
+
         self.setup()
 
     def setup(self):
