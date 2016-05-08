@@ -295,7 +295,7 @@ class UnoBot:
             for i in range(4):
                 ret.append(a)
 
-        if self.topCard != None:
+        if self.topCard is not None:
             for player in self.players:
                 for player_card in player:
                     ret.remove(player_card)
