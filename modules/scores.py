@@ -250,8 +250,21 @@ def addpoint_command(jenni, input):
         nick = nick.strip().split()[0]
     scores.editpoints(jenni, input, nick, True)
 addpoint_command.commands = ['addpoint']
-addpoint_command.priority = 'high'
-addpoint_command.rate = 180
+addpoint_command.priorty = 'high'
+addpoint_command.rate = 60 * 10
+
+
+def second_addpoint_command(jenni, input):
+    """<nick>++ - Adds 1 point to the score system for <nick>."""
+    nick = input.group(1)
+    if nick:
+        nick = nick.strip()
+    if len(nick) == list(nick).count('+'):
+        return
+    scores.editpoints(jenni, input, nick, True)
+second_addpoint_command.rule = r'^(\S+)\+\+($|\s)'
+second_addpoint_command.priority = 'high'
+second_addpoint_command.rate = 60 * 10
 
 
 def rmpoint_command(jenni, input):
@@ -262,7 +275,20 @@ def rmpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, False)
 rmpoint_command.commands = ['rmpoint']
 rmpoint_command.priority = 'high'
-rmpoint_command.rate = 180
+rmpoint_command.rate = 60 * 10
+
+
+def second_rmpoint_command(jenni, input):
+    """<nick>-- - Removes 1 point to the score system for <nick>."""
+    nick = input.group(1)
+    if nick:
+        nick = nick.strip()
+    if len(nick) == list(nick).count('-'):
+        return
+    scores.editpoints(jenni, input, nick, False)
+second_rmpoint_command.rule = r'^(\S+)\-\-($|\s)'
+second_rmpoint_command.priority = 'high'
+second_rmpoint_command.rate = 60 * 10
 
 
 def view_scores(jenni, input):
@@ -270,7 +296,7 @@ def view_scores(jenni, input):
     scores.view_scores(jenni, input)
 view_scores.commands = ['points', 'point', 'scores', 'score']
 view_scores.priority = 'medium'
-view_scores.rate = 180
+view_scores.rate = 60 * 3
 
 
 def setpoint(jenni, input):
