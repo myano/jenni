@@ -49,8 +49,12 @@ def create_default_config(fn):
         # Only sqlite (or none) is supported right now
         db_engine = 'sqlite'
 
-        # Should be an absolute path
-        db_path = '~/.jenni/jenni_db.sqlite'
+        # This will be combined with the engine to form a string like
+        # those found in https://bitbucket.org/ollyc/yoyo
+        # E.g., sqlite:///mydb.sqlite
+        #
+        # See yoyo.ini in jenni's directory for more config options
+        connect_string = '~/.jenni/jenni_db.sqlite'
 
         # Channel jenni will report all private messages sent to her to.
         # This includes server notices.

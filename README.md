@@ -21,6 +21,8 @@ From Pip:
 - *BeautifulSoup* - allows better output from DuckDuckGo in search.py, image_me module and animate_me_module to work, and allow more in-depth results for .calc
 - *yelpapi* - allows you to use the food module
 - *sqlite* - This is *optional*, and will be used as the persistence layer for Jenni if installed
+- *yoyo-migrations* - Likewise this is *optional*. If you install this it will make using Jenni with a DB far easier, allowing module maintainers to create or alter tables with greater ease
+  - For more information about using yoyo-migrations please see https://pypi.python.org/pypi/yoyo-migrations
 
 Google Developer API Key
 ========================

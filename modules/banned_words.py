@@ -87,12 +87,13 @@ def initialize_warnings(jenni):
                     nick, channel, num_warnings = row
                     if channel not in current_warnings:
                         current_warnings[channel] = {}
-                    current_warnings[channel][nick] = int(num_warnings)
+                    current_warnings[channel][nick] = num_warnings
             else:
+                # This should have gotten run as part of migrations (see jenni_home/migrations)
                 table_cols = {
-                    'nick': 'text',
-                    'channel': 'text',
-                    'num_warnings': 'real',
+                    'nick': 'VARCHAR(255)',
+                    'channel': 'VARCHAR(255)',
+                    'num_warnings': 'INT',
                 }
 
                 # Create table

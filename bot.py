@@ -50,9 +50,9 @@ class Jenni(irc.Bot):
         if hasattr(config, 'db_engine'):
             db_engine = config.db_engine
 
-        if not hasattr(config, 'db_path'):
+        if not hasattr(config, 'connect_string'):
             # Try the default if one isn't specified
-            config.db_path = os.path.expanduser(os.path.join('~/.jenni', 'jenni_db.sqlite'))
+            config.connect_string = os.path.expanduser(os.path.join('~/.jenni', 'jenni_db.sqlite'))
 
         args = (config.nick, config.name, config.channels, user, serverpass, lc_pm, logging, ipv6)
         ## next, try putting a try/except around the following line
@@ -67,8 +67,15 @@ class Jenni(irc.Bot):
 
         # Attempt to initialize the DB, if it fails we won't
         # use the DB at all
-        self.db_layer = DbFactory.get_db_object(db_engine, config.db_path)
+        self.db_layer = DbFactory.get_db_object(db_engine, config.connect_string)
 
+        # Let's run migrations if we have a DB connections
+        if self.db_layer.db_capable:
+            DbFactory.run_migrations(
+                os.path.join(home, 'migrations'),
+                db_engine,
+                config.connect_string
+            )
         self.setup()
 
     def setup(self):
