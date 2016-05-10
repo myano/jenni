@@ -18,7 +18,6 @@ import urllib
 import web
 from tools import deprecated
 from modules import unicode as uc
-from modules import proxy
 from icao import data
 
 install_geopy = "Please install geopy via 'pip' to use weather.py"
@@ -598,14 +597,32 @@ windchill.rate = 10
 
 dotw = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+def remove_dots(txt):
+    if '..' not in txt:
+        return txt
+    else:
+        txt = re.sub('\.\.', '.', txt)
+        return remove_dots(txt)
+
 def chomp_desc(txt):
     out = txt
+    #print "original:", out
     def upper_repl(match):
         return match.group(1).upper()
-    out = re.sub('([Tt])hunderstorm', r'\1storm', out)
+    out = re.sub('([Tt])hunder(storm|shower)', r'\1\2', out)
     out = re.sub('with', 'w/', out)
-    out = re.sub('([Ss])cattered', r'\1cat.', out)
-    out = re.sub('([Mm])orning', r'\1orn.', out)
+    out = re.sub('and', '&', out)
+    out = re.sub('occasionally', 'occ', out)
+    out = re.sub('occasional', 'occ', out)
+    out = re.sub('possibly', 'poss', out)
+    out = re.sub('possible', 'poss', out)
+    out = re.sub('([Ss])cattered', r'\1cat', out)
+    out = re.sub('([Mm])orning', 'AM', out)
+    out = re.sub('evening', 'AM', out)
+    out = re.sub('afternoon', 'PM', out)
+    out = re.sub('in the', 'in', out)
+    #out = re.sub('\.\.', ' ', out)
+    out = remove_dots(out)
     out = re.sub('Then the (\S)', upper_repl, out)
     return out
 
