@@ -29,11 +29,17 @@ colours = {
     "16": "unk",
     "17": "unk",
     "18": "unk",
+    "19": "unk",
+    "20": "unk",
+    "21": "unk",
+    "22": "unk",
+    "23": "unk",
+    "24": "unk",
 }
 
 
 def test_colours(jenni, input):
-    if not input.admin:
+    if not input.admin and input.sender.startswith('#'):
         return
     output = str()
 

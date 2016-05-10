@@ -24,7 +24,8 @@ nowords = ['reload', 'help', 'tell', 'ask', 'ping']
 
 r_entity = re.compile(r'&[A-Za-z0-9#]+;')
 HTML_ENTITIES = { 'apos': "'" }
-noun = ['ZHVjaw==', 'Y2F0', 'ZG9n', 'aHVtYW4=',]
+nouns = ['ZHVjaw==', 'Y2F0', 'ZG9n', 'aHVtYW4=', 'cGVyc29u', 'Y29ybg==',
+         'cmF0', 'a2l0dGVu', 'ZGFuY2Vy', ]
 
 kb_nearby = {
         'a': ['q', 'w', 's', 'z'],
@@ -92,6 +93,7 @@ def chat(jenni, input):
     elif channel.startswith('#') and txt[0]:
         ## in a channel and prepended with jenni's name
         pm = False
+        msgi = (msgi).encode('utf-8')
         try:
             time.sleep(random.randint(1, 5))
             msgo = mycb.ask(msgi)
@@ -107,6 +109,7 @@ def chat(jenni, input):
             for x in nowords:
                 if spt.startswith(x):
                     return
+        msgi = (msgi).encode('utf-8')
         try:
             time.sleep(random.randint(1, 5))
             msgo = mycb.ask(msgi)
@@ -119,9 +122,9 @@ def chat(jenni, input):
         time.sleep(random.randint(1, 5))
 
         response = re.sub('(?i)clever(me|script|bot)', 'jenni', msgo)
-        response = re.sub('(?i)\S+bot', (random.choice(noun)).decode('base64'), response)
-        response = re.sub('(?i)(bot|human)', (random.choice(noun)).decode('base64'), response)
-        response = re.sub('(?i)computer', (random.choice(noun)).decode('base64'), response)
+        response = re.sub('(?i)\S+bot', (random.choice(nouns)).decode('base64'), response)
+        response = re.sub('(?i)(bot|human)', (random.choice(nouns)).decode('base64'), response)
+        response = re.sub('(?i)computer', (random.choice(nouns)).decode('base64'), response)
         response = r_entity.sub(e, response)
 
         if random.random() <= 0.5:
