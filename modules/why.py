@@ -19,8 +19,14 @@ r_paragraph = re.compile(r'<quote>.*?</quote>')
 def getwhy(jenni, input):
     page = web.get(whyuri)
     paragraphs = r_paragraph.findall(page)
-    line = re.sub(r'<[^>]*?>', '', unicode(paragraphs[0]))
-    jenni.say(line.lower().capitalize() + ".")
+    out = str()
+    if paragraphs:
+        line = re.sub(r'<[^>]*?>', '', unicode(paragraphs[0]))
+        out = line.lower().capitalize() + "."
+    else:
+        out = 'We are unable to find any reasons *why* this should work.'
+
+    return jenni.say(out)
 getwhy.commands = ['why', 'tubbs']
 getwhy.thread = False
 getwhy.rate = 30
