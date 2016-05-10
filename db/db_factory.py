@@ -29,8 +29,6 @@ class DbFactory():
             full_connect_string += "/"
         full_connect_string += connect_string
 
-        print full_connect_string
-
         backend = get_backend(full_connect_string)
         migrations = read_migrations(migrations_dir)
         backend.apply_migrations(backend.to_apply(migrations))
