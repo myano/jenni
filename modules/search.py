@@ -112,10 +112,12 @@ def duck_search(query):
     else:
         ## if we still can't find a search result via the API
         ## let's try scraping the html page
-        uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % web.urllib.quote(query)
+        uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % query #web.urllib.quote(query)
         #page = web.get(uri)
         page = proxy.get(uri)
+
         r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
+
         bad_results = ['/y.js?', '//ad.ddg.gg/', '.msn.com/', 'r.search.yahoo.com/',]
         m = r_duck.findall(page)
         output = str()
@@ -131,8 +133,9 @@ def duck_search(query):
         else:
             ## if we absolustely can't find a URL, let's try scraping the HTML
             ## page for a zero_click info
-            output = duck_zero_click_scrape(page)
-    return duck_sanitize(output)
+            return((duck_zero_click_scrape(page), False))
+
+    return((duck_sanitize(output), True))
 
 def min_size(key, dictt):
     ## I am lazy
@@ -141,7 +144,7 @@ def min_size(key, dictt):
 
 def duck_api(query):
     '''Send 'query' to DDG's API and return results as a dictionary'''
-    query = web.urllib.quote(query)
+    #query = web.urllib.quote(query)
     uri = 'https://api.duckduckgo.com/?q=%s&format=json&no_html=1&no_redirect=1&kp=-1' % query
     results = proxy.get(uri)
     results = json.loads(results)
@@ -176,10 +179,11 @@ def duck(jenni, input):
     if not query:
         return jenni.reply('.ddg what?')
 
-    query = query.encode('utf-8')
+    #query = query.encode('utf-8')
+    #jenni.say('query: ' + query)
 
     ## try to find a search result via the API
-    uri = duck_search(query)
+    uri, only_url = duck_search(query)
     if uri:
         jenni.say(uri)
         if hasattr(jenni, 'last_seen_uri') and input.sender in jenni.last_seen_uri:
