@@ -21,10 +21,16 @@ Example of how to use the bindings:
 
 """
 
-import cookielib
+#import cookielib
+import collections
 import hashlib
-import urllib
-import urllib2
+import requests
+from requests.compat import urlencode
+from future.backports.html import parser
+
+# Only use the instance method `unescape` of entity_parser. (I wish it was a
+# static method or public function; it never uses `self` anyway)
+entity_parser = parser.HTMLParser()
 
 
 class Cleverbot:
@@ -51,12 +57,44 @@ class Cleverbot:
 
     def __init__(self):
         """ The data that will get passed to Cleverbot's web API """
-        self.data = {
-            'stimulus': '',
-            'start': 'y',  # Never modified
-            'sessionid': '',
-            'vText8': '',
-            'vText7': '',
+        self.data = collections.OrderedDict(
+            (
+                # must be the first pairs
+                ('stimulus', ''),
+                ('cb_settings_language', ''),
+                ('cb_settings_scripting', 'no'),
+                ('islearning', 1),  # Never modified
+                ('icognoid', 'wsf'),  # Never modified
+                ('icognocheck', ''),
+
+                ('start', 'y'),  # Never modified
+                ('sessionid', ''),
+                ('vText8', ''),
+                ('vText7', ''),
+                ('vText6', ''),
+                ('vText5', ''),
+                ('vText4', ''),
+                ('vText3', ''),
+                ('vText2', ''),
+                ('fno', 0),  # Never modified
+                ('prevref', ''),
+                ('emotionaloutput', ''),  # Never modified
+                ('emotionalhistory', ''),  # Never modified
+                ('asbotname', ''),  # Never modified
+                ('ttsvoice', ''),  # Never modified
+                ('typing', ''),  # Never modified
+                ('lineref', ''),
+                ('sub', 'Say'),  # Never modified
+                ('cleanslate', False),  # Never modified
+            )
+        )
+
+        """
+            ('stimulus': ''),
+            ('start': 'y'),
+            ('sessionid': ''),
+            ('vText8': ''),
+            ('vText7': ''),
             'vText6': '',
             'vText5': '',
             'vText4': '',
@@ -77,53 +115,35 @@ class Cleverbot:
             'cleanslate': False,  # Never modified
         }
 
+        """
+
         # the log of our conversation with Cleverbot
         self.conversation = []
-        self.resp = str()
-
-        # install an opener with support for cookies
-        cookies = cookielib.LWPCookieJar()
-        handlers = [
-            urllib2.HTTPHandler(),
-            urllib2.HTTPSHandler(),
-            urllib2.HTTPCookieProcessor(cookies)
-        ]
-        opener = urllib2.build_opener(*handlers)
-        urllib2.install_opener(opener)
 
         # get the main page to get a cookie (see bug  #13)
-        try:
-            urllib2.urlopen(Cleverbot.PROTOCOL + Cleverbot.HOST)
-        except urllib2.HTTPError:
-            # TODO errors shouldn't pass unnoticed,
-            # here and in other places as well
-            return str()
+        self.session = requests.Session()
+        self.session.get(Cleverbot.PROTOCOL + Cleverbot.HOST)
+
 
     def ask(self, question):
         """Asks Cleverbot a question.
 
         Maintains message history.
 
-        Args:
-            q (str): The question to ask
-
-        Returns:
-            Cleverbot's answer
+        :param question: The question to ask
+        :return Cleverbot's answer
         """
+
         # Set the current question
         self.data['stimulus'] = question
 
         # Connect to Cleverbot's API and remember the response
-        try:
-            self.resp = self._send()
-        except urllib2.HTTPError:
-            # request failed. returning empty string
-            return str()
+        resp = self._send()
 
         # Add the current question to the conversation log
         self.conversation.append(question)
 
-        parsed = self._parse()
+        parsed = self._parse(resp.text)
 
         # Set data as appropriate
         if self.data['sessionid'] != '':
@@ -139,9 +159,12 @@ class Cleverbot:
         Cleverbot API
 
         Cleverbot tries to prevent unauthorized access to its API by
-        obfuscating how it generates the 'icognocheck' token, so we have
-        to URLencode the data twice: once to generate the token, and
-        twice to add the token to the data we're sending to Cleverbot.
+        obfuscating how it generates the 'icognocheck' token. The token is
+        currently the md5 checksum of the 10th through 36th characters of the
+        encoded data. This may change in the future.
+
+        TODO: Order is not guaranteed when urlencoding dicts. This hasn't been
+        a problem yet, but let's look into ordered dicts or tuples instead.
         """
         # Set data as appropriate
         if self.conversation:
@@ -153,31 +176,30 @@ class Cleverbot:
                     break
 
         # Generate the token
-        enc_data = urllib.urlencode(self.data)
+        enc_data = urlencode(self.data)
         digest_txt = enc_data[9:35]
-        token = hashlib.md5(digest_txt).hexdigest()
+        token = hashlib.md5(digest_txt.encode('utf-8')).hexdigest()
         self.data['icognocheck'] = token
 
-        # Add the token to the data
-        enc_data = urllib.urlencode(self.data)
-        req = urllib2.Request(self.API_URL, enc_data, self.headers)
+        # POST the data to Cleverbot's API and return
+        return self.session.post(Cleverbot.API_URL,
+                                 data=self.data,
+                                 headers=Cleverbot.headers)
 
-        # POST the data to Cleverbot's API
-        conn = urllib2.urlopen(req)
-        resp = conn.read()
-
-        # Return Cleverbot's response
-        return resp
-
-    def _parse(self):
+    @staticmethod
+    def _parse(resp_text):
         """Parses Cleverbot's response"""
+        resp_text = entity_parser.unescape(resp_text)
         parsed = [
-            item.split('\r') for item in self.resp.split('\r\r\r\r\r\r')[:-1]
+            item.split('\r') for item in resp_text.split('\r\r\r\r\r\r')[:-1]
         ]
+
+        if parsed[0][1] == 'DENIED':
+            raise CleverbotAPIError()
+
         parsed_dict = {
             'answer': parsed[0][0],
             'conversation_id': parsed[0][1],
-            'conversation_log_id': parsed[0][2],
         }
         try:
             parsed_dict['unknown'] = parsed[1][-1]
