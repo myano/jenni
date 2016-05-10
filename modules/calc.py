@@ -205,7 +205,7 @@ def get_wa(search, appid):
     uri = 'https://api.wolframalpha.com/v2/query?reinterpret=true&appid=' + appid
     uri += '&input=' + txt
 
-    page = web.get(uri)
+    page = proxy.get(uri)
 
     try:
         from bs4 import BeautifulSoup
