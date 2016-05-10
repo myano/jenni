@@ -11,7 +11,7 @@ More info:
 
 import imp, os, re, time
 
-WARNINGS_TABLE = 'banned_words_warnings'
+WARNINGS_TABLE = 'banned_words_warning'
 warnings_initialized = False
 current_warnings = {}
 
