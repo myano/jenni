@@ -31,7 +31,7 @@ def f_seen(jenni, input):
         jenni.say(msg)
     else:
         jenni.say("Sorry, I haven't seen %s around." % nick)
-f_seen.commands = ['seen']
+f_seen.rule = r'(?i)^\.(seen)\s+(\w+)'
 f_seen.rate = 15
 
 def f_note(jenni, input):
