@@ -42,7 +42,7 @@ IGNORE = list()
 bitly_loaded = False
 BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
                    'short', 'spotify', 'sp', 'st', 'tell', 'title', 'tw',
-                   'twitter', 'unbitly', 'untiny', 'fixurl', 'fix_url']
+                   'twitter', 'unbitly', 'untiny', 'fixurl', 'fix_url', 'isgd']
 simple_channels = list()
 
 try:
