@@ -205,7 +205,7 @@ def get_wa(search, appid):
     uri = 'https://api.wolframalpha.com/v2/query?reinterpret=true&appid=' + appid
     uri += '&input=' + txt
 
-    page = proxy.get(uri)
+    page = web.get(uri)
 
     try:
         from bs4 import BeautifulSoup
@@ -226,6 +226,7 @@ def get_wa(search, appid):
             if pod.get('title') != 'Input interpretation' and pod.plaintext.get_text():
                 answer = pod.plaintext.get_text()
                 break
+
     return answer
 
 
