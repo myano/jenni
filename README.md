@@ -18,19 +18,33 @@ Optional Dependencies
 
 From Pip:
 - *feedparser* - allows the optional rss.py and nws.py modules to work.
-- *BeautifulSoup* - allows better output from DuckDuckGo in search.py, image_me module and animate_me_module to work, and allow more in-depth results for .calc
+- *BeautifulSoup* - allows better output from DuckDuckGo in search.py and animate_me_module to work, and allow more in-depth results for .calc
 - *yelpapi* - allows you to use the food module
 
 Google Developer API Key
 ========================
 
-The YouTube module requires that you have a Google Developer API key in order to function. This key can be obtained by:
+The YouTube and image_me modules require that you have a Google Developer API key in order to function. This key can be obtained by:
 
 1. Go to the Google Developer Console at: https://console.developers.google.com/
 2. Create or select a project.
 3. In the sidebar on the left, expand *APIs & auth*. Next, click *APIs*. In the list of APIs, find and ensure that the *YouTube Data API* is enabled.
 4. In the sidebar on the left, select *Credentials*.
 5. Create a new *Public API access* key and choose *Server Key*. Copy the created API Key into the *google_dev_apikey* option in your config.
+
+For the image_me module you will need to enable the "Custom Search" API (as you did with YouTube), and in the project settings ensure that "Image search" is enabled.
+
+For the image_me module you will also need a custom search engine (cx) key, which can be obtained by (thanks to http://stackoverflow.com/a/37084643 for the instructions):
+1. From the Google Custom Search homepage ( http://www.google.com/cse/ ), click Create a Custom Search Engine.
+2. Type a name and description for your search engine.
+3. Under Define your search engine, in the Sites to Search box, enter at least one valid URL (For now, just put www.anyurl.com to get past this screen. More on this later ).
+4. Select the CSE edition you want and accept the Terms of Service, then click Next. Select the layout option you want, and then click Next.
+5. Click any of the links under the Next steps section to navigate to your Control panel.
+6. In the left-hand menu, under Control Panel, click Basics.
+7. In the Search Preferences section, select Search the entire web but emphasize included sites.
+8. Click Save Changes.
+9. In the left-hand menu, under Control Panel, click Sites.
+10. Delete the site you entered during the initial setup process.
 
 Best Practices
 ==============

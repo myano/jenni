@@ -1,55 +1,57 @@
 #!/usr/bin/env python
 """
 image_me.py - jenni Image Fetcher Module
+Copyright 2014-2016, Josh Begleiter (jbegleiter.com)
 Copyright 2009-2013, Michael Yanovich (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
-
-Developed by kaneda (https://josh.myhugesite.com / https://github.com/kaneda)
 
 More info:
  * jenni: https://github.com/myano/jenni/
  * Phenny: http://inamidst.com/phenny/
 """
 
+import json
 import random
 import re
 import traceback
-import urllib
+import urllib,urllib2
 import urlparse
 from modules import proxy
 
-try:
-    from BeautifulSoup import BeautifulSoup as Soup
-except ImportError:
-    raise ImportError("Could not find BeautifulSoup library,"
-                      "please install to use the image_me module")
+def image_me(jenni, term):
+    google_images_uri = 'https://www.googleapis.com/customsearch/v1?start=1&searchType=image'
 
-google_images_uri = 'https://www.google.com/search?safe=off'
-google_images_uri += '&source=lnms&tbm=isch&q=%s'
+    search_uri = '{0}&q={1}&key={2}&cx={3}'.format(
+        google_images_uri,
+        urllib.quote_plus(term),
+        jenni.config.google_dev_apikey,
+        jenni.config.google_custom_search_key
+    )
 
+    try:
+        content = urllib2.urlopen(search_uri).read()
+    except Exception as e:
+        jenni.say("Failed to contact Google Search, please try again later")
+        print "Failed to contact Google Search in image_me: {0}".format(e)
+        return
 
-def image_me(term):
-    global google_images_uri
+    try:
+        img_json = json.loads(content)
+    except Exception as e:
+        jenni.say("An error occurred getting image results, check logs for more details")
+        print "Failed to parse JSON for image_me: {0}\n{1}".format(e, content)
+        return
 
-    t = urllib.quote_plus(term)
-    # URL encode the term given
-    if '%' in term:
-        t = urllib.quote_plus(term.replace('%', ''))
+    if "items" not in img_json:
+        jenni.say("No results found")
+        return
 
-    content = proxy.get(google_images_uri % t)
-
-    soup = Soup(content)
-    img_links = [a['href'] for a in soup.findAll('a', 'rg_l', href=True)]
+    img_links = [item["link"] for item in img_json["items"]]
 
     if img_links:
         full_link = img_links[random.randint(0, len(img_links) - 1)]
-        parsed_link = urlparse.urlparse(full_link)
-        query = urlparse.parse_qs(parsed_link.query)
-        img_url = query['imgurl']
-        if type(img_url) == list:
-            img_url = img_url[0]
-        return urllib.unquote_plus(img_url)
+        return full_link
 
 
 def img(jenni, input):
@@ -62,7 +64,7 @@ def img(jenni, input):
     error = None
 
     try:
-        result = image_me(origterm)
+        result = image_me(jenni, origterm)
     except IOError:
         error = "An error occurred connecting to Google Images"
         traceback.print_exc()
