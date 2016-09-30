@@ -1,8 +1,14 @@
-Jenni
+Philly
 =====
 
-jenni is a python IRC bot maintained and developed by Michael Yanovich. This project was originally created by Sean B. Palmer.
+Philly is a fork of jenni which is a fork of phenny. Since the development for both of them seemed stopped we decided to create a fork.
 
+Todo:
+- Clean up not working or unwanted modules
+- Move codebase to Python 3
+
+OLD WIKI FROM JENNI:
+=====
 Installation & Configuration
 ============================
 jenni requires python 2.7, jenni will not work with python 3.x.
