@@ -179,7 +179,7 @@ def query(jenni, input):
     except Exception as e:
         notify(jenni, input.nick, str(e))
 
-query.rule = r'(?i).*\bspotify:(\S+):(\S+)|^\.sp(?:otify)? +https?://open\.spotify\.com/(\S+)/(\S+)$'
+query.rule = r'(?i).*\bspotify:(\S+):(\S+)|^\.sp(?:otify)? +https?://(?:open|play)\.spotify\.com/(\S+)/(\S+)$'
 query.priority = 'low'
 
 
