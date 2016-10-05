@@ -16,14 +16,15 @@ using the sed notation (s///) commonly found in vi/vim.
 from modules import unicode as uc
 import os, re
 
+find_path = os.path.expanduser("~/.jenni/find.txt")  # Keep things in own directory
 
 def load_db():
     """ load lines from find.txt to search_dict """
-    if not os.path.isfile("find.txt"):
-        f = open("find.txt", "w")
+    if not os.path.isfile(find_path):
+        f = open(find_path, "w")
         f.write("#test,yano,foobar\n")
         f.close()
-    search_file = open("find.txt", "r")
+    search_file = open(find_path, "r")
     lines = search_file.readlines()
     search_file.close()
     search_dict = dict()
@@ -56,7 +57,7 @@ def load_db():
 
 def save_db(search_dict):
     """ save search_dict to find.txt """
-    search_file = open("find.txt", "w")
+    search_file = open(find_path, "w")
     for channel in search_dict:
         if channel is not "":
             for nick in search_dict[channel]:
