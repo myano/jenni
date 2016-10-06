@@ -65,5 +65,28 @@ def update_backlog(jenni, input):
 update_backlog.rule = r".*"
 update_backlog.priority = "medium"
 
+def summary(jenni, input):
+    """Parses the backlog of the current channel and creates a summary"""
+    channel = input.sender
+    nick = input.nick
+    max_lines = input.group(2)
+
+    # Backlog is only logged for channels
+    if not channel.startswith("#"):
+        return
+
+    if max_lines:
+        backlog = read_backlog(jenni, channel, max_lines)
+    else:
+        backlog = read_backlog(jenni, channel)
+    backlog_str = "\n".join(backlog)
+
+    jenni.say(backlog_str)
+    pass
+
+summary.commands = ['summary']
+summary.example = '.summary LINES'
+summary.priority = "high"
+
 if __name__ == "__main__":
     print __doc__.strip()
