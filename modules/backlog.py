@@ -1,10 +1,39 @@
 #!/usr/bin/env python
 """
 backlog.py - jenni backlog utilities
+
+Needs sumy, nltk and numpy:
+`pip install sumy nltk numpy`
+`python -c "import nltk; nltk.download('punkt')"`
 """
 
 import os, re
 import threading
+from modules import unicode as uc
+
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
+# Import all summarizers until a good working one is chosen
+from sumy.summarizers.luhn import LuhnSummarizer
+from sumy.summarizers.edmundson import EdmundsonSummarizer
+from sumy.summarizers.lsa import LsaSummarizer
+from sumy.summarizers.text_rank import TextRankSummarizer
+from sumy.summarizers.lex_rank import LexRankSummarizer
+from sumy.summarizers.sum_basic import SumBasicSummarizer
+from sumy.summarizers.kl import KLSummarizer
+AVAILABLE_METHODS = {
+    "luhn": LuhnSummarizer,
+    "edmundson": EdmundsonSummarizer,
+    "lsa": LsaSummarizer,
+    "text-rank": TextRankSummarizer,
+    "lex-rank": LexRankSummarizer,
+    "sum-basic": SumBasicSummarizer,
+    "kl": KLSummarizer,
+}
+LANGUAGE = "german"
 
 def setup(self):
     fn = self.nick + "-" + self.config.host + ".backlog.db"
@@ -42,9 +71,11 @@ def read_backlog(jenni, filter_channel=None, max_lines=100):
 
 def update_backlog(jenni, input):
     """Write every received line to a backlog file"""
-    channel = input.sender
-    nick = input.nick
+    channel = uc.encode(uc.decode(input.sender))
+    nick = (input.nick).encode("utf-8")
     line = input.group()
+    if type(line) != type(str()):
+        line = uc.encode(line)
 
     # Rules for lines that should be excluded
     if not channel.startswith("#"):
@@ -67,25 +98,45 @@ update_backlog.priority = "medium"
 
 def summary(jenni, input):
     """Parses the backlog of the current channel and creates a summary"""
+    backlog_length = 100
+    summary_length = 5
+    summarize_type = "sum-basic"
+
     channel = input.sender
     nick = input.nick
-    max_lines = input.group(2)
+    cmds = input.group().split()
+    if len(cmds) > 1 and cmds[1].isdigit():
+        backlog_length = int(cmds[1])
+    if len(cmds) > 2 and cmds[2].isdigit():
+        summary_length = int(cmds[2])
+    if len(cmds) > 3:
+        summarize_type = cmds[3]
+        jenni.say(summarize_type)
 
     # Backlog is only logged for channels
     if not channel.startswith("#"):
         return
 
-    if max_lines:
-        backlog = read_backlog(jenni, channel, max_lines)
-    else:
-        backlog = read_backlog(jenni, channel)
+    backlog = read_backlog(jenni, channel, backlog_length)
     backlog_str = "\n".join(backlog)
 
-    jenni.say(backlog_str)
-    pass
+    # Get summary
+    parser = PlaintextParser.from_string(backlog_str, Tokenizer(LANGUAGE))
+    stemmer = Stemmer(LANGUAGE)
 
-summary.commands = ['summary']
-summary.example = '.summary LINES'
+    # Allow selection of summarizer
+    summarizer_class = next(cls for name, cls in AVAILABLE_METHODS.items() if summarize_type)
+    summarizer = summarizer_class(stemmer)
+    if summarizer_class is EdmundsonSummarizer:
+        summarizer.null_words = get_stop_words(LANGUAGE)
+    else:
+        summarizer.stop_words = get_stop_words(LANGUAGE)
+
+    for sentence in summarizer(parser.document, summary_length):
+        jenni.say(str(sentence))
+
+summary.commands = ["summary", "tldr"]
+summary.example = ".summary [backlog_length] [summary_length] [luhn,edmundson,lsa,text-rank,lex-rank,sum-basic,kl]"
 summary.priority = "high"
 
 if __name__ == "__main__":
