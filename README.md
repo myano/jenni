@@ -7,6 +7,12 @@ Todo:
 - Clean up not working or unwanted modules
 - Move codebase to Python 3
 
+#Commands (Work in progress)
+- .rand <arg1> <arg2> - Generates a random integer between <arg1> and <arg2>
+- .fd, .fucking_dinner - Gets a fucking recommedation what you could eat tonight
+- .tell
+- .
+
 OLD WIKI FROM JENNI:
 =====
 Installation & Configuration
