@@ -10,8 +10,11 @@ Todo:
 #Commands (Work in progress)
 - .rand arg1 arg2 - Generates a random integer between arg1 and arg2
 - .fd, .fucking_dinner - Gets a fucking recommedation what you could eat tonight
-- .tell
-- .
+- .tell nick x - Tells nick x as soon as he is active again
+- .isup website - Checks if its online
+- .imdb movie - Gets information about movie from imdb
+- .man item - Gets man page and sends info as link and in query
+- ..
 
 OLD WIKI FROM JENNI:
 =====
