@@ -14,8 +14,8 @@ More info:
 
 import re
 import traceback
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 try:
     from BeautifulSoup import BeautifulSoup as Soup
@@ -37,14 +37,14 @@ def man(jenni, input):
     if len(term.split(' ')) > 1:
         return jenni.say('I was expecting only one search term')
 
-    t = urllib.quote_plus(term)
+    t = urllib.parse.quote_plus(term)
     n = not_found % term
     # URL encode the term given
     if '%' in term:
-        t = urllib.quote_plus(term.replace('%', ''))
+        t = urllib.parse.quote_plus(term.replace('%', ''))
         n = not found % term.replace('%','')
 
-    content = urllib.urlopen(man_uri % t).read()
+    content = urllib.request.urlopen(man_uri % t).read()
     soup = Soup(content)
     h2s = soup.findAll('h2')
 
@@ -77,4 +77,4 @@ man.priority = 'high'
 man.rate = 10
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

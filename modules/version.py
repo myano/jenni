@@ -73,4 +73,4 @@ ctcp_time.rule = '\x01TIME\x01'
 ctcp_time.rate = 10
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

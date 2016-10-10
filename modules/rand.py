@@ -41,8 +41,8 @@ def rand(jenni, input):
             ln = li_integers.split()
             if len(ln) == 2:
                 a, b = ln
-                a = re.sub(r'\D', u'', a)
-                b = re.sub(r'\D', u'', b)
+                a = re.sub(r'\D', '', a)
+                b = re.sub(r'\D', '', b)
                 if not a:
                     a = 0
                 if not b:
@@ -61,4 +61,4 @@ rand.commands = ['rand']
 rand.priority = 'medium'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

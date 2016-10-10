@@ -13,7 +13,7 @@ More info:
 
 import json
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import web
 from modules import proxy
 
@@ -228,4 +228,4 @@ def suggest(jenni, input):
 suggest.commands = ['suggest']
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

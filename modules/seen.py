@@ -24,7 +24,7 @@ def f_seen(jenni, input):
     if not hasattr(jenni, 'seen'):
         return jenni.reply('?')
 
-    if jenni.seen.has_key(nick):
+    if nick in jenni.seen:
         channel, t = jenni.seen[nick]
         t = time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(t))
         msg = 'I last saw %s at %s in some channel.' % (nick, t)
@@ -40,9 +40,9 @@ def f_note(jenni, input):
             jenni.seen = dict()
         if input.sender.startswith('#'):
             jenni.seen[input.nick.lower()] = (input.sender, time.time())
-    except Exception, e: print e
+    except Exception as e: print(e)
 f_note.rule = r'(.*)'
 f_note.priority = 'low'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

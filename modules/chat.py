@@ -11,9 +11,9 @@ More info:
 
 
 import cleverbot
-from htmlentitydefs import name2codepoint
+from html.entities import name2codepoint
 import json
-from modules import unicode as uc
+from modules import str as uc
 import random
 import re
 import time
@@ -74,7 +74,7 @@ def chat(jenni, input):
             ## block out /ctcp
             return
     else:
-        print time.time(), 'Something went wrong with chat.py'
+        print(time.time(), 'Something went wrong with chat.py')
         return
 
     if not text:
@@ -208,15 +208,15 @@ def e(m):
     entity = m.group()
     if entity.startswith('&#x'):
         cp = int(entity[3:-1], 16)
-        meep = unichr(cp)
+        meep = chr(cp)
     elif entity.startswith('&#'):
         cp = int(entity[2:-1])
-        meep = unichr(cp)
+        meep = chr(cp)
     else:
         entity_stripped = entity[1:-1]
         try:
             char = name2codepoint[entity_stripped]
-            meep = unichr(char)
+            meep = chr(char)
         except:
             if entity_stripped in HTML_ENTITIES:
                 meep = HTML_ENTITIES[entity_stripped]
@@ -240,4 +240,4 @@ def fchannels():
 
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

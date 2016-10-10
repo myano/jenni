@@ -20,9 +20,9 @@ More info:
 import json
 import re
 import traceback
-import re, urllib, gzip, StringIO
+import re, urllib.request, urllib.parse, urllib.error, gzip, io
 import web
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from modules import proxy
 
 BASE_URL = "https://www.googleapis.com/youtube/v3/"
@@ -300,4 +300,4 @@ yt_title.commands = ['ytitle']
 
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

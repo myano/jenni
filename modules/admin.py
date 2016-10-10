@@ -260,7 +260,7 @@ def write_raw(jenni, input):
     a = txt.split(':')
     status = False
     if len(a) > 1:
-        newstr = u':'.join(a[1:])
+        newstr = ':'.join(a[1:])
         for x in char_replace:
             if x in newstr:
                 newstr = newstr.replace(x, char_replace[x])
@@ -268,7 +268,7 @@ def write_raw(jenni, input):
         status = True
     elif a:
         b = a[0].split()
-        jenni.write([b[0].strip()], u' '.join(b[1:]), raw=True)
+        jenni.write([b[0].strip()], ' '.join(b[1:]), raw=True)
         status = True
     if status:
         jenni.say('Message sent to server.')
@@ -277,5 +277,5 @@ write_raw.priority = 'high'
 write_raw.thread = False
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())
 

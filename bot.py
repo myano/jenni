@@ -77,8 +77,8 @@ class Jenni(irc.Bot):
             # if name in sys.modules:
             #     del sys.modules[name]
             try: module = imp.load_source(name, filename)
-            except Exception, e:
-                print >> sys.stderr, "Error loading %s: %s (in bot.py)" % (name, e)
+            except Exception as e:
+                print("Error loading %s: %s (in bot.py)" % (name, e), file=sys.stderr)
             else:
                 if hasattr(module, 'setup'):
                     module.setup(self)
@@ -86,15 +86,15 @@ class Jenni(irc.Bot):
                 modules.append(name)
 
         if modules:
-            print >> sys.stderr, 'Registered modules:', ', '.join(sorted(modules))
+            print('Registered modules:', ', '.join(sorted(modules)), file=sys.stderr)
         else:
-            print >> sys.stderr, "Warning: Couldn't find any modules"
+            print("Warning: Couldn't find any modules", file=sys.stderr)
 
         self.bind_commands()
 
     def register(self, variables):
         # This is used by reload.py, hence it being methodised
-        for name, obj in variables.iteritems():
+        for name, obj in variables.items():
             if hasattr(obj, 'commands') or hasattr(obj, 'rule'):
                 self.variables[name] = obj
 
@@ -121,7 +121,7 @@ class Jenni(irc.Bot):
             return pattern.replace('$nick', r'%s[,:] +' % re.escape(self.nick))
 
         bound_funcs = []
-        for name, func in self.variables.iteritems():
+        for name, func in self.variables.items():
             # print name, func
             if not hasattr(func, 'priority'):
                 func.priority = 'medium'
@@ -185,7 +185,7 @@ class Jenni(irc.Bot):
         max_pattern_width = max(len(f[2]) for f in bound_funcs)
         for module, name, regexp, priority in sorted(bound_funcs):
             encoded_regex = regexp.encode('utf-8').ljust(max_pattern_width)
-            print ('{0} | {1}.{2}, {3} priority'.format(encoded_regex,  module, name, priority))
+            print(('{0} | {1}.{2}, {3} priority'.format(encoded_regex,  module, name, priority)))
 
     def wrapped(self, origin, text, match):
         class JenniWrapper(object):
@@ -201,7 +201,7 @@ class Jenni(irc.Bot):
                     return lambda msg: self._bot.msg(sender, msg)
                 elif attr == 'bot':
                     # Allow deprecated usage of jenni.bot.foo but print a warning to the console
-                    print "Warning: Direct access to jenni.bot.foo is deprecated.  Please use jenni.foo instead."
+                    print("Warning: Direct access to jenni.bot.foo is deprecated.  Please use jenni.foo instead.")
                     import traceback
                     traceback.print_stack()
                     # Let this keep working by passing it transparently to _bot
@@ -219,9 +219,9 @@ class Jenni(irc.Bot):
         return JenniWrapper(self)
 
     def input(self, origin, text, bytes, match, event, args):
-        class CommandInput(unicode):
+        class CommandInput(str):
             def __new__(cls, text, origin, bytes, match, event, args):
-                s = unicode.__new__(cls, text)
+                s = str.__new__(cls, text)
                 s.sender = origin.sender
                 s.nick = origin.nick
                 s.event = event
@@ -276,17 +276,17 @@ class Jenni(irc.Bot):
                     if '!' in self.excludes[(input.sender).lower()]:
                         # block all function calls for this channel
                         return
-                    fname = func.func_code.co_filename.split('/')[-1].split('.')[0]
+                    fname = func.__code__.co_filename.split('/')[-1].split('.')[0]
                     if fname in self.excludes[(input.sender).lower()]:
                         # block function call if channel is blacklisted
                         return
-        except Exception, e:
-            print "Error attempting to block:", str(func.name)
+        except Exception as e:
+            print("Error attempting to block:", str(func.name))
             self.error(origin)
 
         try:
             func(jenni, input)
-        except Exception, e:
+        except Exception as e:
             self.error(origin)
 
     def limit(self, origin, func):
@@ -302,7 +302,7 @@ class Jenni(irc.Bot):
         text = decode(bytes)
 
         for priority in ('high', 'medium', 'low'):
-            items = self.commands[priority].items()
+            items = list(self.commands[priority].items())
             for regexp, funcs in items:
                 for func in funcs:
                     if event != func.event: continue
@@ -367,5 +367,5 @@ class Jenni(irc.Bot):
                                 self.stats[(func.name, source)] = 1
 
 if __name__ == '__main__':
-    print __doc__
+    print(__doc__)
 
