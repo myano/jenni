@@ -77,7 +77,7 @@ def log_raw(line):
 class Bot(asynchat.async_chat):
     def __init__(self, nick, name, channels, user=None, password=None, logchan_pm=None, logging=False, ipv6=False):
         asynchat.async_chat.__init__(self)
-        self.set_terminator('\n')
+        self.set_terminator(b'\n')
         self.buffer = ''
 
         self.nick = nick
@@ -129,7 +129,6 @@ class Bot(asynchat.async_chat):
 
 
     def __write(self, args, text=None, raw=False):
-        print("w2")
         print(self, args, text)
         #return
         try:
@@ -142,7 +141,6 @@ class Bot(asynchat.async_chat):
                     temp = (' '.join(args) + ' :' + text)[:510] + '\r\n'
                 else:
                     temp = ' '.join(args)[:510] + '\r\n'
-            print("puuush")
             self.push(temp.encode('utf-8'))
            # log_raw(temp)
         except Exception as e:
@@ -151,7 +149,6 @@ class Bot(asynchat.async_chat):
             #pass
 
     def write(self, args, text=None, raw=False):
-        print("w1")
         print(self, args, text)
 
         #return
@@ -227,7 +224,7 @@ class Bot(asynchat.async_chat):
                         raise
                 except:
                     continue
-            self.set_socket(self.ssl)
+            self.met_socket(self.ssl)
 
         if self.verbose:
             print('connected!', file=sys.stderr)
@@ -280,8 +277,8 @@ class Bot(asynchat.async_chat):
                 raise
 
     def collect_incoming_data(self, data):
-        print("read")
-        self.buffer += data
+        self.buffer += data.decode('utf-8')
+
         '''
         if data:
             if self.logchan_pm:
@@ -340,16 +337,6 @@ class Bot(asynchat.async_chat):
 
     def msg(self, recipient, text, log=False, x=False, wait_time=3):
         self.sending.acquire()
-
-        # Cf. http://swhack.com/logs/2006-03-01#T19-43-25
-        if isinstance(text, str):
-            try: text = text.encode('utf-8')
-            except UnicodeEncodeError as e:
-                text = e.__class__ + ': ' + str(e)
-        if isinstance(recipient, str):
-            try: recipient = recipient.encode('utf-8')
-            except UnicodeEncodeError as e:
-                return
 
         if not x:
             text = text.replace('\x01', '')

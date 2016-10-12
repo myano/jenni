@@ -42,7 +42,7 @@ def run_jenni(config):
         p.run(config.host, config.port)
 
     try: Watcher()
-    except e:
+    except Exception as e:
         print('Warning:', e, '(in __init__.py)', file=sys.stderr)
 
     while True:

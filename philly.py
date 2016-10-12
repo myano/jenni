@@ -165,7 +165,6 @@ def create_default_config(fn):
     f.close()
 
 def create_configfile(dotdir):
-
     if not os.path.isdir(dotdir):
         print('Creating a config directory at ~/.jenni...')
         try: os.mkdir(dotdir)

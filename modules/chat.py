@@ -13,7 +13,7 @@ More info:
 import cleverbot
 from html.entities import name2codepoint
 import json
-from modules import str as uc
+from modules import unicode as uc
 import random
 import re
 import time

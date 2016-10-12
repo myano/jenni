@@ -298,8 +298,9 @@ class Jenni(irc.Bot):
         return False
 
     def dispatch(self, origin, args):
-        bytes, event, args = args[0], args[1], args[2:]
-        text = decode(bytes)
+        #bytes, event, args = args[0], args[1], args[2:]
+        text, event, args = args[0], args[1], args[2:]
+        #text = decode(bytes)
 
         for priority in ('high', 'medium', 'low'):
             items = list(self.commands[priority].items())
