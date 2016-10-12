@@ -12,7 +12,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
-from modules import proxy
+import urllib.request as urllib2
 import json
 import re
 import urllib.request, urllib.error, urllib.parse
@@ -48,12 +48,13 @@ def movie(jenni, input):
         uri = API_BASE_URL + '?t=%s&plot=short&r=json' % (title)
 
     try:
-        page = proxy.get(uri)
-    except:
+        response = urllib2.urlopen(uri)
+        page = response.read()
+    except :
         return jenni.say('[IMDB] Connection to API did not succeed.')
 
     try:
-        data = json.loads(page)
+        data = json.loads(page.decode('UTF-8'))
     except:
         return jenni.say("[IMDB] Couldn't make sense of information from API")
 
