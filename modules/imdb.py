@@ -12,10 +12,10 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 '''
 
-from modules import proxy
+import urllib.request as urllib2
 import json
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 API_BASE_URL = 'http://www.omdbapi.com/'
 
@@ -23,7 +23,7 @@ API_BASE_URL = 'http://www.omdbapi.com/'
 def prep_title(txt):
     txt = txt.replace(' ', '+')
     txt = (txt).encode('utf-8')
-    txt = urllib2.quote(txt)
+    txt = urllib.parse.quote(txt)
     return txt
 
 
@@ -48,12 +48,13 @@ def movie(jenni, input):
         uri = API_BASE_URL + '?t=%s&plot=short&r=json' % (title)
 
     try:
-        page = proxy.get(uri)
-    except:
+        response = urllib2.urlopen(uri)
+        page = response.read()
+    except :
         return jenni.say('[IMDB] Connection to API did not succeed.')
 
     try:
-        data = json.loads(page)
+        data = json.loads(page.decode('UTF-8'))
     except:
         return jenni.say("[IMDB] Couldn't make sense of information from API")
 
@@ -65,7 +66,7 @@ def movie(jenni, input):
         else:
             message += 'Got an error from imdbapi'
     else:
-        pre_plot_output = u'Title: {0} | Released: {1} | Rated: {2} '
+        pre_plot_output = 'Title: {0} | Released: {1} | Rated: {2} '
         pre_plot_output += '| Rating: {3} | Metascore: {4} | Genre: {5} '
         pre_plot_output += '| Runtime: {6} | Plot: '
         genre = data['Genre']
@@ -95,4 +96,4 @@ movie.commands = ['imdb', 'movie', 'movies', 'show', 'tv', 'television']
 movie.example = '.imdb Movie Title, 2015'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

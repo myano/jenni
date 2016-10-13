@@ -99,7 +99,7 @@ def lookup(typ, objid):
 
     try:
         raise SpotifyStatusCodes[response['code']]
-    except KeyError, ValueError:
+    except KeyError as ValueError:
         raise Exception("HTTP Error {0}".format(response['code']))
 
 
@@ -197,4 +197,4 @@ def artist_list(data):
 
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

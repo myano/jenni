@@ -10,24 +10,24 @@ More info:
 
 import json
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import time
 
 user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'
 
 
-class Grab(urllib.URLopener):
+class Grab(urllib.request.URLopener):
     def __init__(self, *args):
         self.version = user_agent
-        urllib.URLopener.__init__(self, *args)
+        urllib.request.URLopener.__init__(self, *args)
 
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         return urllib.addinfourl(fp, [headers, errcode], "http:" + url)
-urllib._urlopener = Grab()
+urllib.request._urlopener = Grab()
 
 
 def remote_call(uri, info=False):
-    pyurl = u'https://tumbolia-two.appspot.com/py/'
+    pyurl = 'https://tumbolia-two.appspot.com/py/'
     code = 'import json;'
     #code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
     #code += "req.add_header('User-Agent','%s');" % (user_agent)
@@ -57,15 +57,15 @@ def remote_call(uri, info=False):
         code += "rtn['code']=u.code;"
     code += "print json.dumps(rtn)"
     query = code % repr(uri)
-    temp = urllib.quote(query)
-    u = urllib.urlopen(pyurl + temp)
+    temp = urllib.parse.quote(query)
+    u = urllib.request.urlopen(pyurl + temp)
     results = u.read()
     u.close()
 
     try:
         useful = json.loads(results)
         return True, useful
-    except Exception, error:
+    except Exception as error:
         return False, str(results)
 
 
@@ -99,4 +99,4 @@ def head(uri):
 
 
 if __name__ == "__main__":
-    print __doctype__.strip()
+    print(__doctype__.strip())

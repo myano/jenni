@@ -16,11 +16,11 @@ It also automatically displays the "title" of any URL pasted into the channel.
 
 import json
 import re
-from htmlentitydefs import name2codepoint
-from modules import unicode as uc
+from html.entities import name2codepoint
+from modules import str as uc
 from modules import proxy
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import web
 
 
@@ -54,7 +54,7 @@ try:
     file.close()
     bitly_loaded = True
 except:
-    print 'WARNING: No bitly.txt found.'
+    print('WARNING: No bitly.txt found.')
 
 try:
     f = open('simple_channels.txt', 'r')
@@ -64,7 +64,7 @@ try:
         simple_channels.append(channel.strip())
     f.close()
 except:
-    print 'WARNING: No simple_channels.txt found'
+    print('WARNING: No simple_channels.txt found')
 
 url_finder = re.compile(r'(?iu)(%s?(http|https|ftp)(://\S+\.?\S+/?\S+?))' %
                         (EXCLUSION_CHAR))
@@ -83,9 +83,9 @@ noteuri.priority = 'low'
 
 
 def get_page_backup(url):
-    req = urllib2.Request(url, headers={'Accept':'*/*'})
+    req = urllib.request.Request(url, headers={'Accept':'*/*'})
     req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0')
-    u = urllib2.urlopen(req)
+    u = urllib.request.urlopen(req)
     contents = u.read()
     out = dict()
     try:
@@ -162,7 +162,7 @@ def find_title(url):
     try:
         mtype = info['content-type']
     except:
-        print 'failed mtype:', str(info)
+        print('failed mtype:', str(info))
         return False, 'mtype failed'
     if not (('/html' in mtype) or ('/xhtml' in mtype)):
         return False, str(mtype)
@@ -189,15 +189,15 @@ def find_title(url):
         entity = m.group()
         if entity.startswith('&#x'):
             cp = int(entity[3:-1], 16)
-            meep = unichr(cp)
+            meep = chr(cp)
         elif entity.startswith('&#'):
             cp = int(entity[2:-1])
-            meep = unichr(cp)
+            meep = chr(cp)
         else:
             entity_stripped = entity[1:-1]
             try:
                 char = name2codepoint[entity_stripped]
-                meep = unichr(char)
+                meep = chr(char)
             except:
                 if entity_stripped in HTML_ENTITIES:
                     meep = HTML_ENTITIES[entity_stripped]
@@ -265,7 +265,7 @@ def short(text):
             b = uc.decode(a[i][0])
             ## make sure that it is not already a bitly shortened link
             if not is_bitly(b):
-                longer = urllib2.quote(b)
+                longer = urllib.parse.quote(b)
                 url = 'https://api-ssl.bitly.com/v3/shorten?login=%s' % (bitly_user)
                 url += '&apiKey=%s&longUrl=%s&format=txt' % (bitly_api_key,
                                                              longer)
@@ -409,8 +409,8 @@ def show_title_auto(jenni, input):
 
     try:
         status, results = get_results(input)
-    except Exception, e:
-        print '[%s]' % e, input
+    except Exception as e:
+        print('[%s]' % e, input)
         return
 
     k = 1
@@ -596,4 +596,4 @@ puny.commands = ['puny', 'idn', 'idna']
 
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

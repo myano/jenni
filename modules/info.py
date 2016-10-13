@@ -10,7 +10,7 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-from itertools import izip_longest
+from itertools import zip_longest
 
 def fchannels():
     try:
@@ -46,7 +46,7 @@ def commands(jenni, input):
     jenni.reply("I'm sending you a list of my most common commands in private.")
     jenni.reply('For a list of all of my commands, please visit: https://is.gd/CPStvK')
 
-    common_split = izip_longest(*[iter(common_commands)]*445, fillvalue='')
+    common_split = zip_longest(*[iter(common_commands)]*445, fillvalue='')
     for split_commands in common_split:
         jenni.msg(input.nick, ''.join(split_commands), False, False, 1)
 
@@ -77,7 +77,7 @@ def stats(jenni, input):
     ignore = set(['f_note', 'startup', 'message', 'noteuri',
                   'say_it', 'collectlines', 'oh_baby', 'chat',
                   'collect_links', 'bb_collect', 'random_chat'])
-    for (name, user), count in jenni.stats.iteritems():
+    for (name, user), count in jenni.stats.items():
         if name in ignore:
             continue
         if not user:
@@ -99,9 +99,9 @@ def stats(jenni, input):
             except KeyError:
                 channels[user] = count
 
-    comrank = sorted([(b, a) for (a, b) in commands.iteritems()], reverse=True)
-    userank = sorted([(b, a) for (a, b) in users.iteritems()], reverse=True)
-    charank = sorted([(b, a) for (a, b) in channels.iteritems()], reverse=True)
+    comrank = sorted([(b, a) for (a, b) in commands.items()], reverse=True)
+    userank = sorted([(b, a) for (a, b) in users.items()], reverse=True)
+    charank = sorted([(b, a) for (a, b) in channels.items()], reverse=True)
 
     # most heavily used commands
     creply = 'most used commands: '
@@ -132,4 +132,4 @@ stats.commands = ['stats']
 stats.priority = 'low'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

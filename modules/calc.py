@@ -11,14 +11,14 @@ More info:
  * Phenny: http://inamidst.com/phenny/
 """
 
-import HTMLParser
+import html.parser
 import json
 import re
 import string
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import web
 
-from modules import unicode as uc
+from modules import str as uc
 
 
 c_pattern = r'(?ims)<(?:h2 class="r"|div id="aoba")[^>]*>(.*?)</(?:h2|div)>'
@@ -103,7 +103,7 @@ def c(jenni, input):
         else:
             #### Attempt #2 (DuckDuckGo's API)
             ddg_uri = 'https://api.duckduckgo.com/?format=json&q='
-            ddg_uri += urllib.quote(q)
+            ddg_uri += urllib.parse.quote(q)
 
             ## Try to grab page (results)
             ## If page can't be accessed, we shall fail!
@@ -165,7 +165,7 @@ def py(jenni, input):
             jenni.say(answer)
         else:
             jenni.reply('Sorry, no result.')
-    except Exception, e:
+    except Exception as e:
         jenni.reply('The server did not return an answer.')
 py.commands = ['py', 'python']
 py.example = '.py print "Hello world, %s!" % ("James")'
@@ -179,7 +179,7 @@ def math(jenni, input):
     txt = txt.encode('utf-8')
     txt = txt.decode('utf-8')
     txt = txt.encode('utf-8')
-    txt = urllib.quote(txt.replace('+', '%2B'))
+    txt = urllib.parse.quote(txt.replace('+', '%2B'))
 
     url = 'http://gamma.sympy.org/input/?i='
 
@@ -200,7 +200,7 @@ def get_wa(search, appid):
     txt = search
     txt = txt.decode('utf-8')
     txt = txt.encode('utf-8')
-    txt = urllib.quote(txt)
+    txt = urllib.parse.quote(txt)
 
     uri = 'https://api.wolframalpha.com/v2/query?reinterpret=true&appid=' + appid
     uri += '&input=' + txt
@@ -253,4 +253,4 @@ def wa(jenni, input):
 wa.commands = ['wa']
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

@@ -23,13 +23,13 @@ configpath = os.path.expanduser(dotdir + '/default.py')
 
 if getattr(os, 'geteuid', None) and os.geteuid() == 0:
     error = 'Error: Refusing to run as root.'
-    print >> sys.stderr, error
+    print(error, file=sys.stderr)
     sys.exit(1)
 
 def check_python_version():
     if sys.version_info < (2, 4):
         error = 'Error: Requires Python 2.4 or later, from www.python.org'
-        print >> sys.stderr, error
+        print(error, file=sys.stderr)
         sys.exit(1)
 
 def create_default_config(fn):
@@ -161,22 +161,21 @@ def create_default_config(fn):
 
     # EOF
     """
-    print >> f, trim(output)
+    print(trim(output), file=f)
     f.close()
 
 def create_configfile(dotdir):
-
     if not os.path.isdir(dotdir):
-        print 'Creating a config directory at ~/.jenni...'
+        print('Creating a config directory at ~/.jenni...')
         try: os.mkdir(dotdir)
-        except Exception, e:
-            print >> sys.stderr, 'There was a problem creating %s:' % dotdir
-            print >> sys.stderr, e.__class__, str(e)
-            print >> sys.stderr, 'Please fix this and then run jenni again.'
+        except Exception as e:
+            print('There was a problem creating %s:' % dotdir, file=sys.stderr)
+            print(e.__class__, str(e), file=sys.stderr)
+            print('Please fix this and then run jenni again.', file=sys.stderr)
             sys.exit(1)
 
     create_default_config(configpath)
-    print >> sys.stdout, 'Config file generated. Please edit it at ' + configpath + ' and run ./jenni again.'
+    print('Config file generated. Please edit it at ' + configpath + ' and run ./jenni again.', file=sys.stdout)
 
     sys.exit(0)
 
@@ -199,7 +198,7 @@ def config_names(config):
     if os.path.isdir(here):
         here_files = files(here)
         if(len(here_files) == 0):
-            print >> sys.stderr, "Error: Config directory '{0}' contained no .py files".format(here)
+            print("Error: Config directory '{0}' contained no .py files".format(here), file=sys.stderr)
         return here_files
 
     there = os.path.join(dotdir, config)
@@ -210,10 +209,10 @@ def config_names(config):
     if os.path.isdir(there):
         there_files = files(there)
         if(len(there_files) == 0):
-            print >> sys.stderr, "Error: Config directory '{0}' contained no .py files".format(there)
+            print("Error: Config directory '{0}' contained no .py files".format(there), file=sys.stderr)
         return there_files
 
-    print >> sys.stderr, "Error: Couldn't find config '{0}' to import or .py files therein".format(config)
+    print("Error: Couldn't find config '{0}' to import or .py files therein".format(config), file=sys.stderr)
     sys.exit(1)
 
 def initialize_configs(config_path):
@@ -222,7 +221,7 @@ def initialize_configs(config_path):
     all_configs = config_names(config_path)
 
     if(len(all_configs) == 0):
-        print >> sys.stderr, "Error: no config files found in config path '{0}'".format(config_path)
+        print("Error: no config files found in config path '{0}'".format(config_path), file=sys.stderr)
         sys.exit(1)
 
     config_helper = Configs(all_configs)
@@ -237,7 +236,7 @@ def initialize_configs(config_path):
     except ImportError:
         try: from jenni import run
         except ImportError:
-            print >> sys.stderr, "Error: Couldn't find jenni to import"
+            print("Error: Couldn't find jenni to import", file=sys.stderr)
             sys.exit(1)
 
     # Step Five: Initialise And Run The jennies

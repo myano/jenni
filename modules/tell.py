@@ -37,7 +37,7 @@ def dumpReminders(fn, data, lock):
     lock.acquire()
     try:
         f = open(fn, 'w')
-        for tellee in data.iterkeys():
+        for tellee in data.keys():
             for remindon in data[tellee]:
                 line = '\t'.join((tellee,) + remindon)
                 try: f.write(line + '\n')
@@ -187,10 +187,10 @@ def message(jenni, input):
         for line in reminders[maximum:]:
             jenni.msg(tellee, line)
 
-    if len(jenni.reminders.keys()) != remkeys:
+    if len(list(jenni.reminders.keys())) != remkeys:
         dumpReminders(jenni.tell_filename, jenni.reminders, jenni.tell_lock)  # @@ tell
 message.rule = r'(.*)'
 message.priority = 'low'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())

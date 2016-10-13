@@ -18,4 +18,4 @@ def motivate(jenni, input):
 motivate.rule = r'(?u)^(\!|\.)m\s+(\S+)'
 
 if __name__ == '__main__':
-    print __doc__.strip()
+    print(__doc__.strip())
