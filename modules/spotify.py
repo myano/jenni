@@ -27,6 +27,7 @@ DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THIS PACKAGE.
 
 import json
 import sys
+import traceback
 from datetime import timedelta
 
 from modules import proxy
@@ -171,15 +172,17 @@ def query(jenni, input):
     try:
         result = lookup(typ, objid)
     except Exception as e:
-        notify(jenni, input.nick, str(e))
+        notify(jenni, input.nick, '%s: %s' % (type(e).__name__, str(e)))
+        traceback.print_exc()
         return
 
     try:
         formatters[typ](jenni, result)
     except Exception as e:
-        notify(jenni, input.nick, str(e))
+        notify(jenni, input.nick, '%s: %s' % (type(e).__name__, str(e)))
+        traceback.print_exc()
 
-query.rule = r'(?i).*\bspotify:(\S+):(\S+)|^\.sp(?:otify)? +https?://open\.spotify\.com/(\S+)/(\S+)$'
+query.rule = r'(?i).*\bspotify:(\S+):(\S+)|^\.sp(?:otify)? +https?://(?:open|play)\.spotify\.com/(\S+)/(\S+)$'
 query.priority = 'low'
 
 

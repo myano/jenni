@@ -47,7 +47,7 @@ def remote_call(uri, info=False):
         code += "rtn['info']=u.info();"
     else:
         code += "rtn['headers']=u.headers.dict;"
-        code += "contents=u.read(2048);"
+        code += "contents=u.read(4096);"
         code += "con=str();"
         code += r'''exec "try: con=(contents).decode('utf-8')\n'''
         code += '''except: con=(contents).decode('iso-8859-1')";'''
