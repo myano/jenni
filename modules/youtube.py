@@ -23,7 +23,6 @@ import traceback
 import re, urllib, gzip, StringIO
 import web
 from HTMLParser import HTMLParser
-from modules import proxy
 
 BASE_URL = "https://www.googleapis.com/youtube/v3/"
 
@@ -41,7 +40,7 @@ def ytsearch(jenni, trigger):
 
     query = trigger.group(2).encode('utf-8').strip()
     uri = BASE_URL + "search?part=snippet&type=video&q=" + query + "&key=" + key
-    result = json.loads(proxy.get(uri))
+    result = json.loads(web.get(uri))
 
     num_results = result['pageInfo']['totalResults']
     return_text = "YouTube returned {0} results: ".format(num_results)
@@ -198,7 +197,7 @@ def ytget(jenni, trigger):
     try:
         vid_id = trigger.group(2)
         uri = BASE_URL + "videos?part=snippet,contentDetails,statistics&id=" + vid_id + "&key=" + key
-        bytes = proxy.get(uri)
+        bytes = web.get(uri)
         result = json.loads(bytes)
         video_entry = result['items'][0]
     except IndexError:
