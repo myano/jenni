@@ -251,7 +251,7 @@ def addpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, True)
 addpoint_command.commands = ['addpoint']
 addpoint_command.priorty = 'high'
-addpoint_command.rate = 60 * 10
+addpoint_command.rate = 60 * 2
 
 
 def second_addpoint_command(jenni, input):
@@ -259,12 +259,18 @@ def second_addpoint_command(jenni, input):
     nick = input.group(1)
     if nick:
         nick = nick.strip()
-    if len(nick) == list(nick).count('+'):
+    num_of_plus = list(nick).count('+')
+    if len(nick) == num_of_plus or nick[0] in ['+']:
         return
+    nick = nick[:-2]
+
+    for each in ['++', '--']:
+        if each in nick:
+            return
     scores.editpoints(jenni, input, nick, True)
-second_addpoint_command.rule = r'^(\S+)\+\+($|\s)'
+second_addpoint_command.rule = r'^(\S+\+\+)($|\s)'
 second_addpoint_command.priority = 'high'
-second_addpoint_command.rate = 60 * 10
+second_addpoint_command.rate = 60 * 2
 
 
 def rmpoint_command(jenni, input):
@@ -275,7 +281,7 @@ def rmpoint_command(jenni, input):
     scores.editpoints(jenni, input, nick, False)
 rmpoint_command.commands = ['rmpoint']
 rmpoint_command.priority = 'high'
-rmpoint_command.rate = 60 * 10
+rmpoint_command.rate = 60 * 2
 
 
 def second_rmpoint_command(jenni, input):
@@ -283,12 +289,18 @@ def second_rmpoint_command(jenni, input):
     nick = input.group(1)
     if nick:
         nick = nick.strip()
-    if len(nick) == list(nick).count('-'):
+    num_of_neg = list(nick).count('-')
+    if len(nick) == num_of_neg or nick[0] in ['-']:
         return
+    nick = nick[:-2]
+
+    for each in ['++', '--']:
+        if each in nick:
+            return
     scores.editpoints(jenni, input, nick, False)
-second_rmpoint_command.rule = r'^(\S+)\-\-($|\s)'
+second_rmpoint_command.rule = r'^(\S+\-\-)($|\s)'
 second_rmpoint_command.priority = 'high'
-second_rmpoint_command.rate = 60 * 10
+second_rmpoint_command.rate = 60 * 2
 
 
 def view_scores(jenni, input):
@@ -296,7 +308,7 @@ def view_scores(jenni, input):
     scores.view_scores(jenni, input)
 view_scores.commands = ['points', 'point', 'scores', 'score']
 view_scores.priority = 'medium'
-view_scores.rate = 60 * 3
+view_scores.rate = 60 * 2
 
 
 def setpoint(jenni, input):
