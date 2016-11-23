@@ -112,8 +112,7 @@ def duck_search(query):
     else:
         ## if we still can't find a search result via the API
         ## let's try scraping the html page
-        uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % query #web.urllib.quote(query)
-        #page = web.get(uri)
+        uri = 'https://duckduckgo.com/html/?q=%s&kl=us-en&kp=-1' % web.urllib.quote(query)
         page = proxy.get(uri)
 
         r_duck = re.compile(r'nofollow" class="[^"]+" href="(.*?)">')
