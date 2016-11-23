@@ -40,9 +40,15 @@ IGNORE = list()
 
 # do not edit below this line unless you know what you're doing
 bitly_loaded = False
-BLOCKED_MODULES = ['bitly', 'head', 'host', 'ip', 'isup', 'longurl', 'py',
+BLOCKED_MODULES = ['bitly', 'head', 'host', 'in', 'ip', 'isup', 'longurl', 'py',
                    'short', 'spotify', 'sp', 'st', 'tell', 'title', 'tw',
                    'twitter', 'unbitly', 'untiny', 'fixurl', 'fix_url', 'isgd']
+
+BAD_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.gif', '.pdf',
+                  '.doc', '.docx', '.deb', '.rpm', '.exe', '.zip', '.7z', '.gz',
+                  '.tar', '.webm', '.mp4', '.mp3', '.avi', '.mpeg', '.mpg',
+                  '.ogv', '.ogg', '.java')
+
 simple_channels = list()
 
 try:
@@ -86,7 +92,7 @@ def get_page_backup(url):
     req = urllib2.Request(url, headers={'Accept':'*/*'})
     req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0')
     u = urllib2.urlopen(req)
-    contents = u.read()
+    contents = u.read(262144)
     out = dict()
     try:
         con = (contents).decode('utf-8')
@@ -129,6 +135,11 @@ def find_title(url):
     status = False
 
     while not status:
+        if 'i.imgur' not in url:
+            real_parts = url.split('?')
+            if real_parts and real_parts[0].endswith(BAD_EXTENSIONS):
+                break
+
         k += 1
         if k > 3:
             break
@@ -136,7 +147,8 @@ def find_title(url):
         msg = dict()
 
         try:
-            status, msg = proxy.get_more(url)
+            ## 256 kilobytes
+            status, msg = proxy.get_more(url, 1024 * 256)
         except:
             try:
                 status, msg = get_page_backup(url)
@@ -168,22 +180,28 @@ def find_title(url):
         return False, str(mtype)
 
     content = page
-    regex = re.compile('<(/?)title( [^>]+)?>', re.IGNORECASE)
-    content = regex.sub(r'<\1title>', content)
-    regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
-    content = regex.sub('', content)
-    start = content.find('<title>')
-    if start == -1:
-        return False, 'NO <title> found'
-    end = content.find('</title>', start)
-    if end == -1:
-        return False, 'NO </title> found'
-    content = content[start + 7:end]
-    content = content.strip('\n').rstrip().lstrip()
-    title = content
 
-    if len(title) > 200:
-        title = title[:200] + '[...]'
+
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(content, 'html.parser')
+        title = soup.title.text
+
+    except:
+        regex = re.compile('<(/?)title( [^>]+)?>', re.IGNORECASE)
+        content = regex.sub(r'<\1title>', content)
+        regex = re.compile('[\'"]<title>[\'"]', re.IGNORECASE)
+        content = regex.sub('', content)
+        start = content.find('<title>')
+        if start == -1:
+            return False, 'NO <title> found'
+        end = content.find('</title>', start)
+        if end == -1:
+            return False, 'NO </title> found'
+        content = content[start + 7:end]
+        content = content.strip('\n').rstrip().lstrip()
+        title = content
+
 
     def e(m):
         entity = m.group()
@@ -210,8 +228,9 @@ def find_title(url):
 
     title = r_entity.sub(e, title)
 
-    title = title.replace('\n', '')
-    title = title.replace('\r', '')
+    title = title.replace('\n', ' ')
+    title = title.replace('\r', ' ')
+    title = title.replace('\t', ' ')
 
     def remove_spaces(x):
         if '  ' in x:
@@ -220,7 +239,6 @@ def find_title(url):
         else:
             return x
 
-    title = remove_spaces(title)
 
     new_title = str()
     for char in title:
@@ -231,7 +249,14 @@ def find_title(url):
 
     title = re.sub(r'(?i)dcc\ssend', '', title)
 
+    title = remove_spaces(title)
+    title = (title).strip()
+
     title += '\x0F'
+
+    if len(title) > 200:
+        title = title[:200] + '\x0F[...]'
+
 
     if title:
         return True, title
@@ -272,6 +297,7 @@ def short(text):
                 #shorter = proxy.get(url)
                 shorter = web.get(url)
                 shorter.strip()
+                shorter = shorter.replace('j.mp', 'bit.ly')
                 bitlys.append([b, shorter])
             else:
                 bitlys.append([b, str()])
@@ -433,7 +459,7 @@ def show_title_auto(jenni, input):
             ## let's make it 'https' instead of 'http'
             bitly_link = bitly_link.replace('http:', 'https:')
 
-        if 'imgur: the most awesome images on the internet' in (returned_title).lower():
+        if returned_title and 'imgur: the most awesome images on the internet' in (returned_title).lower():
             ## because of the i.imgur hack above this is done
             ## to prevent from showing useless titles on image
             ## files
