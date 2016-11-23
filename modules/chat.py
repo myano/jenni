@@ -123,7 +123,7 @@ def chat(jenni, input):
 
         response = re.sub('(?i)clever(me|script|bot)', 'jenni', msgo)
         response = re.sub('(?i)\S+bot', (random.choice(nouns)).decode('base64'), response)
-        response = re.sub('(?i)(bot|human)', (random.choice(nouns)).decode('base64'), response)
+        response = re.sub('(?i)(bot|human|ai)', (random.choice(nouns)).decode('base64'), response)
         response = re.sub('(?i)computer', (random.choice(nouns)).decode('base64'), response)
         response = r_entity.sub(e, response)
 

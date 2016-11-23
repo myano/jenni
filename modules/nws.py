@@ -143,7 +143,7 @@ re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp
 re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 re_zip = re.compile(r'^(\d{5})\-?(\d{4})?$')
 more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1} -- You may also PM the bot to get more details.'
-warning_list = 'http://alerts.weather.gov/cap/us.php?x=1'
+warning_list = 'https://alerts.weather.gov/cap/us.php?x=1'
 stop = False
 CHANNEL = '##weather'
 

@@ -40,7 +40,7 @@ class Cleverbot:
     """
     HOST = "www.cleverbot.com"
     PROTOCOL = "http://"
-    RESOURCE = "/webservicemin"
+    RESOURCE = "/webservicemin?uc=165&"
     API_URL = PROTOCOL + HOST + RESOURCE
 
     headers = {
@@ -88,34 +88,6 @@ class Cleverbot:
                 ('cleanslate', False),  # Never modified
             )
         )
-
-        """
-            ('stimulus': ''),
-            ('start': 'y'),
-            ('sessionid': ''),
-            ('vText8': ''),
-            ('vText7': ''),
-            'vText6': '',
-            'vText5': '',
-            'vText4': '',
-            'vText3': '',
-            'vText2': '',
-            'icognoid': 'wsf',  # Never modified
-            'icognocheck': '',
-            'fno': 0,  # Never modified
-            'prevref': '',
-            'emotionaloutput': '',  # Never modified
-            'emotionalhistory': '',  # Never modified
-            'asbotname': '',  # Never modified
-            'ttsvoice': '',  # Never modified
-            'typing': '',  # Never modified
-            'lineref': '',
-            'sub': 'Say',  # Never modified
-            'islearning': 1,  # Never modified
-            'cleanslate': False,  # Never modified
-        }
-
-        """
 
         # the log of our conversation with Cleverbot
         self.conversation = []
