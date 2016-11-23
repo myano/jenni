@@ -328,6 +328,9 @@ class Jenni(irc.Bot):
                             try: bad_nicks = contents[1].split(',')
                             except: bad_nicks = ['']
 
+                            try: bad_idents = contents[2].split(',')
+                            except: bad_idents = ['']
+
                             # check for blocked hostmasks
                             if len(bad_masks) > 0:
                                 host = origin.host
@@ -354,6 +357,19 @@ class Jenni(irc.Bot):
                                     except:
                                         if nick in input.nick:
                                             return
+
+                            if len(bad_idents) > 0:
+                                for ident in bad_idents:
+                                    ident = ident.replace('\n', '').strip()
+                                    if len(ident) < 1: continue
+                                    try:
+                                        re_temp = re.compile(ident)
+                                        if re_temp.findall(input.ident):
+                                            return
+                                    except:
+                                        if ident in input.ident:
+                                            return
+
                         # stats
                         if func.thread:
                             targs = (func, origin, jenni, input)

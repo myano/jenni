@@ -157,7 +157,8 @@ def blocks(jenni, input):
             'success_add' : 'Successfully added block: %s',
             'no_nick' : 'No matching nick block found for: %s',
             'no_host' : 'No matching hostmask block found for: %s',
-            'invalid' : 'Invalid format for %s a block. Try: .blocks add (nick|hostmask) jenni',
+            'no_ident': 'No matching ident block found for: %s',
+            'invalid' : 'Invalid format for %s a block. Try: .blocks add (nick|hostmask|ident) jenni',
             'invalid_display' : 'Invalid input for displaying blocks.',
             'nonelisted' : 'No %s listed in the blocklist.',
             'huh' : 'I could not figure out what you wanted to do.',
@@ -178,9 +179,15 @@ def blocks(jenni, input):
     try: nicks = contents[1].replace('\n', '').split(',')
     except: nicks = ['']
 
+    try: idents = contents[2].replace('\n', '').split(',')
+    except: idents = ['']
+
     text = input.group().split()
 
     if len(text) == 3 and text[1] == 'list':
+        ## Display all contents of the following
+
+        ## Hostmasks
         if text[2] == 'hostmask':
             if len(masks) > 0 and masks.count('') == 0:
                 for each in masks:
@@ -188,6 +195,8 @@ def blocks(jenni, input):
                         jenni.say('blocked hostmask: ' + each)
             else:
                 jenni.reply(STRINGS['nonelisted'] % ('hostmasks'))
+
+        ## Nicks
         elif text[2] == 'nick':
             if len(nicks) > 0 and nicks.count('') == 0:
                 for each in nicks:
@@ -195,14 +204,26 @@ def blocks(jenni, input):
                         jenni.say('blocked nick: ' + each)
             else:
                 jenni.reply(STRINGS['nonelisted'] % ('nicks'))
+
+        elif text[2] == 'ident':
+            if len(idents) > 0 and idents.count('') == 0:
+                for each in idents:
+                    if len(each) > 0:
+                        jenni.say('blocked ident: ' + each)
+
+        ## Couldn't display anything
         else:
             jenni.reply(STRINGS['invalid_display'])
 
     elif len(text) == 4 and text[1] == 'add':
+        ## Add blocks...
+
         if text[2] == 'nick':
             nicks.append(text[3])
         elif text[2] == 'hostmask':
             masks.append(text[3])
+        elif text[2] == 'ident':
+            idents.append(text[3])
         else:
             jenni.reply(STRINGS['invalid'] % ('adding'))
             return
@@ -210,6 +231,9 @@ def blocks(jenni, input):
         jenni.reply(STRINGS['success_add'] % (text[3]))
 
     elif len(text) == 4 and text[1] == 'del':
+        ## Delete a block...
+
+        ## Nick
         if text[2] == 'nick':
             try:
                 nicks.remove(text[3])
@@ -217,12 +241,23 @@ def blocks(jenni, input):
             except:
                 jenni.reply(STRINGS['no_nick'] % (text[3]))
                 return
+
+        ## Hostmask
         elif text[2] == 'hostmask':
             try:
                 masks.remove(text[3])
                 jenni.reply(STRINGS['success_del'] % (text[3]))
             except:
                 jenni.reply(STRINGS['no_host'] % (text[3]))
+                return
+
+        ## Ident
+        elif text[2] == 'ident':
+            try:
+                idents.remove(text[3])
+                jenni.reply(STRINGS['success_del'] % (text[3]))
+            except:
+                jenni.reply(STRINGS['no_ident'] % (text[3]))
                 return
         else:
             jenni.reply(STRINGS['invalid'] % ('deleting'))
@@ -232,15 +267,26 @@ def blocks(jenni, input):
 
     os.remove('blocks')
     blocks = open('blocks', 'w')
+
     masks_str = ','.join(masks)
     if len(masks_str) > 0 and ',' == masks_str[0]:
         masks_str = masks_str[1:]
     blocks.write(masks_str)
+
     blocks.write('\n')
+
     nicks_str = ','.join(nicks)
     if len(nicks_str) > 0 and ',' == nicks_str[0]:
         nicks_str = nicks_str[1:]
     blocks.write(nicks_str)
+
+    blocks.write('\n')
+
+    idents_str = ','.join(idents)
+    if len(idents_str) > 0 and ',' == idents_str[0]:
+        idents_str = idents_str[1:]
+    blocks.write(idents_str)
+
     blocks.close()
 
 blocks.commands = ['blocks']
