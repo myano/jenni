@@ -26,7 +26,7 @@ class Grab(urllib.URLopener):
 urllib._urlopener = Grab()
 
 
-def remote_call(uri, info=False):
+def remote_call(uri, size=0, info=False):
     pyurl = u'https://tumbolia-two.appspot.com/py/'
     code = 'import json;'
     #code += "req=urllib2.Request(%s,headers={'Accept':'*/*'});"
@@ -47,7 +47,13 @@ def remote_call(uri, info=False):
         code += "rtn['info']=u.info();"
     else:
         code += "rtn['headers']=u.headers.dict;"
-        code += "contents=u.read(2048);"
+        if size:
+            code += "contents=u.read("
+            code += size
+            code += ");"
+        else:
+            code += "contents=u.read();"
+
         code += "con=str();"
         code += r'''exec "try: con=(contents).decode('utf-8')\n'''
         code += '''except: con=(contents).decode('iso-8859-1')";'''
@@ -80,10 +86,14 @@ def get(uri):
     return page
 
 
-def get_more(uri):
+def get_more(uri, size=0):
     if not uri.startswith('http'):
         uri = 'http://' + uri
-    status, response = remote_call(uri)
+
+    if size:
+        status, response = remote_call(uri, size=size)
+    else:
+        status, response = remote_call(uri)
     return status, response
 
 
