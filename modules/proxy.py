@@ -49,7 +49,7 @@ def remote_call(uri, size=0, info=False):
         code += "rtn['headers']=u.headers.dict;"
         if size:
             code += "contents=u.read("
-            code += size
+            code += str(size)
             code += ");"
         else:
             code += "contents=u.read();"

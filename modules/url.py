@@ -152,7 +152,9 @@ def find_title(url):
         except:
             try:
                 status, msg = get_page_backup(url)
+                print "[url] Proxy isn't working!"
             except:
+                print '[url] Proxy and "get_page_backup" have both failed!'
                 continue
 
         if type(msg) == type(dict()) and 'code' in msg:
