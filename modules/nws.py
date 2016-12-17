@@ -134,13 +134,13 @@ conditions = {
     'Snow': '\x0311Snow\x03',
 }
 
-county_list = 'http://alerts.weather.gov/cap/{0}.php?x=3'
-alerts = 'http://alerts.weather.gov/cap/wwaatmget.php?x={0}'
-zip_code_lookup = 'http://www.zip-codes.com/zip-code/{0}/zip-code-{0}.asp'
+county_list = 'https://alerts.weather.gov/cap/{0}.php?x=3'
+alerts = 'https://alerts.weather.gov/cap/wwaatmget.php?x={0}'
+zip_code_lookup = 'https://www.zip-codes.com/zip-code/{0}/zip-code-{0}.asp'
 nomsg = 'There are no active watches, warnings or advisories, for {0}.'
-re_fips = re.compile(r'County FIPS:</a></td><td class="info">(\S+)</td></tr>')
-re_state = re.compile(r'State:</a></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z ]+)\]</a></td></tr>')
-re_city = re.compile(r'City:</a></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
+re_fips = re.compile(r'County FIPS:</.*?>(\S+)</td></tr>')
+re_state = re.compile(r'State:</span></td><td class="info"><a href="/state/\S\S.asp">\S\S \[([A-Za-z ]+)\]</a></td></tr>')
+re_city = re.compile(r'City:</span></td><td class="info"><a href="/city/\S+.asp">(.*)</a></td></tr>')
 re_zip = re.compile(r'^(\d{5})\-?(\d{4})?$')
 more_info = 'Complete weather watches, warnings, and advisories for {0}, available here: {1} -- You may also PM the bot to get more details.'
 warning_list = 'https://alerts.weather.gov/cap/us.php?x=1'
@@ -165,7 +165,7 @@ def nws_lookup(jenni, input):
         ## county given
         county = bits[0]
         state = bits[1]
-        url_part1 = 'http://alerts.weather.gov'
+        url_part1 = 'https://alerts.weather.gov'
         state = (state).strip().lower()
         county = (county).strip().lower()
         reverse_lookup = list()
@@ -190,7 +190,7 @@ def nws_lookup(jenni, input):
             prev1 = line
         if not url_part2:
             return jenni.reply('Could not find county.')
-        master_url = 'http://alerts.weather.gov/cap/' + url_part2
+        master_url = 'https://alerts.weather.gov/cap/' + url_part2
         location = text
     elif len(bits) == 1:
         ## zip code

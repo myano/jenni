@@ -105,7 +105,7 @@ def code(jenni, search):
 def get_metar(icao_code):
     '''Obtain METAR data from NOAA for a given ICAO code'''
 
-    uri = 'http://weather.noaa.gov/pub/data/observations/metar/stations/%s.TXT'
+    uri = 'http://tgftp.nws.noaa.gov/data/observations/metar/stations/%s.TXT'
 
     try:
         page = web.get(uri % icao_code)
@@ -216,10 +216,14 @@ def f_weather(jenni, input):
     text = input.group(2)
 
     status, icao_code = get_icao(jenni, text)
+    print 'status:', status
+    print 'icao_code:', icao_code
     if not status:
         return jenni.say(icao_code)
 
     status, page = get_metar(icao_code)
+    print 'status:', status
+    print 'page:', page
     if not status:
         return jenni.say(page)
 
@@ -601,7 +605,7 @@ def remove_dots(txt):
     if '..' not in txt:
         return txt
     else:
-        txt = re.sub('\.\.', '.', txt)
+        txt = re.sub(r'\.\.', '.', txt)
         return remove_dots(txt)
 
 def chomp_desc(txt):
@@ -622,7 +626,7 @@ def chomp_desc(txt):
     out = re.sub('evening', 'AM', out)
     out = re.sub('afternoon', 'PM', out)
     out = re.sub('in the', 'in', out)
-    #out = re.sub('\.\.', ' ', out)
+    #out = re.sub(r'\.\.', ' ', out)
     out = remove_dots(out)
     out = re.sub('Then the (\S)', upper_repl, out)
     return out
@@ -907,11 +911,11 @@ def add_degree(txt):
 
 def weather_wunderground(jenni, input):
     if not hasattr(jenni.config, 'wunderground_apikey'):
-        return jenni.say('Please sign up for a wunderground.com API key at http://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
+        return jenni.say('Please sign up for a wunderground.com API key at https://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
 
     apikey = jenni.config.wunderground_apikey
 
-    url = 'http://api.wunderground.com/api/%s/conditions/geolookup/q/%s.json'
+    url = 'https://api.wunderground.com/api/%s/conditions/geolookup/q/%s.json'
     txt = input.group(2)
     if not txt:
         return jenni.say('No input provided. Please provide a locaiton.')
@@ -999,11 +1003,11 @@ def preface_location(ci, reg='', cty=''):
 
 def forecast_wg(jenni, input):
     if not hasattr(jenni.config, 'wunderground_apikey'):
-        return jenni.say('Please sign up for a wunderground.com API key at http://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
+        return jenni.say('Please sign up for a wunderground.com API key at https://www.wunderground.com/weather/api/ or try .wx-noaa or .weather-noaa')
 
     apikey = jenni.config.wunderground_apikey
 
-    url = 'http://api.wunderground.com/api/%s/forecast10day/geolookup/q/%s.json'
+    url = 'https://api.wunderground.com/api/%s/forecast10day/geolookup/q/%s.json'
 
     txt = input.group(2)
     if not txt:
@@ -1063,7 +1067,15 @@ def forecast_wg(jenni, input):
         lows = u'\x02\x0302%s\u00B0F (%s\u00B0C)\x03\x02' % (day['low']['fahrenheit'], day['low']['celsius'])
         #wind = 'From %s at %s-mph (%s-kph)' % (day['avewind']['dir'], day['maxwind']['mph'], day['maxwind']['kph'])
 
-        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FCond\x1F: %s. Eve: %s | ' % (day_of_week, highs, lows, days_text[k], days_text[k + 1])
+        days_text_temp = days_text[k]
+        if not days_text[k].endswith('.'):
+            days_text_temp += '.'
+
+        days_text1_temp = days_text[k + 1]
+        if not days_text[k + 1].endswith('.'):
+            days_text1_temp += '.'
+
+        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FCond\x1F: %s Eve: %s | ' % (day_of_week, highs, lows, days_text_temp, days_text1_temp)
 
         k += 2
         if (k / 2.) <= 2:
