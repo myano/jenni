@@ -100,7 +100,7 @@ def get_more(uri, size=0):
 def head(uri):
     if not uri.startswith('http'):
         uri = 'http://' + uri
-    status, response = remote_call(uri, True)
+    status, response = remote_call(uri, info=True)
     if status:
         page = response['info']
     else:
