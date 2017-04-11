@@ -102,7 +102,7 @@ def head(uri):
         uri = 'http://' + uri
     status, response = remote_call(uri, True)
     if status:
-        page = u['info']
+        page = response['info']
     else:
         page = str()
     return page
