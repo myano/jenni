@@ -256,8 +256,8 @@ def find_title(url):
 
     title += '\x0F'
 
-    if len(title) > 200:
-        title = title[:200] + '\x0F[...]'
+    if len(title) > 350:
+        title = title[:350] + '\x0F[...]'
 
 
     if title:
