@@ -10,6 +10,7 @@ More info:
 '''
 
 from modules import proxy
+import web
 from modules import unicode as uc
 import datetime as dt
 import json
@@ -17,12 +18,12 @@ import re
 
 exchange_rates = dict()
 last_check = dt.datetime.now()
-exchanges = ['btce', 'rock', 'ripple', 'bitstamp', 'coinbase']
+exchanges = ['btce', 'rock', 'bitstamp', 'coinbase']
 
 
 def btc_page():
     try:
-        page = proxy.get('https://api.bitcoincharts.com/v1/markets.json')
+        page = web.get('https://api.bitcoincharts.com/v1/markets.json')
     except Exception, e:
         print dt.datetime.now(), e
         return False, 'Failed to reach bitcoincharts.com'
@@ -31,7 +32,7 @@ def btc_page():
 
 def btc_coinbase_page():
     try:
-        page = proxy.get('https://coinbase.com/api/v1/currencies/exchange_rates')
+        page = web.get('https://coinbase.com/api/v1/currencies/exchange_rates')
     except Exception, e:
         print dt.datetimenow.now(), e
         return False, 'Failed to reach coinbase.com'
@@ -62,6 +63,8 @@ def btc(jenni, input):
         else:
             return jenni.reply(page)
 
+        if 'USD' not in exchange_rates:
+            exchange_rates['USD'] = dict()
         ## build internal state of exchange
         for each in json_page:
             if each['currency'] == 'USD':
@@ -72,12 +75,16 @@ def btc(jenni, input):
 
         coinbase_status, coinbase_page = btc_coinbase_page()
 
+        coinbase_json = dict()
+
         try:
             coinbase_json = json.loads(coinbase_page)
         except:
+            #return jenni.say('Could not parse json from coinbase API.')
             pass
 
-        exchange_rates['USD']['coinbase'] = ppnum(float(coinbase_json['btc_to_usd']))
+        if coinbase_json:
+            exchange_rates['USD']['coinbase'] = ppnum(float(coinbase_json['btc_to_usd']))
 
     response = '1 BTC (in USD) = '
     symbols = exchange_rates['USD'].keys()
@@ -85,11 +92,11 @@ def btc(jenni, input):
 
     for each in symbols:
         if each.replace('USD', '') in exchanges:
-            response += '%s: %s | ' % (each, exchange_rates['USD'][each])
+            response += '%s: %s | ' % (each, ppnum(float(str(exchange_rates['USD'][each]).replace(',', ''))))
 
-    response += 'lolcat (coinbase) index: $%s | ' % (ppnum(float(exchange_rates['USD']['coinbase']) * 160))
+    response += 'lolcat (coinbase) index: $%s | ' % (ppnum(float(str(exchange_rates['USD']['coinbase']).replace(',', '')) * 160))
 
-    response += 'Howells (coinbase) index: $%s | ' % (ppnum(float(exchange_rates['USD']['coinbase']) * 7500))
+    response += 'Howells (coinbase) index: $%s | ' % (ppnum(float(str(exchange_rates['USD']['coinbase']).replace(',', '')) * 7500))
 
     response += 'last updated at: %s UTC' % (str(last_check))
 
