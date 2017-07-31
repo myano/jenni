@@ -11,6 +11,8 @@ More info:
 
 from datetime import datetime, timedelta
 
+## TODO: just scrape, https://www.timeanddate.com/countdown/generic?iso=20170411T070001&p0=1440&msg=DO+SFO2+DOWNTIME&ud=1&font=cursive
+
 bad_format = "Please use correct format: .countdown 2012 12 21 You can also try: '.nye -5'"
 ## 2036 02 07
 
@@ -127,7 +129,7 @@ def generic_countdown(jenni, input):
             offset = text.split()[0]
         else:
             offset = 0
-        year = str(int(datetime.now().year) + 1)
+        year = str(int(datetime.now().year))
         month = '01'
         day = '01'
 
@@ -149,7 +151,7 @@ def generic_countdown(jenni, input):
             offset = 0
         else:
             offset = offset
-        calculate_date = datetime(int(datetime.now().year) + 1, 1, 1, 0, 0, 0)
+        calculate_date = datetime(int(datetime.now().year), 1, 1, 0, 0, 0)
         today = datetime.now() + timedelta(hours=int(offset))
         nye = True
     else:
