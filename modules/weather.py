@@ -605,17 +605,34 @@ def remove_dots(txt):
     if '..' not in txt:
         return txt
     else:
-        txt = re.sub(r'\.\.', '.', txt)
+        txt = re.sub(r'\.+', ' ', txt)
         return remove_dots(txt)
+
+
+def remove_spaces(x):
+    if '  ' in x:
+        x = x.replace('  ', ' ')
+        return remove_spaces(x)
+    else:
+        return x
+
 
 def chomp_desc(txt):
     out = txt
     #print "original:", out
+    p = re.compile(r'(?<=[\.\?!]\s)(\w+)')
+
     def upper_repl(match):
         return match.group(1).upper()
+
+    def cap(match):
+        return match.group().capitalize()
+
     out = re.sub('([Tt])hunder(storm|shower)', r'\1\2', out)
     out = re.sub('with', 'w/', out)
     out = re.sub('and', '&', out)
+    out = re.sub('during', 'in', out)
+    out = re.sub('becoming', '', out)
     out = re.sub('occasionally', 'occ', out)
     out = re.sub('occasional', 'occ', out)
     out = re.sub('especially', 'esp.', out)
@@ -627,8 +644,16 @@ def chomp_desc(txt):
     out = re.sub('afternoon', 'PM', out)
     out = re.sub('in the', 'in', out)
     #out = re.sub(r'\.\.', ' ', out)
-    out = remove_dots(out)
     out = re.sub('Then the (\S)', upper_repl, out)
+    out = re.sub(r'(?i)(\b)(?:the|a)(\b)', r'\1\2', out)
+    #out = re.sub(cap, '', out)
+
+    out = remove_dots(out)
+    out = remove_spaces(out)
+
+    out = p.sub(cap, out)
+
+    out = out.strip()
     return out
 
 
@@ -703,7 +728,12 @@ def forecast(jenni, input):
         windspeedC = form % (float(day['windSpeed']) * 1.609344)
         windspeed = form % (day['windSpeed'])
         summary = day['summary']
-        dotw_day = datetime.datetime.fromtimestamp(int(day['sunriseTime'])).weekday()
+        #print("day:", str(day))
+        day_ts = day['time']
+        if "sunriseTime" in day:
+            day_ts = int(day['sunriseTime'])
+
+        dotw_day = datetime.datetime.fromtimestamp(day_ts).weekday()
         dotw_day_pretty = u'\x0310\x02\x1F%s\x1F\x02\x03' % (dotw[dotw_day])
 
         line = u'%s: \x02\x0304%sF (%sC)\x03\x02 / \x02\x0312%sF (%sC)\x03\x02, \x1FDew\x1F: %sF (%sC), \x1FWind\x1F: %smph (%skmh), %s | '
@@ -760,6 +790,7 @@ def forecast(jenni, input):
     jenni.say(second_output)
 forecast.commands = ['forecast', 'fct', 'fc']
 forecast.rate = 5
+forecast.priority = 'low'
 
 
 def forecastio_current_weather(jenni, input):
@@ -871,6 +902,7 @@ def forecastio_current_weather(jenni, input):
     jenni.say(output)
 forecastio_current_weather.commands = ['wxi-ft', 'wx-ft', 'weather-ft', 'weather', 'wx']
 forecastio_current_weather.rate = 5
+forecastio_current_weather.priority = 'high'
 
 
 def make_rh_C(temp, dewpoint):
@@ -988,6 +1020,7 @@ def weather_wunderground(jenni, input):
 
 weather_wunderground.commands = ['wx-wg', 'weather-wg']
 weather_wunderground.rate = 10
+weather_wunderground.priority = 'high'
 
 
 def preface_location(ci, reg='', cty=''):
@@ -1075,7 +1108,7 @@ def forecast_wg(jenni, input):
         if not days_text[k + 1].endswith('.'):
             days_text1_temp += '.'
 
-        temp = '\x02\x0310%s\x03\x02: %s / %s, \x1FCond\x1F: %s Eve: %s | ' % (day_of_week, highs, lows, days_text_temp, days_text1_temp)
+        temp = '\x02\x0310%s\x03\x02: %s / %s, AM: %s PM: %s | ' % (day_of_week, highs, lows, days_text_temp, days_text1_temp)
 
         k += 2
         if (k / 2.) <= 2:
@@ -1090,7 +1123,14 @@ def forecast_wg(jenni, input):
     jenni.say(output_second)
 
 forecast_wg.commands = ['forecast-wg']
+forecast_wg.priority = 'low'
 forecast_wg.rate = 5
+
+
+def radar_us(jenni, input):
+    return jenni.say('https://radar.weather.gov/Conus/Loop/NatLoop.gif')
+radar_us.commands = ['radar_us',]
+radar_us.priority = 'low'
 
 
 
