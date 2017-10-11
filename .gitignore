@@ -1,0 +1,11 @@
+*.pyc
+*.txt
+uno_test.py
+.*.sw*
+osu_osc.py
+blocks
+logs/*
+*.db
+build
+*~
+nohup.out
