@@ -277,7 +277,7 @@ class UnoBot:
         self.rankings("ppg")
         i = 1
         for z in self.prescores[:10]:
-            jenni.msg(nickk, STRINGS['SCORE_ROW'] % ('ppg', i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
+            jenni.say(STRINGS['SCORE_ROW'] % ('ppg', i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
             i += 1
 
     def createnewdeck(self):
@@ -669,7 +669,7 @@ passs.rate = 0
 
 def unotop10(jenni, input):
     unobot.top10(jenni, input)
-unotop10.commands = ['unotop10']
+unotop10.commands = ['unotop10, stats']
 unotop10.priority = 'low'
 unotop10.thread = False
 unotop10.rate = 0
