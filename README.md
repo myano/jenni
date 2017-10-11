@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+# Bots
+=======
 Jenni
 =====
 
@@ -50,3 +53,4 @@ Credits
 For a list of contributions to the jenni fork see the file CREDITS.
 
 Sean B. Palmer, http://inamidst.com/sbp/ forked by Michael Yanovich, https://yanovich.net/
+>>>>>>> 27c0da7bd84728e4421fb1a094f96d026fc0134d

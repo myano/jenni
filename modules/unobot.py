@@ -38,8 +38,13 @@ import time
 away_last = 0
 
 # Remember to change these 3 lines or nothing will work
+<<<<<<< HEAD
+CHANNEL = '#swiftfalcons'
+SCOREFILE = "/home/web/Bots/jenni/unoscores.txt"
+=======
 CHANNEL = '##uno'
 SCOREFILE = "/home/jenni/jenni/unoscores.txt"
+>>>>>>> 27c0da7bd84728e4421fb1a094f96d026fc0134d
 # Only the owner (starter of the game) can call .unostop to stop the game.
 # But this calls for a way to allow others to stop it after the game has been idle for a while.
 # After this set time, anyone can stop the game via .unostop
@@ -277,7 +282,7 @@ class UnoBot:
         self.rankings("ppg")
         i = 1
         for z in self.prescores[:10]:
-            jenni.msg(nickk, STRINGS['SCORE_ROW'] % ('ppg', i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
+            jenni.say(STRINGS['SCORE_ROW'] % ('ppg', i, z[0], z[3], z[1], z[2], float(z[3])/float(z[1]), float(z[2])/float(z[1])*100))
             i += 1
 
     def createnewdeck(self):
@@ -669,7 +674,11 @@ passs.rate = 0
 
 def unotop10(jenni, input):
     unobot.top10(jenni, input)
-unotop10.commands = ['unotop10']
+<<<<<<< HEAD
+unotop10.commands = ['unotop10', 'stats']
+=======
+unotop10.commands = ['unotop10, stats']
+>>>>>>> 27c0da7bd84728e4421fb1a094f96d026fc0134d
 unotop10.priority = 'low'
 unotop10.thread = False
 unotop10.rate = 0
