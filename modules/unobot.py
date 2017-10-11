@@ -38,8 +38,13 @@ import time
 away_last = 0
 
 # Remember to change these 3 lines or nothing will work
+<<<<<<< HEAD
 CHANNEL = '#swiftfalcons'
 SCOREFILE = "/home/web/Bots/jenni/unoscores.txt"
+=======
+CHANNEL = '##uno'
+SCOREFILE = "/home/jenni/jenni/unoscores.txt"
+>>>>>>> 27c0da7bd84728e4421fb1a094f96d026fc0134d
 # Only the owner (starter of the game) can call .unostop to stop the game.
 # But this calls for a way to allow others to stop it after the game has been idle for a while.
 # After this set time, anyone can stop the game via .unostop
@@ -669,7 +674,11 @@ passs.rate = 0
 
 def unotop10(jenni, input):
     unobot.top10(jenni, input)
+<<<<<<< HEAD
 unotop10.commands = ['unotop10', 'stats']
+=======
+unotop10.commands = ['unotop10, stats']
+>>>>>>> 27c0da7bd84728e4421fb1a094f96d026fc0134d
 unotop10.priority = 'low'
 unotop10.thread = False
 unotop10.rate = 0
