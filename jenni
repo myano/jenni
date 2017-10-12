@@ -80,6 +80,10 @@ def create_default_config(fn):
     # Get a Server API Key; this is required for YouTube to work.
     # google_dev_apikey = ''
 
+    # If you want to use any of the search features you'll need this as well
+    # check out http://stackoverflow.com/a/37084643 for more info
+    # google_custom_search_key = ''
+
     # wolframalpha_apikey is for an API key from Wolfram|Alpha
     # http://products.wolframalpha.com/api/
     # This is needed in order to make .calc/.c have more comprehensive answers.
