@@ -18,8 +18,8 @@ import sys, os, imp, optparse
 from configs import Configs
 from textwrap import dedent as trim
 
-dotdir = os.path.expanduser('~/.jenni')
-configpath = os.path.expanduser(dotdir + '/default.py')
+dotdir = os.path.expanduser(os.path.join('~', '.jenni'))
+configpath = os.path.expanduser(os.path.join(dotdir, 'default.py'))
 
 if getattr(os, 'geteuid', None) and os.geteuid() == 0:
     error = 'Error: Refusing to run as root.'
@@ -147,7 +147,7 @@ def create_default_config(fn):
 
     # Directories to load user modules from
     # e.g. /path/to/my/modules
-    extra = ['""" + os.getcwd() + '/modules/' + """']
+    extra = ['""" + os.path.join(os.getcwd(), 'modules', '') + """']
 
     # Services to load: maps channel names to white or black lists
     external = {
@@ -167,7 +167,7 @@ def create_default_config(fn):
 def create_configfile(dotdir):
 
     if not os.path.isdir(dotdir):
-        print 'Creating a config directory at ~/.jenni...'
+        print 'Creating a config directory at ~' + os.sep + '.jenni...'
         try: os.mkdir(dotdir)
         except Exception, e:
             print >> sys.stderr, 'There was a problem creating %s:' % dotdir
@@ -176,7 +176,7 @@ def create_configfile(dotdir):
             sys.exit(1)
 
     create_default_config(configpath)
-    print >> sys.stdout, 'Config file generated. Please edit it at ' + configpath + ' and run ./jenni again.'
+    print >> sys.stdout, 'Config file generated. Please edit it at ' + configpath + ' and run jenni again.'
 
     sys.exit(0)
 

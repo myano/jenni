@@ -23,8 +23,8 @@ import sys
 
 last = "DEBUG_ME" # if you see this in the terminal, something broke.
 
-if not os.path.exists("modules/twss.txt"):
-    f = open("modules/twss.txt", "w")
+if not os.path.exists(os.path.join("modules", "twss.txt")):
+    f = open(os.path.join("modules", "twss.txt"), "w")
     url = "http://www.twssstories.com/best?page="
     first_re = re.compile(r"<p>.+TWSS\.*</p>")
     inner_re = re.compile(r'".+"')
@@ -60,10 +60,10 @@ if not os.path.exists("modules/twss.txt"):
 def say_it(jenni, input):
     global last
     user_quotes = None
-    with open("modules/twss.txt") as f:
+    with open(os.path.join("modules", "twss.txt")) as f:
         scraped_quotes = frozenset([line.rstrip() for line in f])
-    if os.path.exists("modules/twss_user_added.txt"):
-        with open("modules/twss_user_added.txt") as f2:
+    if os.path.exists(os.path.join("modules", "twss_user_added.txt")):
+        with open(os.path.join("modules", "twss_user_added.txt")) as f2:
             user_quotes = frozenset([line.rstrip() for line in f2])
     quotes = scraped_quotes.union(user_quotes) if user_quotes else scraped_quotes
     formatted = input.group(1).lower()
@@ -77,7 +77,7 @@ say_it.rate = 20
 def add_twss(jenni, input):
     txt = input.group(2)
     if txt:
-        with open("modules/twss_user_added.txt", "a") as f:
+        with open(os.path.join("modules", "twss_user_added.txt"), "a") as f:
             f.write(re.sub(r"[^\w\s]", "", last.lower()) + "\n")
             f.close()
         jenni.say("Added, new \"That's what she said.\"")

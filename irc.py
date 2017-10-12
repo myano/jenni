@@ -47,7 +47,7 @@ class Origin(object):
         self.full_ident = source
 
 def create_logdir():
-    try: os.mkdir(cwd + "/logs")
+    try: os.mkdir(os.path.join(cwd, "logs"))
     except Exception, e:
         print >> sys.stderr, 'There was a problem creating the logs directory.'
         print >> sys.stderr, e.__class__, str(e)
@@ -55,12 +55,12 @@ def create_logdir():
         sys.exit(1)
 
 def check_logdir():
-    if not os.path.isdir(cwd + "/logs"):
+    if not os.path.isdir(os.path.join(cwd, "logs")):
         create_logdir()
 
 def log_raw(line):
     check_logdir()
-    f = codecs.open(cwd + "/logs/raw.log", 'a', encoding='utf-8')
+    f = codecs.open(os.path.join(cwd, "logs", "raw.log"), 'a', encoding='utf-8')
     f.write(str(time.time()) + "\t")
     temp = line.replace('\n', '')
     try:
@@ -397,7 +397,7 @@ class Bot(asynchat.async_chat):
             report = [lines[0].strip()]
             for line in lines:
                 line = line.strip()
-                if line.startswith('File "/'):
+                if line.startswith('File "'):
                     report.append(line[0].lower() + line[1:])
                     break
             else: report.append('source unknown')

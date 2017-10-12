@@ -13,7 +13,7 @@ from modules import unicode as uc
 def insult(jenni, input):
     """ insults <target> with configured language insult """
     try:
-        insultFilename = os.path.expanduser('~/.jenni/insult.'+ jenni.config.insult_lang +'.txt')
+        insultFilename = os.path.expanduser(os.path.join('~', '.jenni', 'insult.'+ jenni.config.insult_lang +'.txt'))
     except:
         jenni.say("You need to configure the default language!")
         return
@@ -40,7 +40,7 @@ insult.example = '.i <target>'
 def addinsult(jenni, input):
     """.iadd <insult> -- adds a harsh adjetive to the insult database"""
     try:
-        insultFilename = os.path.expanduser('~/.jenni/insult.'+ jenni.config.insult_lang +'.txt')
+        insultFilename = os.path.expanduser(os.path.join('~', '.jenni', 'insult.'+ jenni.config.insult_lang +'.txt'))
     except:
         jenni.say("You need to configure the default language!")
         return
