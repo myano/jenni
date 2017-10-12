@@ -289,15 +289,17 @@ class UnoBot:
                     if i > 0 and a == '0':
                         continue
                     ret.append(b + a)
+                random.SystemRandom().shuffle(ret)
 
         for a in self.special_cards:
             for i in range(4):
                 ret.append(a)
+                random.SystemRandom().shuffle(ret)
 
         if len(self.playerOrder) > 4:
             ret *= 2
 
-        random.shuffle(ret)
+        random.SystemRandom().shuffle(ret)
 
         return ret
 
@@ -746,7 +748,7 @@ def uno_help(jenni, input):
     txt = 'For rules, examples, and getting started: https://is.gd/4YxydS'
     if nick:
         nick = (nick).strip()
-        output = "%s: %s" % (nick, txt)
+        output = "%s, %s" % (nick, txt)
     else:
         output = txt
     jenni.say(output)
@@ -790,7 +792,7 @@ def uno_names(jenni, input, override=False):
     global user_triggered
     if input.sender != CHANNEL:
         return jenni.reply('Try: "/ctcp %s ping" or simply "%s!"' % (jenni.nick, jenni.nick))
-    if time.time() - away_last < 480 and not override:
+    if time.time() - away_last < 300 and not override:
         jenni.notice(input.nick, 'This command is throttled due to abuse.')
         return
     away_last = time.time()
