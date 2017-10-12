@@ -11,6 +11,8 @@ More info:
 
 import imp, os, re, time
 
+WARNINGS_TABLE = 'banned_words_warning'
+warnings_initialized = False
 current_warnings = {}
 
 def ban_user(jenni, full_ident, channel, bad_nick):
@@ -20,8 +22,103 @@ def ban_user(jenni, full_ident, channel, bad_nick):
     jenni.write(['KICK', channel, bad_nick, ' :{0}'.format(reason)])
 
     # Reset the warnings
-    try: del current_warnings[bad_nick]
-    except: pass
+    try:
+        del_warning(jenni, channel, bad_nick)
+    except:
+        pass
+
+def add_warning(jenni, channel, bad_nick, new_num_warnings):
+    global current_warnings
+
+    # If this is the first time we've warned the user
+    if new_num_warnings == 1:
+        current_warnings[channel][bad_nick] = 1
+    else:
+        current_warnings[channel][bad_nick] += 1
+
+    if jenni.db_layer.db_capable:
+        # Insert instead of update
+        if new_num_warnings == 1:
+            args = {
+                'nick': bad_nick,
+                'channel': channel,
+                'num_warnings': 1,
+            }
+
+            jenni.db_layer.insert_row(WARNINGS_TABLE, args)
+        else:
+            updates = {
+                'num_warnings': current_warnings[channel][bad_nick],
+            }
+
+            conditions = {
+                'channel': channel,
+                'nick': bad_nick,
+            }
+
+            jenni.db_layer.update_row(WARNINGS_TABLE, updates, conditions)
+
+def del_warning(jenni, channel, bad_nick):
+    global current_warnings
+
+    del current_warnings[channel][bad_nick]
+
+    if jenni.db_layer.db_capable:
+        args = {
+            'channel': channel,
+            'nick': bad_nick,
+        }
+
+        jenni.db_layer.delete_rows(WARNINGS_TABLE, args)
+
+def initialize_warnings(jenni):
+    global WARNINGS_TABLE
+    global warnings_initialized
+    global current_warnings
+
+    if warnings_initialized is False:
+        if jenni.db_layer.db_capable:
+            # We may need to initialize this table
+            if jenni.db_layer.check_table_exists(WARNINGS_TABLE):
+                # Get the current warnings
+                col_order = ['nick', 'channel', 'num_warnings']
+                # Use 1=1 to get all rows to ensure order
+                for row in jenni.db_layer.get_all_rows(WARNINGS_TABLE, col_order):
+                    nick, channel, num_warnings = row
+                    if channel not in current_warnings:
+                        current_warnings[channel] = {}
+                    current_warnings[channel][nick] = num_warnings
+            else:
+                # This should have gotten run as part of migrations (see jenni_home/migrations)
+                table_cols = {
+                    'nick': 'VARCHAR(255)',
+                    'channel': 'VARCHAR(255)',
+                    'num_warnings': 'INT',
+                }
+
+                # Create table
+                jenni.db_layer.create_table(WARNINGS_TABLE, table_cols)
+        warnings_initialized = True
+
+def is_unbannable(jenni, channel, bad_nick):
+    chan_ops = []
+    chan_hops = []
+    chan_voices = []
+    if channel in jenni.ops:
+        chan_ops = jenni.ops[channel]
+
+    if channel in jenni.hops:
+        chan_hops = jenni.hops[channel]
+
+    if channel in jenni.voices:
+        chan_voices = jenni.voices[channel]
+
+    # First ensure jenni is an op
+    if jenni.nick not in chan_ops:
+        return True
+
+    # Next ensure the sender isn't op, half-op, or voice
+    return (bad_nick in chan_ops or bad_nick in chan_hops or bad_nick in chan_voices)
 
 def banned_words(jenni, input):
     """
@@ -29,8 +126,10 @@ def banned_words(jenni, input):
     warns a user, then after X warnings kickbans them, where
     X defaults to 0, meaning instant ban.
 
-    User warnings are stored only in memory, and as a result
-    restarting jenni will eliminate any warnings.
+    User warnings are stored in memory if there's no database driver,
+    otherwise it's stored in Jenni's sqlite database. This means that
+    when no database is present the warnings will not persist across
+    Jenni's reboots.
 
     Currently bad words must be added to the config, as a future
     addition bad words will be editable by admins using a command.
@@ -39,6 +138,8 @@ def banned_words(jenni, input):
 
     if not hasattr(jenni.config, 'bad_word_limit') or not hasattr(jenni.config, 'bad_words'):
         return
+
+    initialize_warnings(jenni)
 
     bad_word_limit = jenni.config.bad_word_limit or 0
     bad_words = jenni.config.bad_words or {}
@@ -71,39 +172,27 @@ def banned_words(jenni, input):
         return
 
     channel = input.sender
-
-    chan_ops = []
-    chan_hops = []
-    chan_voices = []
-    if channel in jenni.ops:
-        chan_ops = jenni.ops[channel]
-
-    if channel in jenni.hops:
-        chan_hops = jenni.hops[channel]
-
-    if channel in jenni.voices:
-        chan_voices = jenni.voices[channel]
-
-    # First ensure jenni is an op
-    if jenni.nick not in chan_ops:
-        return
+    bad_nick = input.nick
 
     # Next ensure the sender isn't op, half-op, or voice
-    bad_nick = input.nick
-    if bad_nick in chan_ops or bad_nick in chan_hops or bad_nick in chan_voices:
+    # and that Jenni is an op herself
+    if is_unbannable(jenni, channel, bad_nick):
         return
+
+    if channel not in current_warnings:
+        current_warnings[channel] = {}
 
     full_ident = input.full_ident
     if bad_word_limit == 0:
         ban_user(jenni, full_ident, channel, bad_nick)
-    elif bad_nick in current_warnings:
-        if current_warnings[bad_nick] >= bad_word_limit:
+    elif bad_nick in current_warnings[channel]:
+        if current_warnings[channel][bad_nick] >= bad_word_limit:
             ban_user(jenni, full_ident, channel, bad_nick)
         else:
-            current_warnings[bad_nick] += 1
-            jenni.say(bad_word_warning(bad_nick, bad_word_limit, current_warnings[bad_nick]))
+            add_warning(jenni, channel, bad_nick, current_warnings[channel][bad_nick] + 1)
+            jenni.say(bad_word_warning(bad_nick, bad_word_limit, current_warnings[channel][bad_nick]))
     else:
-        current_warnings[bad_nick] = 1
+        add_warning(jenni, channel, bad_nick, 1)
         jenni.say(bad_word_warning(bad_nick, bad_word_limit, 1))
 banned_words.rule = r'(.*)'
 banned_words.priority = 'high'
@@ -129,7 +218,7 @@ def bad_word_warning(nick, bad_word_limit, current_warnings):
     if warnings_remaining == 0:
       base_warning += "You will be banned the next time you violate this policy."
     else:
-      base_warning += "You will be banned after {0} further violations of this policy.".format(warnings_remaining)
+      base_warning += "You will be banned after {0} further violations of this policy.".format(warnings_remaining + 1)
 
     return base_warning
 

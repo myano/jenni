@@ -19,7 +19,7 @@ from configs import Configs
 from textwrap import dedent as trim
 
 dotdir = os.path.expanduser('~/.jenni')
-configpath = os.path.expanduser(dotdir + '/default.py')
+configpath = os.path.expanduser(os.path.join(dotdir, 'default.py'))
 
 if getattr(os, 'geteuid', None) and os.geteuid() == 0:
     error = 'Error: Refusing to run as root.'
@@ -33,150 +33,164 @@ def check_python_version():
         sys.exit(1)
 
 def create_default_config(fn):
-    f = open(fn, 'w')
-    output = """\
-    # Lines that begin with a "#" are comments.
-    # Remove the "#" from the beginning of a line to make those lines active.
+    try:
+        f = open(fn, 'w')
+        output = """\
+        # Lines that begin with a "#" are comments.
+        # Remove the "#" from the beginning of a line to make those lines active.
 
-    nick = 'jenni'
-    host = 'irc.example.net'
-    port = 6667
-    ssl  = False
-    sasl = False
-    channels = ['#example', '#test']
+        nick = 'jenni'
+        host = 'irc.example.net'
+        port = 6667
+        ssl  = False
+        sasl = False
+        channels = ['#example', '#test']
 
-    # Channel jenni will report all private messages sent to her to.
-    # This includes server notices.
-    # logchan_pm = '#jenni-log'
+        # Only sqlite (or none) is supported right now
+        db_engine = 'sqlite'
 
-    # You can also specify nick@hostmask
-    # For example: yano@unaffiliated/yano
-    owner = 'yournickname'
+        # This will be combined with the engine to form a string like
+        # those found in https://bitbucket.org/ollyc/yoyo
+        # E.g., sqlite:///mydb.sqlite
+        #
+        # See yoyo.ini in jenni's directory for more config options
+        connect_string = '~/.jenni/jenni_db.sqlite'
 
-    # user is the NickServ userid
-    # This is useful if your NickServ user is different than the nick you are using
-    # user = 'userid'
+        # Channel jenni will report all private messages sent to her to.
+        # This includes server notices.
+        # logchan_pm = '#jenni-log'
 
-    # password is the NickServ password, serverpass is the server password
-    # password = 'example'
-    # serverpass = 'serverpass'
+        # You can also specify nick@hostmask
+        # For example: yano@unaffiliated/yano
+        owner = 'yournickname'
 
+        # user is the NickServ userid
+        # This is useful if your NickServ user is different than the nick you are using
+        # user = 'userid'
 
-    ## API KEYS
-
-    # forecastio_apikey is for an API key from https://forecast.io/
-    # This is useful if you want extended weather information.
-    # Required if you want .weather to work.
-    # If not, you can use .weather-noaa or .wx-noaa
-    # forecastio_apikey = ''
-
-    # wunderground_apikey is for an API key from http://www.wunderground.com/
-    # This is useful if you want more local and *live* weather information.
-    # This is optional and doesn't need to be added.
-    # wunderground_apikey = ''
-
-    # google_dev_apikey is for an API key from Google Developers
-    # https://developers.google.com/api-client-library/python/guide/aaa_apikeys
-    # Get a Server API Key; this is required for YouTube to work.
-    # google_dev_apikey = ''
-
-    # wolframalpha_apikey is for an API key from Wolfram|Alpha
-    # http://products.wolframalpha.com/api/
-    # This is needed in order to make .calc/.c have more comprehensive answers.
-    # wolframalpha_apikey = ''
+        # password is the NickServ password, serverpass is the server password
+        # password = 'example'
+        # serverpass = 'serverpass'
 
 
-    # twitter_consumer_key and twitter_consumer_secret are for Twitter's API
-    # https://apps.twitter.com/
-    # This is needed if you'd like to make .twitter usable
-    # twitter_consumer_key = ''
-    # twitter_consumer_secret = ''
+        ## API KEYS
 
-    # Fill in Yelp API information here
-    # This is for using the .food command
-    yelp_api_credentials = {
-        'consumer_key': '',
-        'consumer_secret': '',
-        'token': '',
-        'token_secret': ''
+        # forecastio_apikey is for an API key from https://forecast.io/
+        # This is useful if you want extended weather information.
+        # Required if you want .weather to work.
+        # If not, you can use .weather-noaa or .wx-noaa
+        # forecastio_apikey = ''
+
+        # wunderground_apikey is for an API key from http://www.wunderground.com/
+        # This is useful if you want more local and *live* weather information.
+        # This is optional and doesn't need to be added.
+        # wunderground_apikey = ''
+
+        # google_dev_apikey is for an API key from Google Developers
+        # https://developers.google.com/api-client-library/python/guide/aaa_apikeys
+        # Get a Server API Key; this is required for YouTube to work.
+        # google_dev_apikey = ''
+
+        # wolframalpha_apikey is for an API key from Wolfram|Alpha
+        # http://products.wolframalpha.com/api/
+        # This is needed in order to make .calc/.c have more comprehensive answers.
+        # wolframalpha_apikey = ''
+
+        # twitter_consumer_key and twitter_consumer_secret are for Twitter's API
+        # https://apps.twitter.com/
+        # This is needed if you'd like to make .twitter usable
+        # twitter_consumer_key = ''
+        # twitter_consumer_secret = ''
+
+        # Fill in Yelp API information here
+        # This is for using the .food command
+        yelp_api_credentials = {
+            'consumer_key': '',
+            'consumer_secret': '',
+            'token': '',
+            'token_secret': '',
         }
 
+        # You can add bannable words / regex per channel
+        # bad_words = {
+        #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
+        # }
+        #
+        # This controls the number of warnings a user will receive
+        # before they are banned from the channel
+        # bad_word_limit = 1
 
+        # auto_title_disable_chans is for disabling the auto URL title feature
+        # simply add a channel to this list (preferably in all lower-case)
+        # and it won't auto-title URLs in that channel, but .title and other features
+        # will still work
+        # auto_title_disable_chans = ['##yano',]
 
-    # You can add bannable words / regex per channel
-    # bad_words = {
-    #   "#yourchan": ['badword', '(a|b).*c.*(d|e)']
-    # }
-    #
-    # This controls the number of warnings a user will receive
-    # before they are banned from the channel
-    # bad_word_limit = 1
+        # These are people who will be able to use admin.py's functions...
+        admins = [owner, 'someoneyoutrust']
+        # But admin.py is disabled by default, as follows:
+        exclude = ['adminchannel', 'chicken_reply', 'insult', 'lispy', 'twss']
 
-    # auto_title_disable_chans is for disabling the auto URL title feature
-    # simply add a channel to this list (preferably in all lower-case)
-    # and it won't auto-title URLs in that channel, but .title and other features
-    # will still work
-    # auto_title_disable_chans = ['##yano',]
-
-    # These are people who will be able to use admin.py's functions...
-    admins = [owner, 'someoneyoutrust']
-    # But admin.py is disabled by default, as follows:
-    exclude = ['adminchannel', 'chicken_reply', 'insult', 'lispy', 'twss']
-
-    # This allows one to allow specific people to use ".msg channel message here"
-    # in specific channels.
-    helpers = {
-        '#channel1': ['a.somedomain.tld', 'b.anotherdomain.tld'],
-        '##channel2': ['some/other/hostmask'],
+        # This allows one to allow specific people to use ".msg channel message here"
+        # in specific channels.
+        helpers = {
+            '#channel1': ['a.somedomain.tld', 'b.anotherdomain.tld'],
+            '##channel2': ['some/other/hostmask'],
         }
 
-    # Enable raw logging of everything jenni sees.
-    # logged to the folder 'log'
-    logging = False
+        # Enable raw logging of everything jenni sees.
+        # logged to the folder 'log'
+        logging = False
 
-    # Block modules from specific channels
-    # To not block anything for a channel, just don't mention it
-    excludes = {
+        # Block modules from specific channels
+        # To not block anything for a channel, just don't mention it
+        excludes = {
             '##blacklist': ['!'],
         }
 
-    # If you want to enumerate a list of modules rather than disabling
-    # some, use "enable = ['example']", which takes precedent over exclude
-    #
-    # enable = []
+        # If you want to enumerate a list of modules rather than disabling
+        # some, use "enable = ['example']", which takes precedent over exclude
+        #
+        # enable = []
 
-    # Directories to load user modules from
-    # e.g. /path/to/my/modules
-    extra = ['""" + os.getcwd() + '/modules/' + """']
+        # Directories to load user modules from
+        # e.g. /path/to/my/modules
+        extra = ['""" + os.path.join(os.getcwd(), modules) + os.pathsep + """']
 
-    # Services to load: maps channel names to white or black lists
-    external = {
-        '#liberal': ['!'], # allow all
-        '#conservative': [], # allow none
-        '*': ['!'] # default whitelist, allow all
-    }
+        # Services to load: maps channel names to white or black lists
+        external = {
+            '#liberal': ['!'], # allow all
+            '#conservative': [], # allow none
+            '*': ['!'] # default whitelist, allow all
+        }
 
-    # insult database available: "spanish" and "english"
-    insult_lang = "english"
+        # insult database available: "spanish" and "english"
+        insult_lang = "english"
 
-    # EOF
-    """
-    print >> f, trim(output)
-    f.close()
+        # EOF
+        """
+        print >> f, trim(output)
+    except Exception as e:
+        error = "Error: failed to write config file: {0}".format(e)
+        print >> sys.stderr, error
+    finally:
+        if f:
+            f.close()
 
 def create_configfile(dotdir):
-
     if not os.path.isdir(dotdir):
-        print 'Creating a config directory at ~/.jenni...'
-        try: os.mkdir(dotdir)
+        print 'Creating a config directory at {0}...'.format(dotdir)
+        try:
+            os.mkdir(dotdir)
         except Exception, e:
-            print >> sys.stderr, 'There was a problem creating %s:' % dotdir
+            print >> sys.stderr, 'There was a problem creating {0}:'.format(dotdir)
             print >> sys.stderr, e.__class__, str(e)
             print >> sys.stderr, 'Please fix this and then run jenni again.'
             sys.exit(1)
 
     create_default_config(configpath)
-    print >> sys.stdout, 'Config file generated. Please edit it at ' + configpath + ' and run ./jenni again.'
+    info_str = 'Config file generated. Please edit it at {0} and run ./jenni again.'.format(config_path)
+    print >> sys.stdout, info_str
 
     sys.exit(0)
 
@@ -229,13 +243,16 @@ def initialize_configs(config_path):
     config_helper.load_modules(config_modules)
 
     # Give at least one module the config helper
+    # so that it continues to live in memory
     config_modules[0].config_helper = config_helper
 
     # Step Four: Load jenni
 
-    try: from __init__ import run
+    try:
+        from __init__ import run
     except ImportError:
-        try: from jenni import run
+        try:
+            from jenni import run
         except ImportError:
             print >> sys.stderr, "Error: Couldn't find jenni to import"
             sys.exit(1)
