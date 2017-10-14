@@ -11,6 +11,7 @@ More info:
 """
 
 import os, re, time, random
+import string
 import threading
 
 maximum = 4
@@ -24,9 +25,16 @@ def loadReminders(fn, lock):
         for line in f:
             line = line.strip()
             if line:
-                try: tellee, teller, verb, timenow, msg = line.split('\t', 4)
-                except ValueError: continue  # @@ hmm
-                result.setdefault(tellee, []).append((teller, verb, timenow, msg))
+                try:
+                    tellee, xid, teller, verb, timenow, msg = line.split('\t', 5)
+                    result.setdefault(tellee, []).append((xid, teller, verb, timenow, msg))
+                except ValueError: 
+                    try:
+                        tellee, teller, verb, timenow, msg = line.split('\t', 4)
+                        result.setdefault(tellee, []).append(("old", teller, verb, timenow, msg))
+                    except ValueError:
+                        continue
+ 
         f.close()
     finally:
         lock.release()
@@ -96,6 +104,7 @@ def f_remind(jenni, input):
         return
 
     timenow = time.strftime('%d %b %H:%MZ', time.gmtime())
+    xid     = time.strftime('%d%H%M%S', time.gmtime()) + random.choice(string.ascii_letters) + random.choice(string.ascii_letters)
     whogets = list()
     for tellee in tellee.split(','):
         if len(tellee) > 20:
@@ -107,9 +116,9 @@ def f_remind(jenni, input):
                 if not tellee.lower() in whogets:
                     whogets.append(tellee)
                     if tellee not in jenni.reminders:
-                        jenni.reminders[tellee] = [(teller, verb, timenow, msg)]
+                        jenni.reminders[tellee] = [(xid, teller, verb, timenow, msg)]
                     else:
-                        jenni.reminders[tellee].append((teller, verb, timenow, msg))
+                        jenni.reminders[tellee].append((xid, teller, verb, timenow, msg))
             finally:
                 jenni.tell_lock.release()
     response = str()
@@ -147,10 +156,10 @@ def getReminders(jenni, channel, key, tellee):
     jenni.tell_lock.acquire()
 
     try:
-        for (teller, verb, datetime, msg) in jenni.reminders[key]:
+        for (xid, teller, verb, datetime, msg) in jenni.reminders[key]:
             if datetime.startswith(today):
                 datetime = datetime[len(today) + 1:]
-            lines.append(template % (tellee, datetime, teller, verb, tellee, msg))
+            lines.append((xid, template % (tellee, datetime, teller, verb, tellee, msg)))
 
         try: del jenni.reminders[key]
         except KeyError: jenni.msg(channel, 'Er...')
@@ -179,13 +188,22 @@ def message(jenni, input):
         elif tellee.lower().startswith(remkey.rstrip('*:').lower()):
             reminders.extend(getReminders(jenni, channel, remkey, tellee))
 
-    for line in reminders[:maximum]:
-        jenni.say(line)
+    said = set()
+    count = 0
+    ign   = 0
+    for (xid, line) in reminders:
+        ign = ign + 1
+        if (xid == "old") or (xid not in said and count <= maximum):
+            said.add(xid)
+            jenni.say(line)
+            count = count + 1
 
-    if reminders[maximum:]:
+    if reminders[ign:]:
         jenni.say('Further messages sent privately')
-        for line in reminders[maximum:]:
-            jenni.msg(tellee, line)
+        for line in reminders[ign:]:
+            if xid not in said:
+                said.add(xid)
+                jenni.msg(tellee, line)
 
     if len(jenni.reminders.keys()) != remkeys:
         dumpReminders(jenni.tell_filename, jenni.reminders, jenni.tell_lock)  # @@ tell
