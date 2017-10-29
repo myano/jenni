@@ -183,7 +183,7 @@ def wik(jenni, input):
         jenni.say(result)
     else: jenni.say('Can\'t find anything in Wikipedia for "%s".' % origterm)
 
-wik.commands = ['w', 'wik', 'wiki']
+wik.commands = ['wik', 'wiki']
 wik.priority = 'high'
 wik.rate = 5
 

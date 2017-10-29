@@ -94,7 +94,10 @@ def define(jenni, input):
     if len(result) > 300:
         result = result[:295] + '[...]'
     jenni.say(result)
-define.commands = ['dict', 'define', 'word']
+
+define.commands = ['w', 'dict', 'define', 'word']
+define.priority = 'high'
+define.rate = 5
 define.example = '.w bailiwick'
 
 if __name__ == '__main__':
