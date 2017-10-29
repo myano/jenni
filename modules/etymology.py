@@ -14,10 +14,11 @@ import re
 import web
 from tools import deprecated
 
-etyuri = 'http://etymonline.com/?term=%s'
-etysearch = 'http://etymonline.com/?search=%s'
+etyuri = 'https://etymonline.com/word/%s'
+etysearch = 'https://etymonline.com/search/?q=%s'
 
-r_definition = re.compile(r'(?ims)<dd[^>]*>.*?</dd>')
+#r_definition = re.compile(r'(?ims)<dd[^>]*>.*?</dd>')
+r_definition = re.compile(r'<section class="word__defination--2q7ZH">(.*)</section>')
 r_tag = re.compile(r'<(?!!)[^>]+>')
 r_whitespace = re.compile(r'[\t\r\n ]+')
 
@@ -50,12 +51,16 @@ def etymology(word):
     word = {'axe': 'ax/axe'}.get(word, word)
 
     bytes = web.get(etyuri % word)
+    #print(bytes)
+    #definitions = ['<section class="word__defination--2q7ZH"><object>c. 1600, from <span class="crossreference">crimson</span>(n.). Related: <span class="foreign">Crimsoned</span>; <span class="foreign">crimsoning</span>.</object></section>']
     definitions = r_definition.findall(bytes)
+    print(definitions)
 
     if not definitions:
         return None
 
     defn = text(definitions[0])
+    print(defn)
     m = r_sentence.match(defn)
     if not m:
         return None
@@ -94,6 +99,7 @@ def f_etymology(self, origin, match, args):
         uri = etysearch % word
         msg = 'Can\'t find the etymology for "%s". Try %s' % (word, uri)
         self.msg(origin.sender, msg)
+
 # @@ Cf. http://swhack.com/logs/2006-01-04#T01-50-22
 f_etymology.rule = (['ety'], r"([A-Za-z0-9' .-]+)$")
 f_etymology.thread = True
