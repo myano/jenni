@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 etymology.py - jenni Etymology Module
 Copyright 2009-2013, Michael Yanovich (yanovich.net)
@@ -51,16 +52,12 @@ def etymology(word):
     word = {'axe': 'ax/axe'}.get(word, word)
 
     bytes = web.get(etyuri % word)
-    #print(bytes)
-    #definitions = ['<section class="word__defination--2q7ZH"><object>c. 1600, from <span class="crossreference">crimson</span>(n.). Related: <span class="foreign">Crimsoned</span>; <span class="foreign">crimsoning</span>.</object></section>']
     definitions = r_definition.findall(bytes)
-    print(definitions)
 
     if not definitions:
         return None
 
     defn = text(definitions[0])
-    print(defn)
     m = r_sentence.match(defn)
     if not m:
         return None
@@ -71,7 +68,7 @@ def etymology(word):
         sentence = sentence.encode('utf-8')
     except: pass
 
-    maxlength = 275
+    maxlength = 400
     if len(sentence) > maxlength:
         sentence = sentence[:maxlength]
         words = sentence[:-5].split(' ')
@@ -79,6 +76,7 @@ def etymology(word):
         sentence = ' '.join(words) + ' [...]'
 
     sentence = '"' + sentence.replace('"', "'") + '"'
+    sentence = sentence.replace('&quot;', u"“")
     return sentence + ' - ' + (etyuri % word)
 
 @deprecated
