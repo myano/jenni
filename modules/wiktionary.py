@@ -49,6 +49,8 @@ def wiktionary(word):
             mode = 'particle'
         elif 'id="Preposition"' in line:
             mode = 'preposition'
+        elif 'id="Prefix"' in line:
+            mode = 'prefix'
         elif 'id="' in line:
             mode = None
 
@@ -62,7 +64,7 @@ def wiktionary(word):
     return etymology, definitions
 
 parts = ('preposition', 'particle', 'noun', 'verb',
-    'adjective', 'adverb', 'interjection')
+    'adjective', 'adverb', 'interjection', 'prefix')
 
 def format(word, definitions, number=2):
     result = '%s' % word.encode('utf-8')
