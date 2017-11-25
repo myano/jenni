@@ -81,7 +81,7 @@ def define(jenni, input):
     if not word:
         jenni.reply("You want the definition for what?")
         return
-    word = (word).lower()
+#    word = (word).lower()
     etymology, definitions = wiktionary(word)
     if not definitions:
         jenni.say("Couldn't get any definitions for %s at Wiktionary." % word)
