@@ -51,12 +51,17 @@ def wiktionary(word):
             mode = 'preposition'
         elif 'id="Prefix"' in line:
             mode = 'prefix'
+        elif 'id="Proper_noun"' in line:
+            mode = 'proper noun'
         elif 'id="' in line:
-            mode = None
-
+            # some proper noun definitions have these id tags in their <li> elements
+            # which leads to the mode being set to None prematurely
+            if not 'id="English-Q' in line:
+                mode = None
         elif (mode == 'etmyology') and ('<p>' in line):
             etymology = text(line)
-        elif (mode is not None) and ('<li>' in line):
+
+        if (mode is not None) and (('<li>' in line) or ('<li class="senseid"' in line)):
             definitions.setdefault(mode, []).append(text(line))
 
         if '<hr' in line:
@@ -64,7 +69,7 @@ def wiktionary(word):
     return etymology, definitions
 
 parts = ('preposition', 'particle', 'noun', 'verb',
-    'adjective', 'adverb', 'interjection', 'prefix')
+    'adjective', 'adverb', 'interjection', 'prefix', 'proper noun')
 
 def format(word, definitions, number=2):
     result = '%s' % word.encode('utf-8')
