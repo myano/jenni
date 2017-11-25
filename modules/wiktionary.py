@@ -91,12 +91,14 @@ def define(jenni, input):
     if len(result) < 150:
         result = format(word, definitions, 5)
 
-    formatted_uri = ' ... ' + (uri % web.urllib.quote(word.encode('utf-8')))[:-14]
+    formatted_uri = (uri % web.urllib.quote(word.encode('utf-8')))[:-14]
     uri_len = len(formatted_uri)
-    max_len = 410 - uri_len
+    max_len = 405 - uri_len
 
     if len(result) > max_len:
-        result = result[:max_len] + formatted_uri
+        result = result[:max_len] + ' ... ' + formatted_uri
+    else:
+        result = result + ' || ' + formatted_uri
 
     jenni.say(result)
 
