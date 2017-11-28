@@ -53,6 +53,10 @@ def wiktionary(word):
             mode = 'prefix'
         elif 'id="Proper_noun"' in line:
             mode = 'proper noun'
+        elif 'id="Determiner"' in line:
+            mode = 'determiner'
+        elif 'id="Pronoun"' in line:
+            mode = 'pronoun'
         elif 'id="' in line:
             # some proper noun definitions have these id tags in their <li> elements
             # which leads to the mode being set to None prematurely
@@ -69,7 +73,8 @@ def wiktionary(word):
     return etymology, definitions
 
 parts = ('preposition', 'particle', 'noun', 'verb',
-    'adjective', 'adverb', 'interjection', 'prefix', 'proper noun')
+    'adjective', 'adverb', 'interjection', 'prefix',
+    'proper noun', 'determiner', 'pronoun')
 
 def format(word, definitions, number=2):
     result = '%s' % word.encode('utf-8')
