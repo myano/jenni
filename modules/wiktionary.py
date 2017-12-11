@@ -43,6 +43,8 @@ def wiktionary(word):
             mode = 'adjective'
         elif 'id="Adverb"' in line:
             mode = 'adverb'
+        elif 'id="Initialism"' in line:
+            mode = 'initialism'
         elif 'id="Interjection"' in line:
             mode = 'interjection'
         elif 'id="Particle"' in line:
@@ -73,7 +75,7 @@ def wiktionary(word):
     return etymology, definitions
 
 parts = ('preposition', 'particle', 'noun', 'verb',
-    'adjective', 'adverb', 'interjection', 'prefix',
+    'adjective', 'adverb', 'initialism', 'interjection', 'prefix',
     'proper noun', 'determiner', 'pronoun')
 
 def format(word, definitions, number=2):
