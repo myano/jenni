@@ -14,6 +14,7 @@ import re
 import web
 
 uri = 'https://en.wiktionary.org/w/index.php?title=%s&printable=yes'
+uri_ = 'https://en.wiktionary.org/wiki/%s'
 r_tag = re.compile(r'<[^>]+>')
 r_ul = re.compile(r'(?ims)<ul>.*?</ul>')
 
@@ -123,7 +124,8 @@ def define(jenni, input):
     if len(result) < 150:
         result = format(word, definitions, 5)
 
-    formatted_uri = (uri % web.urllib.quote(word.encode('utf-8')))[:-14]
+    formatted_uri = uri_ % web.urllib.quote(word.encode('utf-8'))
+    print(formatted_uri)
     uri_len = len(formatted_uri)
     max_len = 405 - uri_len
 
