@@ -16,10 +16,11 @@ import web
 from tools import deprecated
 
 etyuri = 'https://etymonline.com/word/%s'
-etysearch = 'https://etymonline.com/search/?q=%s'
+etysearch = 'https://www.etymonline.com/classic/search/?q=%s'
+#etysearch = 'https://www.etymonline.com/search/?q=%s'
 
-#r_definition = re.compile(r'(?ims)<dd[^>]*>.*?</dd>')
-r_definition = re.compile(r'<section class="word__defination--2q7ZH">(.*)</section>')
+r_definition = re.compile(r'<section class="word__defination--2q7ZH undefined">([\s\S]*)</section>')
+#r_definition = re.compile(r'<section class="word__defination--2q7ZH word__defination_thumbnail--HCtyA">([\s\S]*)</section>') # this one should be used with non-classic search URI
 r_tag = re.compile(r'<(?!!)[^>]+>')
 r_whitespace = re.compile(r'[\t\r\n ]+')
 
@@ -51,7 +52,7 @@ def etymology(word):
         raise ValueError("Word too long: %s[...]" % word[:10])
     word = {'axe': 'ax/axe'}.get(word, word)
 
-    bytes = web.get(etyuri % word)
+    bytes = web.get(etysearch % word)
     definitions = r_definition.findall(bytes)
 
     if not definitions:
@@ -76,7 +77,7 @@ def etymology(word):
         sentence = ' '.join(words) + ' [...]'
 
     sentence = '"' + sentence.replace('"', "'") + '"'
-    sentence = sentence.replace('&quot;', u"“")
+    sentence = sentence.replace('&quot;', '“')
     return sentence + ' - ' + (etyuri % word)
 
 @deprecated
