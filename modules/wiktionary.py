@@ -76,13 +76,6 @@ def wiktionary(word):
             mode = 'symbol'
         elif 'id="Participle"' in line:
             mode = 'participle'
-        elif 'id="' in line:
-            # some proper noun definitions have these id tags in their <li> elements
-            # which leads to the mode being set to None prematurely
-            if 'id="English-Q' in line or 'id="cite_ref-EtymOnLine_1-0' in line:
-                pass
-            else:
-                mode = None
         elif (mode == 'etmyology') and ('<p>' in line):
             etymology = text(line)
 
@@ -124,7 +117,11 @@ def define(jenni, input):
     if len(result) < 150:
         result = format(word, definitions, 3)
     if len(result) < 150:
+        result = format(word, definitions, 4)
+    if len(result) < 150:
         result = format(word, definitions, 5)
+    if len(result) < 150:
+        result = format(word, definitions, 6)
 
     formatted_uri = uri_ % web.urllib.quote(word.encode('utf-8'))
     uri_len = len(formatted_uri)
