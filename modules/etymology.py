@@ -78,7 +78,8 @@ def etymology(word):
 
     sentence = '"' + sentence.replace('"', "'") + '"'
     sentence = sentence.replace('&quot;', '“')
-    return sentence + ' - ' + (etyuri % word)
+    formatted_uri = etyuri % web.urllib.quote(word.encode('utf-8'))
+    return sentence + ' - ' + formatted_uri
 
 @deprecated
 def f_etymology(self, origin, match, args):
