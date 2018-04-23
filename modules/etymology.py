@@ -17,7 +17,7 @@ from tools import deprecated
 
 etyuri = 'https://etymonline.com/word/%s'
 etysearch = 'https://www.etymonline.com/classic/search/?q=%s'
-#etysearch = 'https://www.etymonline.com/search/?q=%s'
+etysearch_orig = 'https://www.etymonline.com/search/?q=%s'
 
 r_definition = re.compile(r'<section class="word__defination--2q7ZH undefined">([\s\S]*)</section>')
 #r_definition = re.compile(r'<section class="word__defination--2q7ZH word__defination_thumbnail--HCtyA">([\s\S]*)</section>') # this one should be used with non-classic search URI
@@ -96,7 +96,7 @@ def f_etymology(self, origin, match, args):
     if result is not None:
         self.msg(origin.sender, result)
     else:
-        uri = etysearch % word
+        uri = etysearch_orig % word
         msg = 'Can\'t find the etymology for "%s". Try %s' % (word, uri)
         self.msg(origin.sender, msg)
 
