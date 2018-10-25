@@ -70,10 +70,14 @@ def wiktionary(word):
 
 parts = ('preposition', 'particle', 'noun', 'verb',
     'adjective', 'adverb', 'interjection', 'prefix', 'proper noun')
+flagparts = dict(zip(('p','P','n','v',
+    'a','A','i','f','r'),parts))
 
-def format(word, definitions, number=2):
+def format(word, definitions, number=2, force_part=None):
     result = '%s' % word.encode('utf-8')
-    for part in parts:
+    # if there is a definition for force_part use only that,
+    # otherwise loop through parts
+    for part in (parts if not force_part else (force_part,)):
         if definitions.has_key(part):
             defs = definitions[part][:number]
             result += u' \u2014 '.encode('utf-8') + ('%s: ' % part)
@@ -81,8 +85,25 @@ def format(word, definitions, number=2):
             result += ', '.join(n)
     return result.strip(' .,')
 
+def wclass_word(input):
+    try:
+        part, word = input.group(2).split()
+    except:
+        # unsplittable, return entire arg
+        return None, input.group(2)
+    # two args. don't crash on <2-character part
+    try:
+        if part[0] == '-':
+            if part[1] in flagparts.keys():
+                return flagparts[part[1]], word
+    except:
+        pass
+    # three args, but invalid flag. just ignore it for now and return last arg
+    return None, word
+
 def define(jenni, input):
-    word = input.group(2)
+    #word = input.group(2)
+    wclass, word = wclass_word(input)
     if not word:
         jenni.reply("You want the definition for what?")
         return
@@ -92,11 +113,11 @@ def define(jenni, input):
         jenni.say("Couldn't get any definitions for %s at Wiktionary." % word)
         return
 
-    result = format(word, definitions)
+    result = format(word, definitions, force_part=wclass)
     if len(result) < 150:
-        result = format(word, definitions, 3)
+        result = format(word, definitions, 3, force_part=wclass)
     if len(result) < 150:
-        result = format(word, definitions, 5)
+        result = format(word, definitions, 5, force_part=wclass)
 
     formatted_uri = (uri % web.urllib.quote(word.encode('utf-8')))[:-14]
     uri_len = len(formatted_uri)
