@@ -14,6 +14,7 @@ import re
 import web
 
 uri = 'https://en.wiktionary.org/w/index.php?title=%s&printable=yes'
+uri_ = 'https://en.wiktionary.org/wiki/%s'
 r_tag = re.compile(r'<[^>]+>')
 r_ul = re.compile(r'(?ims)<ul>.*?</ul>')
 
@@ -43,6 +44,8 @@ def wiktionary(word):
             mode = 'adjective'
         elif 'id="Adverb"' in line:
             mode = 'adverb'
+        elif 'id="Initialism"' in line:
+            mode = 'initialism'
         elif 'id="Interjection"' in line:
             mode = 'interjection'
         elif 'id="Particle"' in line:
@@ -51,13 +54,28 @@ def wiktionary(word):
             mode = 'preposition'
         elif 'id="Prefix"' in line:
             mode = 'prefix'
+        elif 'id="Suffix"' in line:
+            mode = 'suffix'
         elif 'id="Proper_noun"' in line:
             mode = 'proper noun'
-        elif 'id="' in line:
-            # some proper noun definitions have these id tags in their <li> elements
-            # which leads to the mode being set to None prematurely
-            if not 'id="English-Q' in line:
-                mode = None
+        elif 'id="Determiner"' in line:
+            mode = 'determiner'
+        elif 'id="Pronoun"' in line:
+            mode = 'pronoun'
+        elif 'id="Prepositional_phrase"' in line:
+            mode = 'prepositional phrase'
+        elif 'id="Conjunction"' in line:
+            mode = 'conjunction'
+        elif 'id="Abbreviation"' in line:
+            mode = 'abbreviation'
+        elif 'id="Numeral"' in line:
+            mode = 'numeral'
+        elif 'id="Phrase"' in line:
+            mode = 'phrase'
+        elif 'id="Symbol"' in line:
+            mode = 'symbol'
+        elif 'id="Participle"' in line:
+            mode = 'participle'
         elif (mode == 'etmyology') and ('<p>' in line):
             etymology = text(line)
 
@@ -69,7 +87,10 @@ def wiktionary(word):
     return etymology, definitions
 
 parts = ('preposition', 'particle', 'noun', 'verb',
-    'adjective', 'adverb', 'interjection', 'prefix', 'proper noun')
+    'adjective', 'adverb', 'initialism', 'interjection', 'prefix',
+    'proper noun', 'determiner', 'pronoun', 'prepositional phrase',
+    'conjunction', 'abbreviation', 'numeral', 'phrase', 'symbol',
+    'participle', 'suffix')
 flagparts = dict(zip(('p','P','n','v',
     'a','A','i','f','r'),parts))
 
@@ -117,9 +138,13 @@ def define(jenni, input):
     if len(result) < 150:
         result = format(word, definitions, 3, force_part=wclass)
     if len(result) < 150:
+        result = format(word, definitions, 4, force_part=wclass)
+    if len(result) < 150:
         result = format(word, definitions, 5, force_part=wclass)
+    if len(result) < 150:
+        result = format(word, definitions, 6, force_part=wclass)
 
-    formatted_uri = (uri % web.urllib.quote(word.encode('utf-8')))[:-14]
+    formatted_uri = uri_ % web.urllib.quote(word.encode('utf-8'))
     uri_len = len(formatted_uri)
     max_len = 405 - uri_len
 
