@@ -1,7 +1,7 @@
-Jenni
+jenni
 =====
 
-jenni is a python IRC bot maintained and developed by Michael Yanovich. This project was originally created by Sean B. Palmer.
+jenni is a python IRC bot. This project is now in "maintenance mode." Please do not expect any bugs or features to be fixed. Try *Sopel* instead, https://sopel.chat/
 
 Installation & Configuration
 ============================
@@ -49,4 +49,4 @@ Credits
 
 For a list of contributions to the jenni fork see the file CREDITS.
 
-Sean B. Palmer, http://inamidst.com/sbp/ forked by Michael Yanovich, https://yanovich.net/
+Sean B. Palmer, http://inamidst.com/sbp/ forked by yano, https://yanovich.net/
