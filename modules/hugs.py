@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 hugs.py - jenni Hugs Module
-Copyright 2015, Michael Yanovich (yanovich.net)
+Copyright 2015, yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

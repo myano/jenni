@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 lispy.py - Lisp Module
-Copyright 2013 Michael Yanovich (yanovich.net)
+Copyright 2013 yano (yanovich.net)
 Copyright 2010-2013 Peter Norvig (norvig.com)
 Licensed under the Eiffel Forum License 2.
 

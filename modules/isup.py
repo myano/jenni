@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 isup.py - Simple website status check with isup.me
-Copyright 2013-2014, Michael Yanovich (yanovich.net)
+Copyright 2013-2014, yano (yanovich.net)
 Copyright 2012-2013 Edward Powell (embolalaia.net)
 Licensed under the Eiffel Forum License 2.
 

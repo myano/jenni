@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 admin.py - jenni Admin Module
-Copyright 2010-2013, Sean B. Palmer (inamidst.com) and Michael Yanovich (yanovich.net)
+Copyright 2010-2013, Sean B. Palmer (inamidst.com) and yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

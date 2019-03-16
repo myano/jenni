@@ -1,10 +1,12 @@
 jenni
 =====
 
-jenni is a python IRC bot. This project is now in "maintenance mode." Please do not expect any bugs or features to be fixed. Try *Sopel* instead, https://sopel.chat/
+jenni is a python IRC bot. This project is closed. Please do not expect any bugs or features to be fixed. Try *Sopel* instead, https://sopel.chat/
+
 
 Installation & Configuration
 ============================
+
 jenni requires python 2.7, jenni will not work with python 3.x.
 
 1. Run ./jenni - this creates a default config file
@@ -35,6 +37,7 @@ The YouTube module requires that you have a Google Developer API key in order to
 Best Practices
 ==============
 
+- Don't use jenni, use Sopel, https://sopel.chat/
 - Give jenni '@' (ops) at your risk. This software is provided without warranty, without exception.
 - You can no longer run jenni as the root user (euid = 0).
   - This is a huge security risk, amplifying the impact of any potential vulnerability.

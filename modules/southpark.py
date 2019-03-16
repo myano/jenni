@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 southpark.py - jenni Southpark Module
-Copyright 2011-2013, Michael Yanovich (yanovich.net) and Kenneth Sham (Kays)
+Copyright 2011-2013, yano (yanovich.net) and Kenneth Sham (Kays)
 Licensed under the Eiffel Forum License 2.
 
 More info:

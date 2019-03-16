@@ -5,7 +5,7 @@ youtube.py - Youtube Module Improved v3
 
 Copyright 2015, David Jarrett (jarada.co.uk)
 Copyright 2015, Josh Begleiter (kanedasan@gmail.com)
-Copyright 2015, Michael Yanovich (yanovich.net)
+Copyright 2015, yano (yanovich.net)
 Copyright 2014, Sujeet Akula (sujeet@freeboson.org)
 Copyright 2012, Dimitri Molenaars, Tyrope.nl.
 Copyright 2012-2013, Elad Alfassa, <elad@fedoraproject.org>
@@ -33,7 +33,7 @@ def colorize(text):
 
 def ytsearch(jenni, trigger):
     """Search YouTube"""
-    #modified from ytinfo: Copyright 2010-2011, Michael Yanovich, yanovich.net, Kenneth Sham.
+    #modified from ytinfo: Copyright 2010-2011, yano, yanovich.net, Kenneth Sham.
     if not hasattr(jenni.config, 'google_dev_apikey'):
         return jenni.say('Please sign up for a Google Developer API key to use this function.')
     key = jenni.config.google_dev_apikey

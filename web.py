@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 web.py - Web Facilities
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 Copyright 2012, Dimitri Molenaars (Tyrope.nl)
 Copyright 2012, Elad Alfassa (elad@fedoraproject.org)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)

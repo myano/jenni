@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 wiktionary.py - jenni Wiktionary Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 Copyright 2009-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

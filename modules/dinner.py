@@ -2,7 +2,7 @@
 '''
 dinner.py - Dinner Module
 Copyright 2014 Sujeet Akula (sujeet@freeboson.org)
-Copyright 2013 Michael Yanovich (yanovich.net)
+Copyright 2013 yano (yanovich.net)
 Copyright 2013 Unknown
 Licensed under the Eiffel Forum License 2.
 

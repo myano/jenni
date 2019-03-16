@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 github_stats.py - jenni Github Info Module
-Copyright 2009-2015, Michael Yanovich (yanovich.net)
+Copyright 2009-2015, yano (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

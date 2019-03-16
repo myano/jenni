@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 tell.py - jenni Tell and Ask Module
-Copyright 2012-2013, Michael Yanovich (yanovich.net)
+Copyright 2012-2013, yano (yanovich.net)
 Copyright 2008, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 scores.py - jenni Scores Module
-Copyright 2010-2013, Michael Yanovich (yanovich.net) and Matt Meinwald,
+Copyright 2010-2013, yano (yanovich.net) and Matt Meinwald,
     and Samuel Clements
 
 More info:

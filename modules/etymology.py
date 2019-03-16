@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 etymology.py - jenni Etymology Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 Copyright 2007-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 ask.py - jenni's Ask Module
-Copyright 2011-2013, Michael Yanovich (yanovich.net)
+Copyright 2011-2013, yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

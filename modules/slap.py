@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 scores.py - jenni Slap Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 
 More info:
  * jenni: https://github.com/myano/jenni/

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 version.py - jenni Version Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 Copyright 2009-2013, Silas Baronda
 Licensed under the Eiffel Forum License 2.
 

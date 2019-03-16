@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 rand.py - jenni Rand Module
-Copyright 2010-2013, Michael Yanovich (yanovich.net)
+Copyright 2010-2013, yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

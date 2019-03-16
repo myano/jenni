@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 units.py - jenni Units Module
-Copyright 2013, Michael Yanovich (yanovich.net)
+Copyright 2013, yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

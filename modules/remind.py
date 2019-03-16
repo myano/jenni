@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 remind.py - jenni Reminder Module
-Copyright 2011-2013, Michael Yanovich (yanovich.net)
+Copyright 2011-2013, yano (yanovich.net)
 Copyright 2011-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

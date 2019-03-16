@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 xkcd.py - XKCD Module
-Copyright 2010-2014 Michael Yanovich (yanovich.net), and Morgan Goose
+Copyright 2010-2014 yano (yanovich.net), and Morgan Goose
 Partially re-written by Paul Schellin (paulschellin@gmail.com) 2014
 
 Licensed under the Eiffel Forum License 2.

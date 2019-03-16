@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 pun.py - jenni Pun Module
-Copyright 2009-2015, Michael Yanovich (yanovich.net)
+Copyright 2009-2015, yano (yanovich.net)
 Copyright 2008-2015, Sean B. Palmer (inamidst.com)
 Copyright 2015, Jonathan Arnett (j3rn.com)
 

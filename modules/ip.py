@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 ip.py - jenni IP Lookup Module
-Copyright 2013, Michael Yanovich (yanovich.net)
+Copyright 2013, yano (yanovich.net)
 Copyright 2011, Dimitri Molenaars (TyRope.nl)
 Licensed under the Eiffel Forum License 2.
 

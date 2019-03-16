@@ -2,7 +2,7 @@
 # coding=utf-8
 """
 calc.py - jenni Calculator Module
-Copyright 2009-2013, Michael Yanovich (yanovich.net)
+Copyright 2009-2013, yano (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 

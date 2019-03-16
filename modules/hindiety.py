@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 hindiety.py - jenni Hindi Etymology Module
-Copyright 2012-2013, Kenneth K. Sham and Michael Yanovich (yanovich.net)
+Copyright 2012-2013, Kenneth K. Sham and yano (yanovich.net)
 Licensed under the Eiffel Forum License 2.
 
 More info:

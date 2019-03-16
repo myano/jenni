@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 warnings.py -- jenni NWS Alert Module
-Copyright 2011-2013, Michael Yanovich (yanovich.net)
+Copyright 2011-2013, yano (yanovich.net)
 
 More info:
  * jenni: https://github.com/myano/jenni/

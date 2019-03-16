@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 '''
 imdb.py - jenni Movie Information Module
-Copyright 2014-2015, Michael Yanovich, yanovich.net
+Copyright 2014-2015, yano, yanovich.net
 Copyright 2012, Elad Alfassa, <elad@fedoraproject.org>
 Licensed under the Eiffel Forum License 2.
 

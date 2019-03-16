@@ -2,7 +2,7 @@
 """
 url.py - jenni Bitly Module
 Copyright 2015, Sujeet Akula (sujeet@freeboson.org)
-Copyright 2010-2013, Michael Yanovich (yanovich.net)
+Copyright 2010-2013, yano (yanovich.net)
 Copyright 2010-2013, Kenneth Sham
 Licensed under the Eiffel Forum License 2.
 

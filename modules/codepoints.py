@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 codepoints.py - jenni Codepoints Module
-Copyright 2009-2014, Michael Yanovich (yanovich.net)
+Copyright 2009-2014, yano (yanovich.net)
 Copyright 2008-2013, Sean B. Palmer (inamidst.com)
 Licensed under the Eiffel Forum License 2.
 
