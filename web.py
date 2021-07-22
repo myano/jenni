@@ -129,7 +129,7 @@ def remove_xml_tags(txt):
 
 def get_urllib_object(uri, timeout):
     '''Return a urllib2 object for `uri` and `timeout`. This is better than
-    using urrlib2 directly, for it handles redirects, makes sure URI is utf8,
+    using urllib2 directly, for it handles redirects, makes sure URI is utf8,
     and is shorter and easier to use.
     Modules may use this if they need a urllib2 object to execute .read() on.
     For more information, refer to the urllib2 documentation.'''

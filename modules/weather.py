@@ -426,7 +426,7 @@ def f_weather(jenni, input):
             ## if in North America
             windchill = u'%.1f\u00B0F (%.1f\u00B0C)'.encode('utf-8') % (f, windchill)
         else:
-            ## else, anywhere else in the worldd
+            ## else, anywhere else in the world
             windchill = u'%.1f\u00B0C'.encode('utf-8') % (windchill)
 
     heatindex = False
@@ -844,7 +844,7 @@ def forecastio_current_weather(jenni, input):
     humidity = today['humidity']
     APtemp = today['apparentTemperature']
 
-    ## this code is different than the section in the previous sectio
+    ## this code is different than the section in the previous section
     ## as darksky.net uses more precise measurements than NOAA
     if cover >= 0.8:
         cover_word = 'Overcast'

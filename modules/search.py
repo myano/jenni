@@ -130,7 +130,7 @@ def duck_search(query):
                     output = result
                     break
         else:
-            ## if we absolustely can't find a URL, let's try scraping the HTML
+            ## if we absolutely can't find a URL, let's try scraping the HTML
             ## page for a zero_click info
             return((duck_zero_click_scrape(page), False))
 
