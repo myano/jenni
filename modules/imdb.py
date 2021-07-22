@@ -81,7 +81,7 @@ def movie(jenni, input):
 
         ## 510 - (16 + 8 + 63)
         ## max_chars (minus \r\n) - (max_nick_length + max_ident_length
-        ##     + max_vhost_lenth_on_freenode)
+        ##     + max_vhost_length_on_freenode)
         max_len_of_plot = 423 - (len(pre_plot) + len(after_plot) + len(truncation))
 
         new_plot = data['Plot']

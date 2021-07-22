@@ -473,7 +473,7 @@ def show_title_auto(jenni, input):
             break
         k += 1
 
-        ## deteremine if we should display the bitly link
+        ## determine if we should display the bitly link
         useBitLy = doUseBitLy(returned_title, orig)
 
         reg_format = '[ %s ] - %s'
